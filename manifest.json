@@ -1,0 +1,41 @@
+{
+   "background": {
+      "service_worker": "background.js"
+   },
+   "content_scripts": [ {
+      "css": [ "styles.css", "dark.css", "features/homepage-redesign.css" ],
+      "js": [
+         "features/storage-utils.js",
+         "features/tutorial-content.js",
+         "features/download-buttons.js",
+         "features/core-timetable-sidebar-icons.js",
+         "features/decoration.js",
+         "features/sidebar-controls.js",
+         "features/settings-panel.js",
+         "features/sidebar-titles-banners.js",
+         "features/tutorial-modal.js",
+         "features/homebar-streamside.js",
+         "features/homepage-redesign.js",
+         "features/cursor-attraction.js",
+         "features/floating-notes.js",
+         "features/assignment-stars.js",
+         "features/classwork-completion-indicator.js",
+	 "features/font-picker.js",
+         "content.js"
+      ],
+      "matches": [ "*://classroom.google.com/*" ]
+   } ],
+   "description": "GC Visuals – Enhanced Google Classroom with dark mode, strict 3‑zone colors, and liquid glass",
+   "icons": {
+      "128": "icon128.png",
+      "48": "icon48.png"
+   },
+   "manifest_version": 3,
+   "name": "GC Visuals",
+   "permissions": [ "storage" ],
+   "version": "1.0.0",
+   "web_accessible_resources": [ {
+      "matches": [ "*://classroom.google.com/*" ],
+      "resources": [ "Icons/*", "Tutorial/*", "Decoration/*" ]
+   } ]
+}
