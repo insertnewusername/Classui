@@ -1,40 +1,6 @@
 const DECORATION_STYLE_ID = 'mgc-decoration-style';
 let currentDecoration = null;
 
-// ----- Overlay toggle support -----
-let overlayEnabled = true; // default
-let currentDecorationFilename = null; // store filename
-let currentDecorationUrl = null; // store url
-
-async function loadOverlaySetting() {
-    try {
-        const data = await storageGet('decoration:overlayEnabled');
-        if (data !== undefined) overlayEnabled = data;
-    } catch (_) {}
-}
-
-// Function to update only the style element with new overlay setting
-function updateOverlayInStyle() {
-    const styleEl = document.getElementById(DECORATION_STYLE_ID);
-    if (!styleEl || !currentDecorationFilename) return;
-    const css = buildDecorationCSS(currentDecorationUrl, currentDecorationFilename);
-    styleEl.textContent = css;
-}
-
-// Listen for changes to the overlay setting
-if (chrome.storage && chrome.storage.onChanged) {
-    chrome.storage.onChanged.addListener((changes, areaName) => {
-        if (areaName === 'local' && changes['decoration:overlayEnabled']) {
-            overlayEnabled = changes['decoration:overlayEnabled'].newValue;
-            updateOverlayInStyle();
-        }
-    });
-}
-
-// Load initial value
-loadOverlaySetting();
-
-// ----- Base functions -----
 function decorationBaseUrl() {
     return (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL)
         ? chrome.runtime.getURL('Decoration/')
@@ -46,35 +12,7 @@ function decorationUrl(filename) {
     return decorationBaseUrl() + filename;
 }
 
-// Helper to build the CSS (only light-mode overlay)
-function buildDecorationCSS(url, filename) {
-    let baseCSS = `body.mc-has-decoration {
-        background-image: url("${url}") !important;
-        background-attachment: fixed !important;
-        background-repeat: no-repeat !important;
-        background-size: cover !important;
-        background-position: center center !important;
-    }`;
-
-    let overlayCSS = '';
-    if (overlayEnabled) {
-        overlayCSS = `
-    body:not(.dark-mode).mc-has-decoration::before {
-        content: "" !important;
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 100% !important;
-        height: 100% !important;
-        background: rgba(248, 250, 253, 0.6) !important;
-        pointer-events: none !important;
-        z-index: -1 !important;
-    }`;
-    }
-    return baseCSS + overlayCSS;
-}
-
-async function applyDecorationStyle(filename) {
+function applyDecorationStyle(filename) {
     let styleEl = document.getElementById(DECORATION_STYLE_ID);
     
     // Always clear old decoration first
@@ -84,9 +22,6 @@ async function applyDecorationStyle(filename) {
     }
     
     if (!filename) {
-        // Clear stored values
-        currentDecorationFilename = null;
-        currentDecorationUrl = null;
         try { document.body.classList.remove('mc-has-decoration'); } catch (_) {}
         try { if (document.body && document.body.dataset) delete document.body.dataset.mcDecoration; } catch (_) {}
         return;
@@ -102,34 +37,27 @@ async function applyDecorationStyle(filename) {
             chrome.storage.local.get('decoration:custom', (data) => {
                 if (data['decoration:custom']) {
                     url = data['decoration:custom'];
-                    // Store the current decoration details
-                    currentDecorationFilename = filename;
-                    currentDecorationUrl = url;
+                    const css = `body.mc-has-decoration {\n        background-image: url("${url}") !important;\n        background-attachment: fixed !important;\n        background-repeat: no-repeat !important;\n        background-size: cover !important;\n        background-position: center center !important;\n    }\n    body.dark-mode.mc-has-decoration::before {\n        content: "" !important;\n        position: fixed !important;\n        top: 0 !important;\n        left: 0 !important;\n        width: 100% !important;\n        height: 100% !important;\n        background: rgba(28, 27, 29, 0.8) !important;\n        pointer-events: none !important;\n        z-index: -1 !important;\n    }\n    body:not(.dark-mode).mc-has-decoration::before {\n        content: "" !important;\n        position: fixed !important;\n        top: 0 !important;\n        left: 0 !important;\n        width: 100% !important;\n        height: 100% !important;\n        background: rgba(248, 250, 253, 0.6) !important;\n        pointer-events: none !important;\n        z-index: -1 !important;\n    }`;
                     
-                    const css = buildDecorationCSS(url, filename);
                     styleEl = document.createElement('style');
                     styleEl.id = DECORATION_STYLE_ID;
                     document.head.appendChild(styleEl);
                     styleEl.textContent = css;
                     try { document.body.classList.add('mc-has-decoration'); } catch (_) {}
                     try { document.body.dataset.mcDecoration = filename; } catch (_) {}
-                } else {
-                    // If no custom data, clear and treat as no decoration
-                    currentDecorationFilename = null;
-                    currentDecorationUrl = null;
-                    try { document.body.classList.remove('mc-has-decoration'); } catch (_) {}
                 }
                 resolve();
             });
         });
     }
 
-    // Regular (non‑custom) decoration
     url = decorationUrl(filename);
-    currentDecorationFilename = filename;
-    currentDecorationUrl = url;
-    
-    const css = buildDecorationCSS(url, filename);
+    const lower = filename ? filename.toLowerCase() : '';
+    const isColours = lower && (lower.includes('gradient') || lower.includes('doodles'));
+    const isDoodles = lower.includes('doodles');
+    const overlayOpacity = isColours ? 0.8 : 0.98;
+    const css = `body.mc-has-decoration {\n        background-image: url("${url}") !important;\n        background-attachment: fixed !important;\n        background-repeat: no-repeat !important;\n        background-size: cover !important;\n        background-position: center center !important;\n    }\n    body.dark-mode.mc-has-decoration::before {\n        content: "" !important;\n        position: fixed !important;\n        top: 0 !important;\n        left: 0 !important;\n        width: 100% !important;\n        height: 100% !important;\n        background: rgba(28, 27, 29, ${overlayOpacity}) !important;\n        pointer-events: none !important;\n        z-index: -1 !important;\n    }${isDoodles ? `\n    body:not(.dark-mode).mc-has-decoration::before {\n        content: "" !important;\n        position: fixed !important;\n        top: 0 !important;\n        left: 0 !important;\n        width: 100% !important;\n        height: 100% !important;\n        background: rgba(248, 250, 253, 0.6) !important;\n        pointer-events: none !important;\n        z-index: -1 !important;\n    }` : ''}`;
+
     styleEl = document.createElement('style');
     styleEl.id = DECORATION_STYLE_ID;
     document.head.appendChild(styleEl);
@@ -154,7 +82,7 @@ async function persistDecorationSelection(filename) {
 async function applyDecorationFilename(filename, { persist = true } = {}) {
     if (!filename) {
         currentDecoration = null;
-        await applyDecorationStyle(null);
+        applyDecorationStyle(null);
         if (persist) await persistDecorationSelection(null);
         return;
     }
@@ -227,11 +155,6 @@ function ensureDecorationObservers() {
     })();
 }
 
-// ----- Expose for settings panel -----
-window.applyDecorationFilename = applyDecorationFilename;
-window.currentDecoration = currentDecoration;
-
-// ----- Init -----
 restoreDecorationFromStorage();
 ensureDecorationObservers();
 

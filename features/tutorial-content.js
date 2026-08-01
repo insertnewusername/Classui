@@ -6,8 +6,8 @@
                 title: 'Welcome',
                 icon: 'Home Icon.svg',
                 content: [
-                    { type: 'text', text: 'Use the navigation menu to the left to explore the different features and customisation options found around your new classroom.' },
-                    { type: 'text', text: 'Feel free to report any issues or provide feedback through the feedback button in the settings menu.' },
+                    { type: 'text', text: 'Explore new features and customisation options by clicking through the list on the left' },
+                    { type: 'text', text: 'Customise your classroom using the tabs found above' },
                 ]
             },
             {
@@ -17,7 +17,50 @@
                 content: [
                     { type: 'text', text: 'In the top left corner of Classroom, you will find the Dark Mode toggle.' },
                     { type: 'text', text: 'This button will display a sun or moon depending on the current theme. To switch between light and dark mode, simply click on the button and the new theme will fade in, replacing the old one.' },
-                    { type: 'image', src: baseUrl + 'darklight.jpeg', width: '60%' },
+                    { type: 'image', src: baseUrl + 'DarkToggle.jpeg', width: '60%' },
+                ]
+            },
+            {
+                id: 'sidebar-icons',
+                title: 'Icons',
+                icon: 'unset.svg',
+                content: [
+                    { type: 'text', text: 'When inside of a classroom, by hovering over the icon for that class in the sidebar, an edit icon will appear.' },
+                    { type: 'text', text: 'Click this to bring up the icon customisation menu, where you can change the sidebar icon and colour for that classroom.' },
+                    { type: 'text', text: 'You can also upload up to 14 of your own ".svg" files using the add button at the top of the icons list.' },
+                    { type: 'text', text: 'Once you are finished, you are able to click any other icon in the sidebar to easily customise it.' },
+                    { type: 'image', src: baseUrl + 'sideicon.jpeg', width: '50%' }
+                ]
+            },
+            {
+                id: 'classcolour',
+                title: 'Classroom Colours',
+                icon: 'Palette Icon.svg',
+                content: [
+                    { type: 'text', text: "The key colour found across an individual classroom can be changed by clicking the box in the lower right corner of that classroom's banner" },
+                    { type: 'image', src: baseUrl + 'classcolour.jpeg', width: '60%'},
+                ]
+            }, 
+            {
+                id: 'nicknames',
+                title: 'Nicknames',
+                icon: 'Rename.svg',
+                content: [
+                    { type: 'text', text: 'On the home page, you can add or edit a classroom nickname by clicking the rename icon in the lower right of that classrooms widget.' },
+                    { type: 'image', src: baseUrl + 'rename.jpeg', width: '60%'}
+                ]
+            },
+            {
+                id: 'classroom-banners',
+                title: 'Banners',
+                icon: 'editwidgimg.svg',
+                content: [
+                    { type: 'text', text: "Click the photo icon on a classroom's widget to bring up the banner editing panel" },
+                    { type: 'text', text: "This will open to the banner selection panel, where you can choose or add a new banner to be used for that classroom" },
+                    { type: 'image', src: baseUrl + 'banner.jpeg', width: '60%' },
+                    { type: 'break', size: 35 },
+                    { type: 'text', text: "You can add a tint to your banner by clicking the paint bucket icon, then adjusting the colour and opacity to your liking." },
+                    { type: 'image', src: baseUrl + 'banner2.jpeg', width: '60%' },
                 ]
             },
             {
@@ -43,15 +86,7 @@
                     { type: 'image', src: baseUrl + 'ttlive.jpeg' },
                 ]
             },
-            {
-                id: 'nicknames',
-                title: 'Nicknames',
-                icon: 'Rename.svg',
-                content: [
-                    { type: 'text', text: 'Pressing rename icon in the bottom right of each classroom widget will allow you to edit their nickname. This will be displayed across Google Classroom, making it easier to identify what class is which!' },
-                    { type: 'image', src: baseUrl + 'rename.jpeg' }
-                ]
-            },
+
             {
                 id: 'notes',
                 title: 'Notes',
@@ -70,49 +105,16 @@
                     { type: 'image', src: baseUrl + 'ntodo.jpeg', width: '70%' },
                     { type: 'break', size: 35 },
                     { type: 'text', text: 'The third tab, "Notes" allows you to write down any notes that you may need easy access to.' },
-                    { type: 'image', src: baseUrl + 'nnote.jpeg', width: '70%' },
-                    { type: 'text', text: 'The fourth tab, "Class Tasks" displays all of your active classes. Click the + button to add a new column, which will allow you to easily indicate when regular tasks you may do for these classes are in progress or are complete.' },
-                    { type: 'text', text: 'The list of classes is dependent on what classroom folder is open, and the order of these classes set on the home page. By hovering over a column header, you can delete or clear that column.' },
-                    { type: 'image', src: baseUrl + 'ct.jpeg', width: '70%' },
-                    { type: 'text', text: 'Click the clear button (Broom) in the sidebar to clear everything, or click the clear buttons that appear as you hover over class names or column headers to clear each one respectively.' },
-                ]
+                    { type: 'image', src: baseUrl + 'nnote.jpeg', width: '70%' }                ]
             },
             {
-                id: 'home-layout',
-                title: 'Home Page',
+                id: 'clock',
+                title: 'Clock',
                 icon: 'edithome.svg',
                 content: [
-                    { type: 'text', text: 'By default, your home page will display a clock with the date and temperature, any scheduled classes, and your list of classrooms' },
-                    { type: 'text', text: 'These can be toggled on or off, or customised using the edit button in the top right corner' },
-                    { type: 'image', src: baseUrl + 'homeepic.jpeg', width: '70%' },
-                    { type: 'break', size: 35 },
-                    { type: 'text', text: 'Above your classrooms, there are three options: The first two toggle between expanded or compact widget styling...' },
-                    { type: 'image', src: baseUrl + 'layout1.jpeg', width: '70%' },
-                    { type: 'break', size: 35 },
-                    { type: 'text', text: 'The settings button to the right of these allows you to adjust what is displayed on these home widgets.' },
-                    { type: 'image', src: baseUrl + 'layout2.jpeg', width: '70%' }
-                ]
-            },
-            {
-                id: 'classcolour',
-                title: 'Classroom Colours',
-                icon: 'Palette Icon.svg',
-                content: [
-                    { type: 'text', text: "Click the grey box in the bottom right of the banner on a classroom stream to change the key colour of that class." },
-                    { type: 'image', src: baseUrl + 'classcolour.jpeg' },
-                ]
-            },            
-            {
-                id: 'classroom-banners',
-                title: 'Banners',
-                icon: 'editwidgimg.svg',
-                content: [
-                    { type: 'text', text: "Click the photo icon on a classroom's widget to bring up the banner editing panel" },
-                    { type: 'text', text: "The first tab allows you to select a custom banner image from the list, or upload your own. At the top of the sidebar, you'll find the close button above the reset button. (Resetting the banner will require you to refresh the page)" },
-                    { type: 'image', src: baseUrl + 'banner.jpeg', width: '100%' },
-                    { type: 'break', size: 35 },
-                    { type: 'text', text: "By clicking the paint bucket in the sidebar, you bring up the tinting menu. Pick a colour and increase the opacity to your liking" },
-                    { type: 'image', src: baseUrl + 'banner2.jpeg', width: '100%' },
+                    { type: 'text', text: 'In the top left, you will find a clock widget, displaying your local time and temperature' },
+                    { type: 'text', text: 'Click this widget to expand the settings, where you can toggle between 12 and 24 hour time, as well as between Celcius and Farenheit.' },
+                    { type: 'image', src: baseUrl + 'Clock.jpeg', width: '100%' },
                 ]
             },
             {
@@ -128,34 +130,15 @@
                 ]
             },
             {
-                id: 'sidebar-icons',
-                title: 'Icons',
-                icon: 'unset.svg',
-                content: [
-                    { type: 'text', text: 'Double click an icon within the sidebar to edit its appearance and colour.' },
-                    { type: 'text', text: 'You can also upload your own .svg files which can be used as a sidebar icon.' },
-                    { type: 'image', src: baseUrl + 'sideicon.jpeg', width: '50%' }
-                ]
-            },
-            {
                 id: 'sidebar-customisation',
                 title: 'Settings',
                 icon: 'newsettings.svg',
                 content: [
-                    { type: 'text', text: 'Within the Settings panel, you are able to adjust your sidebar and classroom experience to best suit you and your needs.' },
-                    { type: 'text', text: 'Additionally, you can click the "Feedback" button to provide bug reports or suggestions for what you want to see!' },
-                    { type: 'image', src: baseUrl + 'setting.jpeg' }
+                    { type: 'text', text: 'The settings panel features this tutorial, along with 3 tabs where you can customise the sidebar, background, and layout of Google Classroom.' },
+                    { type: 'text', text: 'Here you can also find a "Feedback" button to provide bug reports or suggestions for what you want to see implemented' },
+                    { type: 'image', src: baseUrl + 'Settings.jpeg' }
                 ]
             },
-            {
-                id: 'decoration',
-                title: 'Decoration',
-                icon: 'Picture Icon Font.svg',
-                content: [
-                    { type: 'text', text: 'At the bottom of the settings panel, you can chose from a variety of backgrounds to use across Google classroom, or you can upload your own.' },
-                    { type: 'image', src: baseUrl + 'decor.jpeg' }
-                ]
-            }
         ];
     }
 

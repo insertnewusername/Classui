@@ -78,19 +78,8 @@ function setTitle(courseId, newTitle) {
   sendMessageSafe({ action: "setTitle", courseId, newTitle }, () => {});
 }
 
-// ---- Cache titles in memory and pre-populate from localStorage ----
+// Cache titles in memory for faster access
 let cachedTitles = {};
-
-// 🔥 Immediately load from localStorage (synchronous)
-try {
-  const raw = localStorage.getItem('titles');
-  if (raw) {
-    const localTitles = JSON.parse(raw);
-    if (localTitles && typeof localTitles === 'object') {
-      cachedTitles = localTitles;
-    }
-  }
-} catch (_) {}
 
 function getCachedTitles(callback) {
   getTitles(({ titles = {} }) => {
@@ -222,135 +211,105 @@ if (document.body) {
   });
 }
 
-// ---- Helper: Apply titles to the DOM (synchronous) ----
-function applyTitlesToDOM(titles) {
-    if (!titles || typeof titles !== 'object') return;
-
-    // Update course page header (if on a class page)
-    updateCoursePageHeaderTitleForActiveCourse();
-
-    // Update classroom home cards (widgets on the homepage)
-    document.querySelectorAll("li[data-course-id]").forEach(card => {
-        const courseId = card.dataset.courseId;
-        if (!courseId || editingCourseIds.has(courseId)) return;
-        const titleNode = card.querySelector(".ScpeUc");
-        if (!titleNode) return;
-        if (titles[courseId]) {
-            titleNode.textContent = titles[courseId];
-        }
-    });
-
-    // Update sidebar links
-    Object.entries(titles).forEach(([courseId, title]) => {
-        if (title) {
-            updateSidebarTitle(courseId, title);
-        }
-    });
-}
-
-// ---- Modified restoreTitles with synchronous fast-pass ----
 function restoreTitles() {
-    // ===== 1. Apply from cache (already pre-populated from localStorage) =====
-    if (Object.keys(cachedTitles).length > 0) {
-        applyTitlesToDOM(cachedTitles);
-    }
+  snapshotCardBackgroundDefaultsFromDom();
 
-    // ===== 2. Async refresh (sync with cloud) =====
-    snapshotCardBackgroundDefaultsFromDom();
-
-    getTitles(({ titles = {} }) => {
-        // Merge or overwrite cache with cloud data
-        cachedTitles = titles;
-        applyTitlesToDOM(titles);
-    });
-
-    // ---- The rest: add edit buttons, image pickers, etc. ----
+  getTitles(({ titles = {} }) => {
+    cachedTitles = titles;
+    updateCoursePageHeaderTitleForActiveCourse();
+    
     document.querySelectorAll("li[data-course-id]").forEach(card => {
-        const courseId = card.dataset.courseId;
-        if (!courseId || editingCourseIds.has(courseId)) return;
+      const courseId = card.dataset.courseId;
+      if (!courseId || editingCourseIds.has(courseId)) return;
 
-        const titleNode = card.querySelector(".ScpeUc");
-        if (!titleNode) return;
+      const titleNode = card.querySelector(".ScpeUc");
+      if (!titleNode) return;
 
-        const container = card.querySelector(".SZ0kZe");
-        if (!container || container.querySelector(".my-extension-edit")) return;
+      if (titles[courseId]) {
+        titleNode.textContent = titles[courseId];
+      }
 
-        const editBtn = document.createElement("div");
-        editBtn.className = "my-extension-edit";
-        editBtn.setAttribute("role", "button");
-        editBtn.setAttribute("tabindex", "0");
-        editBtn.style.cssText = "display:inline-block;";
+      const container = card.querySelector(".SZ0kZe");
+      if (!container || container.querySelector(".my-extension-edit")) return;
 
-        const img = document.createElement("img");
-        img.src = chrome.runtime.getURL("Icons/Rename.svg");
-        img.alt = "Edit";
-        img.style.cssText = "width:24px;height:24px;";
-        editBtn.appendChild(img);
+      const editBtn = document.createElement("div");
+      editBtn.className = "my-extension-edit";
+      editBtn.setAttribute("role", "button");
+      editBtn.setAttribute("tabindex", "0");
+      editBtn.style.cssText = "display:inline-block;";
 
-        container.appendChild(editBtn);
+      const img = document.createElement("img");
+      img.src = chrome.runtime.getURL("Icons/Rename.svg");
+      img.alt = "Edit";
+      img.style.cssText = "width:24px;height:24px;";
+      editBtn.appendChild(img);
 
-        // Image picker button
-        const imageBtn = document.createElement("div");
-        imageBtn.className = "my-extension-image";
-        imageBtn.setAttribute("role", "button");
-        imageBtn.setAttribute("tabindex", "0");
-        imageBtn.style.cssText = "display:inline-block;margin-left:6px;";
-        const imageIcon = document.createElement("img");
-        imageIcon.src = chrome.runtime.getURL("Icons/editwidgimg.svg");
-        imageIcon.alt = "Change background";
-        imageIcon.style.cssText = "width:24px;height:24px;";
-        imageBtn.appendChild(imageIcon);
-        container.appendChild(imageBtn);
+      container.appendChild(editBtn);
 
-        // Apply persisted background if present (uses cached storage)
-        try {
-            const savedUrl = getSavedBackgroundForCourse(courseId);
-            const bgDiv = card.querySelector('.OjOEXb');
-            if (savedUrl && bgDiv) {
-                bgDiv.style.setProperty('background-image', `url("${savedUrl}")`, 'important');
-                bgDiv.style.setProperty('background-size', 'cover', 'important');
-                bgDiv.style.setProperty('background-position', 'center center', 'important');
-                bgDiv.style.setProperty('background-repeat', 'no-repeat', 'important');
-            }
-        } catch (e) {}
+      // Image picker button - allows selecting a background image from available theme URLs on the page
+      const imageBtn = document.createElement("div");
+      imageBtn.className = "my-extension-image";
+      imageBtn.setAttribute("role", "button");
+      imageBtn.getAttribute("tabindex", "0");
+      imageBtn.style.cssText = "display:inline-block;margin-left:6px;";
+      const imageIcon = document.createElement("img");
+      imageIcon.src = chrome.runtime.getURL("Icons/editwidgimg.svg");
+      imageIcon.alt = "Change background";
+      imageIcon.style.cssText = "width:24px;height:24px;";
+      imageBtn.appendChild(imageIcon);
+      container.appendChild(imageBtn);
+
+      // Apply persisted background if present (uses cached storage)
+      try {
+        const savedUrl = getSavedBackgroundForCourse(courseId);
+        const bgDiv = card.querySelector('.OjOEXb');
+        if (savedUrl && bgDiv) {
+          bgDiv.style.setProperty('background-image', `url("${savedUrl}")`, 'important');
+          bgDiv.style.setProperty('background-size', 'cover', 'important');
+          bgDiv.style.setProperty('background-position', 'center center', 'important');
+          bgDiv.style.setProperty('background-repeat', 'no-repeat', 'important');
+        }
+      } catch (e) {}
+
     });
 
     // Apply persisted backgrounds for all existing cards (covers ones where buttons already existed)
     Promise.all([refreshCardBackgroundsFromStorage(), refreshCardIconColorsFromStorage()]).then(() => {
-        document.querySelectorAll('li[data-course-id]').forEach(card => {
-            try {
-                const courseId = card.dataset.courseId;
-                const url = getSavedBackgroundForCourse(courseId);
-                if (url) {
-                    const bgDiv = card.querySelector('.OjOEXb');
-                    if (bgDiv) {
-                        bgDiv.style.setProperty('background-image', `url("${url}")`, 'important');
-                        bgDiv.style.setProperty('background-size', 'cover', 'important');
-                        bgDiv.style.setProperty('background-position', 'center center', 'important');
-                        bgDiv.style.setProperty('background-repeat', 'no-repeat', 'important');
-                    }
-                }
-                
-                // Apply saved card icon color
-                const iconColor = getCardIconColorForCourse(courseId);
-                if (iconColor) {
-                    applyCardIconColor(card, courseId, iconColor);
-                    const colorSwatch = card.querySelector('.my-extension-color-picker [style*="background"]');
-                    if (colorSwatch) {
-                        colorSwatch.style.backgroundColor = iconColor;
-                    }
-                }
-            } catch (e) {}
-        });
-        try { updateHeaderBackgroundForActiveCourse(); } catch (e) {}
+      document.querySelectorAll('li[data-course-id]').forEach(card => {
+        try {
+          const courseId = card.dataset.courseId;
+          const url = getSavedBackgroundForCourse(courseId);
+          if (url) {
+            const bgDiv = card.querySelector('.OjOEXb');
+            if (bgDiv) {
+              bgDiv.style.setProperty('background-image', `url("${url}")`, 'important');
+              bgDiv.style.setProperty('background-size', 'cover', 'important');
+              bgDiv.style.setProperty('background-position', 'center center', 'important');
+              bgDiv.style.setProperty('background-repeat', 'no-repeat', 'important');
+            }
+          }
+          
+          // Apply saved card icon color
+          const iconColor = getCardIconColorForCourse(courseId);
+          if (iconColor) {
+            applyCardIconColor(card, courseId, iconColor);
+            // Update swatch color if button exists
+            const colorSwatch = card.querySelector('.my-extension-color-picker [style*="background"]');
+            if (colorSwatch) {
+              colorSwatch.style.backgroundColor = iconColor;
+            }
+          }
+        } catch (e) {}
+      });
+      try { updateHeaderBackgroundForActiveCourse(); } catch (e) {}
     });
 
-    // Update sidebar from titles (already done in applyTitlesToDOM, but keep for safety)
-    Object.entries(cachedTitles).forEach(([courseId, title]) => {
-        if (title) {
-            updateSidebarTitle(courseId, title);
-        }
+    Object.entries(titles).forEach(([courseId, title]) => {
+      if (title) {
+        updateSidebarTitle(courseId, title);
+      }
     });
+  });
 }
 
 function focusIfVisible(el) {
@@ -1432,10 +1391,6 @@ function openImagePickerForCard(card, triggerEl) {
   const previewShell = document.createElement('div');
   previewShell.className = 'image-picker-preview-shell';
 
-  const previewLabel = document.createElement('div');
-  previewLabel.className = 'image-picker-preview-label';
-  previewLabel.textContent = 'Preview';
-
   const previewFrame = document.createElement('div');
   previewFrame.className = 'image-picker-preview-frame';
 
@@ -1447,7 +1402,6 @@ function openImagePickerForCard(card, triggerEl) {
 
   previewFrame.appendChild(preview);
   previewFrame.appendChild(previewTint);
-  previewShell.appendChild(previewLabel);
   previewShell.appendChild(previewFrame);
 
   const content = document.createElement('div');
@@ -1589,8 +1543,6 @@ function openImagePickerForCard(card, triggerEl) {
     const opacityLabel = document.createElement('label');
     opacityLabel.className = 'image-picker-paint-label';
     opacityLabel.textContent = 'Opacity';
-    const opacityPreview = document.createElement('div');
-    opacityPreview.className = 'image-picker-paint-opacity-preview';
     const opacityControls = document.createElement('div');
     opacityControls.className = 'image-picker-paint-opacity-controls';
 
@@ -1613,7 +1565,6 @@ function openImagePickerForCard(card, triggerEl) {
     opacityControls.appendChild(opacitySlider);
     opacityControls.appendChild(opacityNumber);
     opacityRow.appendChild(opacityLabel);
-    opacityRow.appendChild(opacityPreview);
     opacityRow.appendChild(opacityControls);
     tintPanel.appendChild(opacityRow);
 
@@ -1685,8 +1636,6 @@ function openImagePickerForCard(card, triggerEl) {
 
     function updateOpacityPreview(color, opacity) {
       const nextOpacity = Math.max(0, Math.min(1, Number(opacity) || 0));
-      opacityPreview.style.setProperty('--image-picker-opacity-color', color || MGC_BANNER_TINT_DEFAULTS.color);
-      opacityPreview.style.setProperty('--image-picker-opacity-alpha', String(nextOpacity));
       opacitySlider.style.setProperty('--image-picker-opacity-color', color || MGC_BANNER_TINT_DEFAULTS.color);
       opacitySlider.style.setProperty('--image-picker-opacity-alpha', String(nextOpacity));
     }
@@ -1976,13 +1925,8 @@ function openImagePickerForCard(card, triggerEl) {
             topRow.appendChild(backBtn);
             customInner.appendChild(topRow);
 
-            const inputLabel = document.createElement('label');
-            inputLabel.className = 'image-picker-custom-section-label';
-            inputLabel.textContent = 'Image URL';
-            customInner.appendChild(inputLabel);
-
             const input = document.createElement('textarea');
-            input.placeholder = "Paste an image URL here from 'Copy image address'";
+            input.placeholder = "Right click an image from google and select 'Copy image address'";
             input.value = isSavedCustom ? savedForCourse : '';
             input.className = 'image-picker-custom-input';
             input.rows = 4;

@@ -26,17 +26,16 @@
         return button;
     }
 
-    // Expose for other modules so they can perform SPA-friendly classroom navigation
+
     try {
         if (typeof window !== 'undefined') window.navigateToClassroom = navigateToClassroom;
     } catch (_) {}
 
-    // Create a floating widget attached to document.body so it doesn't affect layout
     function createLiveWidget() {
         const host = document.createElement('div');
         host.className = 'mc-live-widget';
-        host.style.display = 'none'; // hidden by default until content exists
-        host.style.position = 'fixed'; // fixed so it doesn't move on scroll
+        host.style.display = 'none'; 
+        host.style.position = 'fixed'; 
         host.style.pointerEvents = 'auto';
         host.style.zIndex = '1000';
         host.innerHTML = `
@@ -130,10 +129,6 @@
         try {
             const widget = document.querySelector('.mc-live-widget');
             if (!widget) return;
-            if (document.body && document.body.classList.contains('mc-homepage-redesign-enabled') && !document.body.classList.contains('mc-homepage-schedule-hidden')) {
-                widget.style.display = 'none';
-                return;
-            }
             // If the widget has been reparented into the page header (or elsewhere) move it back
             if (widget.parentElement !== document.body) {
                 try { document.body.appendChild(widget); } catch (_) {}
@@ -1078,6 +1073,12 @@
         form.className = 'mc-edit-form-fields';
         form.addEventListener('submit', (e) => { e.preventDefault(); });
 
+        const detailsCard = document.createElement('div');
+        detailsCard.className = 'mc-class-details-card';
+
+        const scheduleCard = document.createElement('div');
+        scheduleCard.className = 'mc-schedule-editor-card';
+
         // Top row: Colour + Title
         const topRow = document.createElement('div');
         topRow.className = 'mc-field-row mc-top-row';
@@ -1107,7 +1108,7 @@
                 <input name="title" type="text" class="mc-input-title" placeholder="Title" aria-label="Title">
             </div>
         `;
-        form.appendChild(topRow);
+        detailsCard.appendChild(topRow);
 
         // Middle row: Teacher, Room and Classroom side-by-side
         const midRow = document.createElement('div');
@@ -1139,7 +1140,7 @@
                 </div>
             </div>
         `;
-        form.appendChild(midRow);
+        detailsCard.appendChild(midRow);
         const classroomInput = midRow.querySelector('.mc-input-classroom');
         const classroomSelectedEl = midRow.querySelector('.mc-classroom-selected');
         const classroomDropdownEl = midRow.querySelector('.mc-classroom-dropdown');
@@ -1232,7 +1233,7 @@
             if (!courses.length) {
                 const empty = document.createElement('div');
                 empty.className = 'mc-classroom-empty';
-                empty.textContent = 'No visible classrooms found. Visit the Classroom home page to refresh.';
+                empty.textContent = 'Go to the home page to edit';
                 classroomDropdownEl.appendChild(empty);
                 return;
             }
@@ -1315,16 +1316,15 @@
                 </div>
             </div>
         `;
-        form.appendChild(periodsRow);
+        scheduleCard.appendChild(periodsRow);
 
         // Footer (close button only — delete is inline on the selected list item)
-        const footer = document.createElement('div');
-        footer.className = 'mc-edit-form-footer';
         const closeBtn = document.createElement('button');
         closeBtn.type = 'button';
         closeBtn.className = 'mc-close-edit-btn';
         closeBtn.innerHTML = '&times;';
-        form.appendChild(footer);
+        form.appendChild(detailsCard);
+        form.appendChild(scheduleCard);
 
         right.appendChild(form);
 
@@ -2445,10 +2445,6 @@
             const section = document.createElement('section');
             section.className = 'mc-periods-day-section mc-block-periods-section';
 
-            const header = document.createElement('div');
-            header.className = 'mc-periods-day-header';
-            header.textContent = blockEditorState.name || 'Current block';
-            section.appendChild(header);
 
             const grid = document.createElement('div');
             grid.className = 'mc-periods-day-grid';
@@ -4162,14 +4158,16 @@
         if (!document.body.contains(container)) document.body.appendChild(container);
 
         // Apply initial sizing so position can be calculated
-        container.style.visibility = 'hidden';
+        container.style.visibility = '';
         container.style.display = 'block';
         // use fixed positioning so the panel stays put during scroll
         container.style.position = 'fixed';
         container.style.zIndex = 1000000;
 
-        positionTimetableMenu(container, anchor);
-        container.style.visibility = '';
+        // Trigger slide-in animation
+        requestAnimationFrame(() => {
+            container.classList.add('mc-timetable-visible');
+        });
 
         updateTimetableIndicator();
         // render period blocks on the timeline
@@ -4193,7 +4191,17 @@
     function hideTimetableMenu() {
         if (!mcTimetable.container) return;
         if (mcTimetable.intervalId) { clearInterval(mcTimetable.intervalId); mcTimetable.intervalId = null; }
-        if (mcTimetable.container.parentElement) mcTimetable.container.parentElement.removeChild(mcTimetable.container);
+        
+        // Trigger slide-out animation
+        mcTimetable.container.classList.remove('mc-timetable-visible');
+        
+        // Remove after animation completes
+        setTimeout(() => {
+            if (mcTimetable.container && mcTimetable.container.parentElement) {
+                mcTimetable.container.parentElement.removeChild(mcTimetable.container);
+            }
+        }, 340); // matches animation duration
+        
         document.removeEventListener('click', onDocumentClickForTimetable);
         document.removeEventListener('keydown', onDocumentKeydownForTimetable);
     }
@@ -4771,6 +4779,7 @@
                 sidebarHotspot.classList.add('sidebar-hide-indicator');
             }
         }
+        try { updateVisibleIconEditHint(); } catch (_) {}
     }
 
     function hideSidebar() {
@@ -4782,6 +4791,7 @@
                 sidebarHotspot.classList.remove('sidebar-hide-indicator');
             }
         }
+        try { updateVisibleIconEditHint(); } catch (_) {}
     }
 
     function handleSidebarVisibility() {
@@ -4805,6 +4815,7 @@
                 sidebar.classList.remove('sidebar-visible');
             }
         }
+        try { updateVisibleIconEditHint(); } catch (_) {}
     }
 
     function findSidebar() {
@@ -5339,6 +5350,8 @@
         return 'path:' + textHash(path.join('>'));
     }
     async function persistColorForElement(el, hex) {
+        el.dataset.dnaUneditedIcon = 'false';
+        updateVisibleIconEditHint();
         const key = pageStorageKey();
         const map = (await storageGet(key)) || {};
         const stableKey = computeStableKey(el);
@@ -5399,6 +5412,8 @@
     }
 
     async function persistIconForElement(el, iconUrl) {
+        el.dataset.dnaUneditedIcon = 'false';
+        updateVisibleIconEditHint();
         const key = pageStorageKey() + ':icons';
         const map = (await storageGet(key)) || {};
         const stableKey = computeStableKey(el);
@@ -5412,6 +5427,92 @@
             }
         } catch (_) {}
     }
+
+    function setIconEditHintState(el, iconMap, colorMap) {
+        if (!el || !el.dataset) return;
+        const stableKey = computeStableKey(el);
+        const hasCustomisation = Boolean(
+            (iconMap && iconMap[stableKey]) ||
+            (colorMap && colorMap[stableKey])
+        );
+        el.dataset.dnaUneditedIcon = hasCustomisation ? 'false' : 'true';
+    }
+
+    let iconEditHintElement = null;
+    let iconEditHintResizeObserver = null;
+    let iconEditHintObservedElements = [];
+
+    function observeIconEditHintLayout(...elements) {
+        if (typeof ResizeObserver === 'undefined') return;
+        const nextElements = [...new Set(elements)].filter(Boolean);
+        const isAlreadyObserving = nextElements.length === iconEditHintObservedElements.length &&
+            nextElements.every((el, index) => el === iconEditHintObservedElements[index]);
+        if (isAlreadyObserving) return;
+        if (!iconEditHintResizeObserver) {
+            iconEditHintResizeObserver = new ResizeObserver(() => updateVisibleIconEditHint());
+        }
+        iconEditHintResizeObserver.disconnect();
+        nextElements.forEach(el => iconEditHintResizeObserver.observe(el));
+        iconEditHintObservedElements = nextElements;
+    }
+
+    function updateVisibleIconEditHint() {
+        const icons = Array.from(document.querySelectorAll('.kWQ5wd[data-dna-unedited-icon="true"]'))
+            .filter(el => el.closest('a.uTwgne'));
+
+        document.querySelectorAll('.kWQ5wd[data-dna-show-edit-hint="true"]')
+            .forEach(el => { el.dataset.dnaShowEditHint = 'false'; });
+        document.querySelectorAll('a.uTwgne[data-dna-show-edit-hint="true"]')
+            .forEach(el => { el.dataset.dnaShowEditHint = 'false'; });
+
+        const target = icons[0];
+        const sidebarElement = target && target.closest('.STek2d');
+        const iconRect = target && target.getBoundingClientRect();
+        const scrollContainer = target && target.closest('div[role="group"]');
+        const scrollRect = scrollContainer && scrollContainer.getBoundingClientRect();
+        const sidebarRect = sidebarElement && sidebarElement.getBoundingClientRect();
+        const sidebarIsHidden = sidebarElement && window.innerWidth <= 1042 && !sidebarElement.classList.contains('sidebar-visible');
+        const iconIsVisible = iconRect && iconRect.width > 0 && iconRect.height > 0 &&
+            iconRect.top >= 0 && iconRect.bottom <= window.innerHeight &&
+            (!sidebarRect || (iconRect.top >= sidebarRect.top && iconRect.bottom <= sidebarRect.bottom)) &&
+            (!scrollRect || (iconRect.top >= scrollRect.top && iconRect.bottom <= scrollRect.bottom));
+
+        if (!target || sidebarIsHidden || !iconIsVisible) {
+            if (iconEditHintElement) iconEditHintElement.hidden = true;
+            return;
+        }
+
+        target.dataset.dnaShowEditHint = 'true';
+        const targetLink = target.closest('a.uTwgne');
+        if (!targetLink) return;
+        targetLink.dataset.dnaShowEditHint = 'true';
+        const hintHost = document.body;
+        if (!iconEditHintElement) {
+            iconEditHintElement = document.createElement('div');
+            iconEditHintElement.className = 'mgc-icon-edit-hint';
+            iconEditHintElement.textContent = 'Click the icon to customise';
+            iconEditHintElement.setAttribute('role', 'tooltip');
+        }
+
+        if (iconEditHintElement.parentElement !== hintHost) {
+            hintHost.appendChild(iconEditHintElement);
+        }
+        const linkRect = targetLink.getBoundingClientRect();
+        iconEditHintElement.style.left = `${Math.round(linkRect.right + 8)}px`;
+        iconEditHintElement.style.top = `${Math.round(linkRect.top + (linkRect.height / 2))}px`;
+        iconEditHintElement.hidden = false;
+        observeIconEditHintLayout(targetLink, sidebarElement, scrollContainer);
+    }
+
+    window.addEventListener('resize', updateVisibleIconEditHint);
+    document.addEventListener('scroll', updateVisibleIconEditHint, true);
+    if (document.body) {
+        new MutationObserver(updateVisibleIconEditHint).observe(document.body, {
+            attributes: true,
+            attributeFilter: ['class']
+        });
+    }
+
     async function restoreSavedColors(root = document) {
         const key = pageStorageKey();
         const map = (await storageGet(key)) || {};
@@ -5439,8 +5540,15 @@
                     const resolvedIcon = resolveIconUrl(icon);
                     el.style.setProperty('--dna-icon-url', `url("${resolvedIcon}")`);
                 }
+                setIconEditHintState(el, iconMap, map);
             });
         } catch (_) {}
+
+        try {
+            refreshActiveClassroomHoverEdit(root);
+        } catch (_) {}
+
+        updateVisibleIconEditHint();
 
         for (const [savedKey, hex] of Object.entries(map)) {
             if (/[#.>:\[]/.test(savedKey) && typeof hex === 'string') {
@@ -5502,7 +5610,11 @@
         });
 
         input.addEventListener('change', function onColorCommit() {
+            const target = elementAwaitingColor;
             elementAwaitingColor = null;
+            if (target) {
+                persistColorForElement(target, input.value);
+            }
         });
 
         document.body.appendChild(input);
@@ -5525,6 +5637,8 @@
         return `#${r}${g}${b}`;
     }
 
+    let iconPickerModeActive = false;
+
     function openPickerForElement(targetElement, event) {
         if (!targetElement) return;
         if (event) {
@@ -5534,6 +5648,15 @@
                 event.stopImmediatePropagation();
             }
         }
+
+        const isPickerActive = !!elementAwaitingColor && wheelUi && wheelUi.wrapper && wheelUi.wrapper.style.display !== 'none';
+        const isSameTarget = !!elementAwaitingColor && targetElement === elementAwaitingColor;
+        if (isPickerActive && !isSameTarget) {
+            try { hideWheel(); } catch (_) {}
+        }
+
+        iconPickerModeActive = true;
+        try { applyActiveClassroomHoverIcon(targetElement, false); } catch (_) {}
 
         try {
             showColorWheelFor(targetElement, event);
@@ -5573,18 +5696,123 @@
         }
     }
 
+    let lastPointerClientX = 0;
+    let lastPointerClientY = 0;
+
+    function applyActiveClassroomHoverIcon(el, active) {
+        if (!el) return;
+        const linkEl = el.closest('a.uTwgne');
+        if (!linkEl || linkEl.getAttribute('aria-current') !== 'page') return;
+        if (iconPickerModeActive) {
+            const previousIconValue = el.dataset.dnaHoverOriginalIcon || '';
+            if (previousIconValue) {
+                el.style.setProperty('--dna-icon-url', previousIconValue);
+            } else {
+                el.style.removeProperty('--dna-icon-url');
+            }
+            return;
+        }
+
+        const editIconUrl = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL)
+            ? chrome.runtime.getURL('Icons/Edit.svg')
+            : '';
+        if (!editIconUrl) return;
+
+        if (active) {
+            const currentIconValue = el.style.getPropertyValue('--dna-icon-url') || getComputedStyle(el).getPropertyValue('--dna-icon-url') || '';
+            if (currentIconValue && !el.dataset.dnaHoverOriginalIcon) {
+                el.dataset.dnaHoverOriginalIcon = currentIconValue;
+            }
+            el.style.setProperty('--dna-icon-url', `url("${editIconUrl}")`);
+        } else {
+            const previousIconValue = el.dataset.dnaHoverOriginalIcon || '';
+            if (previousIconValue) {
+                el.style.setProperty('--dna-icon-url', previousIconValue);
+            } else {
+                el.style.removeProperty('--dna-icon-url');
+            }
+        }
+    }
+
+    function attachActiveClassroomHoverEdit(el) {
+        if (!el || el.dataset.dnaHoverBound === '1') return;
+        const editIconUrl = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL)
+            ? chrome.runtime.getURL('Icons/Edit.svg')
+            : '';
+        if (!editIconUrl) return;
+
+        el.dataset.dnaHoverBound = '1';
+
+        el.addEventListener('mouseenter', () => {
+            applyActiveClassroomHoverIcon(el, true);
+        });
+
+        el.addEventListener('mouseleave', () => {
+            applyActiveClassroomHoverIcon(el, false);
+        });
+    }
+
+    function syncActiveClassroomHoverState(root = document) {
+        const elements = root.querySelectorAll ? root.querySelectorAll('.kWQ5wd') : [];
+        const pointerOver = document.elementFromPoint(lastPointerClientX, lastPointerClientY);
+        const hoveredForCurrentPage = pointerOver && pointerOver.closest && pointerOver.closest('a.uTwgne');
+        elements.forEach((el) => {
+            const linkEl = el.closest('a.uTwgne');
+            const isCurrentPage = !!linkEl && linkEl.getAttribute('aria-current') === 'page';
+            const isPointerOverThis = !!(hoveredForCurrentPage && hoveredForCurrentPage === linkEl);
+            if (isCurrentPage && isPointerOverThis) {
+                applyActiveClassroomHoverIcon(el, true);
+            } else {
+                const currentIconValue = el.style.getPropertyValue('--dna-icon-url') || getComputedStyle(el).getPropertyValue('--dna-icon-url') || '';
+                const hasCustomIcon = !!currentIconValue && currentIconValue.includes('Icons/') || currentIconValue.includes('chrome-extension');
+                if (!hasCustomIcon) {
+                    applyActiveClassroomHoverIcon(el, false);
+                }
+            }
+        });
+    }
+
+    function refreshActiveClassroomHoverEdit(root = document) {
+        const elements = root.querySelectorAll ? root.querySelectorAll('.kWQ5wd') : [];
+        elements.forEach(attachActiveClassroomHoverEdit);
+        try { syncActiveClassroomHoverState(root); } catch (_) {}
+    }
+
     function attachIconPickersInDom(root = document) {
         const elements = root.querySelectorAll('.kWQ5wd');
         elements.forEach((el) => {
             if (el.dataset.dnaPickerAttached === '1') return;
             el.dataset.dnaPickerAttached = '1';
+            attachActiveClassroomHoverEdit(el);
             el.addEventListener('dblclick', (e) => {
                 console.debug('[Modern Classroom] dblclick on .kWQ5wd');
                 openPickerForElement(el, e);
             }, true);
+            el.addEventListener('mousedown', (e) => {
+                if (e.button !== 0) return;
+                const linkEl = el.closest('a.uTwgne');
+                if (!linkEl) return;
+                if (iconPickerModeActive) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (e.stopImmediatePropagation) {
+                        e.stopImmediatePropagation();
+                    }
+                }
+            }, true);
             el.addEventListener('click', (e) => {
-                if (e.detail === 2) {
-                    console.debug('[Modern Classroom] click detail=2 on .kWQ5wd');
+                const linkEl = el.closest('a.uTwgne');
+                const isCurrentPageIcon = !!linkEl && linkEl.getAttribute('aria-current') === 'page';
+                const isSwitchingTarget = !!elementAwaitingColor && el !== elementAwaitingColor && !e.target.closest('.picker');
+                if (e.detail === 2 || isSwitchingTarget) {
+                    console.debug('[Modern Classroom] icon click switching target on .kWQ5wd');
+                    openPickerForElement(el, e);
+                } else if (iconPickerModeActive || isCurrentPageIcon) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (e.stopImmediatePropagation) {
+                        e.stopImmediatePropagation();
+                    }
                     openPickerForElement(el, e);
                 }
             }, true);
@@ -5597,6 +5825,19 @@
     }
 
     function initializeIconColorPicker() {
+        document.addEventListener('mousemove', function onMouseMove(event) {
+            lastPointerClientX = event.clientX;
+            lastPointerClientY = event.clientY;
+        }, true);
+        document.addEventListener('mousedown', function onIconMouseDown(event) {
+            const targetElement = event.target.closest('.kWQ5wd');
+            if (!targetElement || event.button !== 0 || !iconPickerModeActive) return;
+            event.preventDefault();
+            event.stopPropagation();
+            if (event.stopImmediatePropagation) {
+                event.stopImmediatePropagation();
+            }
+        }, true);
         document.addEventListener('dblclick', function onDblClick(event) {
             const targetElement = event.target.closest('.kWQ5wd');
             if (targetElement) {
@@ -5604,9 +5845,17 @@
             }
         }, true);
         document.addEventListener('click', function onClick(event) {
-            if (event.detail !== 2) return;
             const targetElement = event.target.closest('.kWQ5wd');
-            if (targetElement) {
+            if (!targetElement) return;
+            const linkEl = targetElement.closest('a.uTwgne');
+            const isCurrentPageIcon = !!linkEl && linkEl.getAttribute('aria-current') === 'page';
+            const isSwitchingTarget = !!elementAwaitingColor && targetElement !== elementAwaitingColor && !event.target.closest('.picker');
+            if (event.detail === 2 || isSwitchingTarget || iconPickerModeActive || isCurrentPageIcon) {
+                event.preventDefault();
+                event.stopPropagation();
+                if (event.stopImmediatePropagation) {
+                    event.stopImmediatePropagation();
+                }
                 openPickerForElement(targetElement, event);
             }
         }, true);
@@ -5638,25 +5887,28 @@
 
         const style = document.createElement('style');
         style.textContent = `
-            .picker { pointer-events: auto; box-sizing: border-box; position: absolute; width: 380px; padding: 10px; border-radius: 40px;corner-shape: squircle;background: #212126; color: #fff; box-shadow: 0 10px 30px rgba(0,0,0,.35); font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; border: 1.5px solid rgba(43, 45, 63, 0.421) !important; }
+            .picker { pointer-events: auto; box-sizing: border-box; position: absolute; width: 380px; padding: 10px; border-radius: 40px;corner-shape: squircle;background: var(--picker-bg, #212126); color: #fff; box-shadow: 0 10px 30px rgba(0,0,0,.35); font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; border: 1.5px solid var(--picker-border, rgba(43, 45, 63, 0.421)) !important; overflow: visible; isolation: isolate; z-index: 2; --picker-bg: #212126; --picker-border: rgba(43, 45, 63, 0.421); }
+            .picker-pointer { position: absolute; width: 20px; height: 20px; background: var(--picker-bg, #212126); transform: rotate(45deg); pointer-events: none; z-index: -1; box-sizing: border-box; display: none; box-shadow: none; border: transparent; border-top: none; border-right: none; border-radius: 0px 0px 0px 5px; }
+            .picker-pointer.left { left: -10.8px; top: 40px; }
+            .picker-pointer.right { right: -10.8px; top: 40px; }
             .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
             .title { font-size: 13px; opacity: .8; }
             .close { background: transparent; border: 0; color: #fff; cursor: pointer; font-size: 26px; line-height: 1; opacity: .8; margin-right: 8px;}
             .close:hover { opacity: 1; }
             .wheel { position: relative; display: block; width: 100%; height: 160px; margin: 6px 0; cursor: crosshair; border-radius: 20px; corner-shape: squircle; overflow: hidden; }
             .marker { position: absolute; width: 12px; height: 12px; border: 2px solid #fff; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 0 1px rgba(0,0,0,.6); pointer-events:none; }
-            .row { display:flex; align-items:center; gap:8px; padding: 6px 0 2px; width: 100%; margin: 0; }
-            .preview { width: 28px; height: 20px; border-radius: 4px; border: 1px solid rgba(255,255,255,.2); }
+            .row { display:flex; align-items:center; gap:8px; padding: 6px 0 10px; width: 100%; margin: 0; }
+            .preview { width: 35px; height: 10px; border-radius: 5px;}
             .hex-input { width: 100%; box-sizing: border-box; padding: 6px 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); background: transparent; color: inherit; margin: 6px 0; font-family: inherit; }
-            .hex-input::placeholder { color: rgba(255,255,255,0.35); }
+            .hex-input::placeholder { color: rgba(255, 255, 255, 0.35); }
             .hex-input-inline { width: 120px; margin-right: 8px; margin-left: 6px; padding: 4px 8px; height: 28px; font-size: 12px; border-radius: 6px; }
-            input[type="range"] { width: 100%; -webkit-appearance: none; appearance: none; height: 10px; border-radius: 6px; background: linear-gradient(90deg, hsl(0,100%,50%) 0%, hsl(60,100%,50%) 16.66%, hsl(120,100%,50%) 33.33%, hsl(180,100%,50%) 50%, hsl(240,100%,50%) 66.66%, hsl(300,100%,50%) 83.33%, hsl(360,100%,50%) 100%); outline: none; }
-            input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 2px rgba(0,0,0,0.14); border: 0; margin-top: -2px; }
+            input[type="range"] { width: 100%; -webkit-appearance: none; appearance: none; height: 10px; border-radius: 6px; background: linear-gradient(90deg, hsl(0,100%,50%) 0%, hsl(60,100%,50%) 16.66%, hsl(120,100%,50%) 33.33%, hsl(180,100%,50%) 50%, hsl(240,100%,50%) 66.66%, hsl(300,100%,50%) 83.33%, hsl(360,100%,50%) 100%); outline: none; align-items: flex-start; }
+            input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 14px; border-radius: 4px; background: #ffffff34; border: solid 1.5px #ffffff; backdrop-filter: blur(2px); margin-top: -2px; }
             input[type="range"]::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 2px rgba(0,0,0,0.14); border: 0; }
             input[type="range"]::-ms-thumb { width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 2px rgba(0,0,0,0.14); border: 0; }
             .footer { display:flex; justify-content: flex-end; gap: 6px; margin-top: 6px; }
             .btn { padding: 6px 10px; border-radius: 8px; border: 0; cursor: pointer; }
-            .icons { display: block; max-height: 220px; overflow: auto; padding-top: 8px; background: transparent; }
+            .icons { display: block; max-height: 220px; overflow: auto; background: transparent; }
             .icon-group { padding: 6px 8px; }
             .icon-group-title { font-size: 12px; opacity: .8; color: inherit; margin: 6px 4px; }
             .icon-grid { display: grid; grid-template-columns: repeat(auto-fill, 35px); grid-auto-rows: 35px; gap: 10px 13px; align-items: start; justify-content: start; }
@@ -5676,7 +5928,7 @@
 
             .picker:not(.light) .icon { filter: invert(1) brightness(1.1) contrast(1.1); }
 
-            .picker.light { background: #f8fafd; color: #111; box-shadow: 0 10px 30px rgba(0,0,0,.15); border: 1.5px solid rgba(235, 237, 255, 0.58) !important; }
+            .picker.light { --picker-bg: #f8fafd; --picker-border: rgba(235, 237, 255, 0.58); background: var(--picker-bg, #f8fafd); color: #111; border: 1.5px solid var(--picker-border, rgba(235, 237, 255, 0.58)) !important; }
             .picker.light .close { color: #111; }
             .picker.light .marker { border-color: #000; box-shadow: 0 0 0 1px rgba(0,0,0,.2); }
             .picker.light .preview { border-color: rgba(0,0,0,.15); }
@@ -5687,6 +5939,11 @@
 
         const wrapper = document.createElement('div');
         wrapper.className = 'picker';
+
+        const pointer = document.createElement('div');
+        pointer.className = 'picker-pointer';
+        pointer.setAttribute('aria-hidden', 'true');
+        wrapper.appendChild(pointer);
 
         const header = document.createElement('div');
         header.className = 'header';
@@ -5758,14 +6015,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(100, 150, 255, 0.1) !important;
-            border: 1.5px dashed rgba(100, 150, 255, 0.4) !important;
         `;
         
         const plusText = document.createElement('span');
+        plusText.className = 'custom-add-text';
         plusText.style.fontSize = '20px';
         plusText.style.lineHeight = '1';
-        plusText.style.color = 'rgba(100, 150, 255, 0.7)';
         plusText.textContent = '+';
         addCustomBtn.appendChild(plusText);
         
@@ -5970,7 +6225,7 @@
         wrapper.appendChild(iconsGrid);
         shadow.appendChild(wrapper);
 
-    wheelUi = { host, shadow, wrapper, canvas, marker, slider, preview, iconsGrid, hexInput };
+    wheelUi = { host, shadow, wrapper, canvas, marker, slider, preview, iconsGrid, hexInput, pointer };
     wheelUi.currentH = 0;
     wheelUi.currentS = 1;
     wheelUi.currentV = 1;
@@ -6128,6 +6383,7 @@
         ui.wrapper.style.display = 'block';
         positionPickerWithinViewport(pref.left, pref.top);
         ui.wrapper.style.visibility = 'visible';
+        updatePickerPointerForTarget();
 
         const style = getComputedStyle(targetElement);
         const variableColor = style.getPropertyValue('--dna-icon-color').trim();
@@ -6153,6 +6409,33 @@
         }, 0);
     }
 
+    function updatePickerPointerForTarget() {
+        if (!wheelUi || !wheelUi.wrapper || !wheelUi.pointer) return;
+        const pointer = wheelUi.pointer;
+        if (!elementAwaitingColor) {
+            pointer.style.display = 'none';
+            pointer.classList.remove('left', 'right');
+            return;
+        }
+
+        const panelRect = wheelUi.wrapper.getBoundingClientRect();
+        const targetRect = elementAwaitingColor.getBoundingClientRect();
+        const targetCenterX = targetRect.left + (targetRect.width / 2);
+        const panelCenterX = panelRect.left + (panelRect.width / 2);
+        const targetCenterY = targetRect.top + (targetRect.height / 2);
+        const top = Math.max(16, Math.min(panelRect.height - 24, targetCenterY - panelRect.top - 8));
+
+        pointer.style.display = 'block';
+        pointer.style.top = `${top}px`;
+        if (targetCenterX < panelCenterX) {
+            pointer.classList.add('left');
+            pointer.classList.remove('right');
+        } else {
+            pointer.classList.add('right');
+            pointer.classList.remove('left');
+        }
+    }
+
     function positionPickerWithinViewport(preferredLeft, preferredTop) {
         if (!wheelUi) return;
         const el = wheelUi.wrapper;
@@ -6160,7 +6443,7 @@
         const width = el.offsetWidth;
         const height = el.offsetHeight;
         let left = Math.round(preferredLeft);
-        let top = Math.round(preferredTop);
+        let top = Math.round(preferredTop - 28);
         if (left + width + margin > window.innerWidth) {
             left = window.innerWidth - width - margin;
         }
@@ -6171,6 +6454,7 @@
         if (top < margin) top = margin;
         el.style.left = `${left}px`;
         el.style.top = `${top}px`;
+        updatePickerPointerForTarget();
     }
 
     function positionPopupWithinViewport(el, preferredLeft, preferredTop) {
@@ -6203,6 +6487,11 @@
     function hideWheel() {
         if (!wheelUi) return;
         wheelUi.wrapper.style.display = 'none';
+        iconPickerModeActive = false;
+        if (wheelUi.pointer) {
+            wheelUi.pointer.style.display = 'none';
+            wheelUi.pointer.classList.remove('left', 'right');
+        }
         elementAwaitingColor = null;
         try { sidebarForceVisible = false; } catch (_) {}
         if (wheelUi.onKey) {
@@ -6276,8 +6565,55 @@ function handleUrlChange() {
         // Also restore colors when URL changes
         setTimeout(() => {
             restoreSavedColors();
+            setTimeout(() => {
+                try { refreshActiveClassroomHoverEdit(); } catch (_) {}
+                try { syncActiveClassroomHoverState(); } catch (_) {}
+            }, 50);
+            // After colors are restored, conditionally open icon customizer
+            setTimeout(() => {
+                try { openIconCustomizerIfUncustomized(); } catch (_) {}
+            }, 120);
         }, 100);
     }, 100);
+}
+
+async function openIconCustomizerIfUncustomized() {
+    // Try to find the currently selected class anchor and open the picker
+    // if there is no custom CSS variable set for icon or colour.
+    const attempts = 6;
+    const delay = (ms) => new Promise(r => setTimeout(r, ms));
+    for (let i = 0; i < attempts; i++) {
+        try {
+            // Prefer the currently-focused/active class entry in the sidebar
+            let anchor = document.querySelector('a[href*="/c/"][aria-current="page"]')
+                || document.querySelector('a[href*="/c/"]');
+            if (!anchor) {
+                // Wait a bit and retry if the sidebar hasn't rendered yet
+                await delay(150);
+                continue;
+            }
+
+            const iconEl = anchor.querySelector('.kWQ5wd');
+            if (!iconEl) return;
+
+            const computed = getComputedStyle(iconEl);
+            const varColor = (computed.getPropertyValue('--dna-icon-color') || '').trim();
+            const varUrl = (computed.getPropertyValue('--dna-icon-url') || '').trim();
+            const inlineColor = (iconEl.style && iconEl.style.getPropertyValue('--dna-icon-color') || '').trim();
+            const inlineUrl = (iconEl.style && iconEl.style.getPropertyValue('--dna-icon-url') || '').trim();
+
+            const hasCustomColour = !!(varColor || inlineColor);
+            const hasCustomIcon = !!(varUrl || inlineUrl);
+
+            if (!hasCustomColour && !hasCustomIcon) {
+                try { openPickerForElement(iconEl); } catch (_) {}
+            }
+            return;
+        } catch (err) {
+            // keep retrying briefly
+            await delay(150);
+        }
+    }
 }
 
 window.addEventListener('popstate', handleUrlChange);

@@ -1,8 +1,4 @@
 (function() {
-    function dispatchClassTasksRefresh(reason = 'unknown') {
-        // Manual refresh is now triggered only by clicking outside the notes panel.
-        return;
-    }
 
     function initStreamsideToggleButton() {
         let processScheduled = false;
@@ -17,6 +13,7 @@
         }
 
         function createButtonForElement(targetElement) {
+            // Check if button already exists for this element
             if (targetElement.hasAttribute('data-streamside-button-added')) {
                 return false;
             }
@@ -59,6 +56,7 @@
                 toggleBtn.classList.remove('hover');
             });
 
+            // Check saved preference
             chrome.storage.sync.get('streamsideEnabled', (result) => {
                 if (result.streamsideEnabled) {
                     document.body.classList.add('streamside');
@@ -71,6 +69,7 @@
 
             buttonWrapper.appendChild(toggleBtn);
 
+            // Wrap both target element and button wrapper in a flex container
             const flexContainer = document.createElement('div');
             flexContainer.className = 'streamside-flex-container';
             flexContainer.style.display = 'flex';
@@ -81,6 +80,7 @@
             flexContainer.appendChild(buttonWrapper);
             flexContainer.appendChild(targetElement);
             
+            // Mark element so we don't add button twice
             targetElement.setAttribute('data-streamside-button-added', 'true');
             return true;
         }
@@ -92,6 +92,7 @@
             });
         }
 
+        // Aggressive observer that watches for new target elements
         const observer = new MutationObserver((mutations) => {
             let shouldCheck = false;
             
@@ -116,11 +117,13 @@
             }
         });
 
+        // Start observing immediately
         observer.observe(document.body, {
             childList: true,
             subtree: true
         });
 
+        // Initial processing attempt
         setTimeout(() => {
             processAllTargets();
         }, 500);
@@ -302,6 +305,7 @@
         btn1.addEventListener('click', () => updateState(true));
         btn2.addEventListener('click', () => updateState(false));
 
+        // Load from localStorage immediately
         let savedState = false;
         try {
             const raw = localStorage.getItem('homeMiniWidget');
@@ -309,6 +313,7 @@
         } catch (_) {}
         updateState(savedState, false);
         
+        // Then load from sync storage in background
         if (typeof storageGet === 'function') {
             storageGet('homeMiniWidget', false).then(syncState => {
                 if (syncState !== savedState) {
@@ -352,58 +357,37 @@
             }
         }
 
-        // ---- HOME SETTINGS ----
-        let homeSettings = {
-            icon: 'Home Icon.svg',
-            color: '#6c5ce7'
-        };
-
-        try {
-            const raw = localStorage.getItem('modernClassroom_homeSettings');
-            if (raw) homeSettings = JSON.parse(raw);
-        } catch (_) {}
-
-        function saveHomeSettings() {
-            try {
-                localStorage.setItem('modernClassroom_homeSettings', JSON.stringify(homeSettings));
-            } catch (_) {}
-        }
-
         const foldersContainer = document.createElement('div');
         foldersContainer.className = 'home-folders-container';
 
-        // ---- HOME BUTTON (Fixed First) ----
-        const appsBtn = document.createElement('div');
-        appsBtn.className = 'home-folder-item active';
-        appsBtn.dataset.folderId = '__home__';
 
+        
+        // 2. Apps Icon Box (Home)
+        const appsBtn = document.createElement('div');
+        appsBtn.className = 'home-folder-item active'; // Removed icon-item to allow text
+        
         const appsIcon = document.createElement('div');
         appsIcon.className = 'home-folder-icon-div home-icon';
-        appsIcon.style.setProperty('--dna-icon-url', `url("${chrome.runtime.getURL('Icons/' + homeSettings.icon)}")`);
-        if (homeSettings.color) {
-            appsIcon.style.setProperty('background-color', homeSettings.color, 'important');
-        }
-
+        appsIcon.style.setProperty('--dna-icon-url', `url("${chrome.runtime.getURL('Icons/Home Icon.svg')}")`);
+        // Color handled in CSS for light/dark mode support
+        
         const appsText = document.createElement('span');
         appsText.className = 'folder-name';
         appsText.textContent = 'Home';
-        if (homeSettings.color) {
-            appsText.style.color = homeSettings.color;
-        }
-
+        
         appsBtn.appendChild(appsIcon);
         appsBtn.appendChild(appsText);
         foldersContainer.appendChild(appsBtn);
 
-        // ---- CUSTOM FOLDERS WRAPPER ----
+        // Wrapper for dynamic folders
         const dynamicFoldersWrapper = document.createElement('div');
         dynamicFoldersWrapper.className = 'dynamic-folders-wrapper';
         dynamicFoldersWrapper.style.display = 'flex';
         dynamicFoldersWrapper.style.alignItems = 'center';
-        dynamicFoldersWrapper.style.gap = '4px';
+        dynamicFoldersWrapper.style.gap = '4px'; // Add gap between folders
         foldersContainer.appendChild(dynamicFoldersWrapper);
 
-        // ---- PLUS BUTTON ----
+        // 3. Plus Icon Box
         const plusBtn = document.createElement('div');
         plusBtn.className = 'home-folder-item icon-item';
         plusBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -417,7 +401,7 @@
         
         document.body.appendChild(indicator);
 
-        // ---- SUB BAR ----
+        // --- Sub Bar ---
         const subBar = document.createElement('div');
         subBar.className = 'home-sub-bar';
         
@@ -445,7 +429,7 @@
             <span>Classes</span>
         `;
 
-        // Set as Home Button
+        // Set as Home (default-open folder) Button
         const setHomeBtn = document.createElement('div');
         setHomeBtn.className = 'sub-bar-btn sub-bar-home-btn';
         setHomeBtn.innerHTML = `
@@ -484,6 +468,7 @@
             if (!activeFolderId) return;
             
             if (!isDeleting) {
+                // Switch to confirm state
                 isDeleting = true;
                 deleteBtn.innerHTML = `
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
@@ -492,6 +477,7 @@
                 deleteBtn.style.borderColor = '#ff4444';
                 deleteBtn.style.color = '#ff4444';
             } else {
+                // Perform delete
                 const index = folders.findIndex(f => f.id === activeFolderId);
                 if (index !== -1) {
                     folders.splice(index, 1);
@@ -499,7 +485,7 @@
                         saveDefaultFolder(null);
                     }
                     saveFolders();
-                    setActiveFolder(null);
+                    setActiveFolder(null); // Go back to home
                 }
             }
         });
@@ -509,11 +495,13 @@
         subBar.appendChild(iconBtn);
         subBar.appendChild(addClassBtn);
         subBar.appendChild(deleteBtn);
+        // Don't append to body yet, will be appended to active folder
 
         function showClassroomPicker() {
             subBar.innerHTML = '';
             subBar.style.flexDirection = 'column';
             
+            // Return Button
             const returnBtn = document.createElement('div');
             returnBtn.className = 'sub-bar-btn';
             returnBtn.style.marginBottom = '0';
@@ -533,12 +521,15 @@
             const grid = document.createElement('div');
             grid.className = 'classroom-picker-grid';
             
+            // Get all courses from DOM
             const cards = document.querySelectorAll('ol li');
             const courses = [];
             cards.forEach(card => {
+                // Skip hidden classes (they have the OmA97e div)
                 if (card.querySelector('.OmA97e')) return;
                 
                 const id = getClassIdFromCard(card);
+                // Use the primary class title only (exclude subtitle like teacher/section text)
                 const name = getPrimaryClassTitleFromCard(card);
                 
                 if (id && !courses.find(c => c.id === id)) {
@@ -583,17 +574,14 @@
         }
 
         function resetSubBarState() {
-            if (activeFolderId === null) {
-                rebuildSubBarForHome();
-                return;
-            }
-
+            // Reset Rename Button
             renameBtn.innerHTML = `
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                 <span>Rename</span>
             `;
             renameBtn.classList.remove('editing');
 
+            // Reset Delete Button
             isDeleting = false;
             deleteBtn.innerHTML = `
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
@@ -602,6 +590,7 @@
             deleteBtn.style.borderColor = '';
             deleteBtn.style.color = '';
 
+            // Reset SubBar Content
             subBar.innerHTML = '';
             subBar.style.flexDirection = '';
             subBar.appendChild(setHomeBtn);
@@ -611,7 +600,7 @@
             subBar.appendChild(deleteBtn);
         }
 
-        // ---- FOLDER LOGIC ----
+        // --- Folder Logic ---
         let folders = [];
         try {
             const raw = localStorage.getItem('modernClassroom_folders');
@@ -620,7 +609,7 @@
             folders = []; 
         }
 
-        let activeFolderId = null;
+        let activeFolderId = null; // null = Home
         const DEFAULT_FOLDER_KEY = 'modernClassroom_defaultFolder';
         let defaultFolderId = null;
         try {
@@ -658,10 +647,12 @@
             }
         }
         
+        // Load from sync storage in background and update if different
         if (typeof storageGet === 'function') {
             storageGet('modernClassroom_folders', []).then(storedFolders => {
                 if (storedFolders && storedFolders.length > 0) {
                     folders = storedFolders;
+                    // Re-render folders if needed
                     if (typeof renderFolders === 'function') {
                         renderFolders();
                     }
@@ -684,7 +675,7 @@
             });
         }
 
-        // ---- AVAILABLE ICONS ----
+        // Icon Logic
         const availableIcons = [
             { title: 'Maths & Science', icons: [
                 'Square Root Icon.svg',
@@ -872,7 +863,6 @@
             ]},
         ];
 
-        // ---- ICON PICKER FOR CUSTOM FOLDERS ----
         iconBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             if (!activeFolderId) return;
@@ -880,6 +870,7 @@
             const currentFolder = folders.find(f => f.id === activeFolderId);
             if (!currentFolder) return;
 
+            // Temporarily replace sub-bar content with icon picker
             const originalContent = Array.from(subBar.children);
             subBar.innerHTML = '';
             
@@ -930,6 +921,7 @@
                     iconDiv.addEventListener('click', (ev) => {
                         ev.stopPropagation();
                         
+                        // Update UI selection
                         const allIcons = iconList.querySelectorAll('.home-icon-btn');
                         allIcons.forEach(el => el.classList.remove('selected'));
                         iconDiv.classList.add('selected');
@@ -948,6 +940,7 @@
             
             pickerContainer.appendChild(iconList);
 
+            // Return button for picker
             const closePicker = document.createElement('div');
             closePicker.className = 'sub-bar-btn';
             closePicker.style.marginBottom = '0';
@@ -966,6 +959,7 @@
                 restoreSubBar();
             });
 
+            // Color Picker Section
             const colorSection = document.createElement('div');
             colorSection.className = 'home-color-picker-section';
             
@@ -978,12 +972,13 @@
             colorTitle.style.textTransform = 'uppercase';
             colorSection.appendChild(colorTitle);
 
+            // SV Box (Saturation/Value)
             const svWrapper = document.createElement('div');
             svWrapper.className = 'home-sv-wrapper';
             
             const svCanvas = document.createElement('canvas');
             svCanvas.className = 'home-sv-canvas';
-            svCanvas.width = 280;
+            svCanvas.width = 280; // Approximate width
             svCanvas.height = 120;
             
             const svMarker = document.createElement('div');
@@ -993,6 +988,7 @@
             svWrapper.appendChild(svMarker);
             colorSection.appendChild(svWrapper);
 
+            // Hue Slider
             const hueSlider = document.createElement('input');
             hueSlider.type = 'range';
             hueSlider.min = '0';
@@ -1000,16 +996,19 @@
             hueSlider.className = 'home-hue-slider';
             colorSection.appendChild(hueSlider);
             
+            // Hex Input
             const hexInput = document.createElement('input');
             hexInput.type = 'text';
             hexInput.className = 'home-hex-input';
             hexInput.placeholder = '#RRGGBB';
             colorSection.appendChild(hexInput);
 
+            // State
             let currentH = 0;
             let currentS = 1;
             let currentV = 1;
 
+            // Helper functions defined locally to ensure scope access
             function localHsvToRgb(h, s, v) {
                 const c = v * s;
                 const hh = (h / 60) % 6;
@@ -1063,6 +1062,7 @@
                 return { h, s, v };
             }
 
+            // Initialize from current folder color
             if (currentFolder.color) {
                 const { h, s, v } = localHexToHsv(currentFolder.color);
                 currentH = h;
@@ -1073,6 +1073,7 @@
             hueSlider.value = currentH;
             hexInput.value = currentFolder.color || '#ffffff';
 
+            // Logic
             function drawSvBox() {
                 const ctx = svCanvas.getContext('2d');
                 const width = svCanvas.width;
@@ -1080,15 +1081,18 @@
                 
                 ctx.clearRect(0, 0, width, height);
                 
+                // Fill with current Hue
                 ctx.fillStyle = `hsl(${currentH}, 100%, 50%)`;
                 ctx.fillRect(0, 0, width, height);
                 
+                // White gradient (Left to Right)
                 const whiteGrad = ctx.createLinearGradient(0, 0, width, 0);
                 whiteGrad.addColorStop(0, 'rgba(255,255,255,1)');
                 whiteGrad.addColorStop(1, 'rgba(255,255,255,0)');
                 ctx.fillStyle = whiteGrad;
                 ctx.fillRect(0, 0, width, height);
                 
+                // Black gradient (Top to Bottom)
                 const blackGrad = ctx.createLinearGradient(0, 0, 0, height);
                 blackGrad.addColorStop(0, 'rgba(0,0,0,0)');
                 blackGrad.addColorStop(1, 'rgba(0,0,0,1)');
@@ -1097,6 +1101,7 @@
             }
 
             function updateMarkerPosition() {
+                // Ensure we have dimensions
                 const width = svCanvas.offsetWidth || 280;
                 const height = svCanvas.offsetHeight || 120;
                 
@@ -1110,13 +1115,16 @@
                 const { r, g, b } = localHsvToRgb(currentH, currentS, currentV);
                 const hex = localRgbToHex(r, g, b);
                 
+                // Update inputs
                 if (document.activeElement !== hexInput) {
                     hexInput.value = hex;
                 }
                 
+                // Update data
                 currentFolder.color = hex;
                 saveFolders();
                 
+                // Update DOM directly
                 const activeBtn = subBar.parentElement || dynamicFoldersWrapper.querySelector('.home-folder-item.active');
                 if (activeBtn) {
                     const iconDiv = activeBtn.querySelector('.home-folder-icon-div');
@@ -1130,6 +1138,7 @@
                 }
             }
 
+            // Event Listeners
             hueSlider.addEventListener('input', (e) => {
                 currentH = Number(e.target.value);
                 drawSvBox();
@@ -1145,6 +1154,7 @@
                 let x = clientX - rect.left;
                 let y = clientY - rect.top;
                 
+                // Clamp
                 x = Math.max(0, Math.min(rect.width, x));
                 y = Math.max(0, Math.min(rect.height, y));
                 
@@ -1187,6 +1197,7 @@
 
             pickerContainer.appendChild(colorSection);
             
+            // Initial Draw
             setTimeout(() => {
                 drawSvBox();
                 updateMarkerPosition();
@@ -1201,14 +1212,15 @@
             }
         });
 
-        // ---- RENAME LOGIC ----
+        // Rename Logic
         renameBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
+            e.stopPropagation(); // Prevent folder click
             if (!activeFolderId) return;
             
             const currentFolder = folders.find(f => f.id === activeFolderId);
             if (!currentFolder) return;
 
+            // Clear sub-bar to show rename interface
             subBar.innerHTML = '';
             
             const input = document.createElement('input');
@@ -1231,7 +1243,6 @@
                     currentFolder.name = newName;
                     saveFolders();
                     renderFolders();
-                    dispatchClassTasksRefresh('folder-renamed');
                 }
                 resetSubBarState();
             }
@@ -1260,127 +1271,42 @@
             input.focus();
         });
 
-        // ---- RENDER FOLDERS (with drag-and-drop) ----
         function renderFolders() {
+            // Sync existing buttons to preserve animations
             const existingButtons = Array.from(dynamicFoldersWrapper.children);
             const folderIds = folders.map(f => f.id);
 
+            // Remove buttons for deleted folders
             existingButtons.forEach(btn => {
                 if (btn.dataset.folderId && !folderIds.includes(btn.dataset.folderId)) {
                     btn.remove();
                 }
             });
 
-            dynamicFoldersWrapper.querySelectorAll('.folder-placeholder').forEach(el => el.remove());
-
-            let draggedElement = null;
-            let draggedId = null;
-
             folders.forEach((folder, index) => {
                 let fBtn = dynamicFoldersWrapper.querySelector(`[data-folder-id="${folder.id}"]`);
-
+                
                 if (!fBtn) {
+                    // Create new button
                     fBtn = document.createElement('div');
                     fBtn.className = 'home-folder-item folder-btn';
                     fBtn.style.position = 'relative';
                     fBtn.dataset.folderId = folder.id;
-
+                    
                     const icon = document.createElement('div');
                     icon.className = 'home-folder-icon-div';
-
+                    
                     const nameSpan = document.createElement('span');
                     nameSpan.className = 'folder-name';
-
+                    
                     fBtn.appendChild(icon);
                     fBtn.appendChild(nameSpan);
-
+                    
                     fBtn.addEventListener('click', () => {
                         setActiveFolder(folder.id);
                     });
 
-                    // ---- DRAG-AND-DROP WITH PLACEHOLDER ----
-                    fBtn.draggable = true;
-
-                    fBtn.addEventListener('dragstart', (e) => {
-                        draggedElement = fBtn;
-                        draggedId = folder.id;
-                        e.dataTransfer.effectAllowed = 'move';
-                        e.dataTransfer.setData('text/plain', folder.id);
-                        fBtn.style.opacity = '0.4';
-                        dynamicFoldersWrapper.querySelectorAll('.folder-placeholder').forEach(el => el.remove());
-                    });
-
-                    fBtn.addEventListener('dragend', () => {
-                        fBtn.style.opacity = '1';
-                        draggedElement = null;
-                        draggedId = null;
-                        dynamicFoldersWrapper.querySelectorAll('.folder-placeholder').forEach(el => el.remove());
-                        dynamicFoldersWrapper.querySelectorAll('.home-folder-item').forEach(el => {
-                            el.style.backgroundColor = '';
-                            el.style.boxShadow = '';
-                        });
-                    });
-
-                    fBtn.addEventListener('dragover', (e) => {
-                        e.preventDefault();
-                        e.dataTransfer.dropEffect = 'move';
-                        if (!draggedId || draggedId === folder.id) return;
-
-                        dynamicFoldersWrapper.querySelectorAll('.folder-placeholder').forEach(el => el.remove());
-
-                        const placeholder = document.createElement('div');
-                        placeholder.className = 'home-folder-item folder-btn folder-placeholder';
-                        placeholder.style.cssText = `
-                            visibility: hidden;
-                            height: ${fBtn.offsetHeight}px;
-                            width: ${fBtn.offsetWidth}px;
-                            flex-shrink: 0;
-                            margin: 0 4px;
-                            pointer-events: none;
-                        `;
-                        fBtn.parentNode.insertBefore(placeholder, fBtn);
-                    });
-
-                    fBtn.addEventListener('dragleave', (e) => {
-                        const related = e.relatedTarget;
-                        if (!related || !fBtn.contains(related)) {
-                            dynamicFoldersWrapper.querySelectorAll('.folder-placeholder').forEach(el => el.remove());
-                        }
-                    });
-
-                    fBtn.addEventListener('drop', (e) => {
-                        e.preventDefault();
-                        const droppedId = e.dataTransfer.getData('text/plain');
-                        if (!droppedId || droppedId === folder.id) return;
-
-                        const draggedIndex = folders.findIndex(f => f.id === droppedId);
-                        const targetIndex = folders.findIndex(f => f.id === folder.id);
-                        if (draggedIndex === -1 || targetIndex === -1) return;
-
-                        dynamicFoldersWrapper.querySelectorAll('.folder-placeholder').forEach(el => el.remove());
-
-                        const [removed] = folders.splice(draggedIndex, 1);
-                        const adjustedTarget = (draggedIndex < targetIndex) ? targetIndex - 1 : targetIndex;
-                        folders.splice(adjustedTarget, 0, removed);
-
-                        saveFolders();
-
-                        setTimeout(() => {
-                            renderFolders();
-                            if (activeFolderId !== null) {
-                                const activeBtn = dynamicFoldersWrapper.querySelector(`[data-folder-id="${activeFolderId}"]`);
-                                if (activeBtn) {
-                                    activeBtn.classList.add('active');
-                                    if (!activeBtn.contains(subBar)) {
-                                        activeBtn.appendChild(subBar);
-                                    }
-                                    requestAnimationFrame(() => subBar.classList.add('visible'));
-                                }
-                            }
-                        }, 50);
-                    });
-                    // ---- END DRAG-AND-DROP ----
-
+                    // Insert in correct order
                     if (index < dynamicFoldersWrapper.children.length) {
                         dynamicFoldersWrapper.insertBefore(fBtn, dynamicFoldersWrapper.children[index]);
                     } else {
@@ -1388,12 +1314,13 @@
                     }
                 }
 
+                // Update Content
                 const icon = fBtn.querySelector('.home-folder-icon-div');
                 const nameSpan = fBtn.querySelector('.folder-name');
-
+                
                 const iconName = folder.icon || 'fi-sr-folder.svg';
                 icon.style.setProperty('--dna-icon-url', `url("${chrome.runtime.getURL('Icons/' + iconName)}")`);
-
+                
                 if (folder.color) {
                     icon.style.setProperty('background-color', folder.color, 'important');
                     nameSpan.style.color = folder.color;
@@ -1401,9 +1328,10 @@
                     icon.style.removeProperty('background-color');
                     nameSpan.style.removeProperty('color');
                 }
-
+                
                 nameSpan.textContent = folder.name;
 
+                // Update Active State
                 if (folder.id === activeFolderId) {
                     if (!fBtn.classList.contains('active')) {
                         fBtn.classList.add('active');
@@ -1416,214 +1344,35 @@
                     }
                 }
             });
-
-            if (activeFolderId !== null) {
-                const activeBtn = dynamicFoldersWrapper.querySelector(`[data-folder-id="${activeFolderId}"]`);
-                if (activeBtn && !activeBtn.contains(subBar)) {
-                    activeBtn.appendChild(subBar);
-                    requestAnimationFrame(() => subBar.classList.add('visible'));
-                }
-            }
         }
 
-        // ---- SET ACTIVE FOLDER ----
         function setActiveFolder(id) {
-    const previousId = activeFolderId;
-    if (previousId === id) return;
+            // Reset sub-bar state when switching folders
+            if (activeFolderId !== id) {
+                try { resetSubBarState(); } catch (_) {}
+            }
 
-    // 1. UPDATE STATE FIRST
-    activeFolderId = id;
-
-    // 2. NOW reset the sub-bar (it knows whether we're on Home or a custom folder)
-    try { resetSubBarState(); } catch (_) {}
-
-    updateSetHomeButtonState();
-
-    // 3. Update UI
-    if (id === null) {
-        appsBtn.classList.add('active');
-        document.body.classList.remove('folder-active');
-
-        // Attach sub-bar to indicator for Home
-        const indicator = document.querySelector('.home-indicator');
-        if (indicator && !indicator.contains(subBar)) {
-            indicator.appendChild(subBar);
-        }
-        subBar.style.display = 'flex';
-        requestAnimationFrame(() => subBar.classList.add('visible'));
-
-        // (resetSubBarState already called rebuildSubBarForHome, so no need to call it again)
-    } else {
-        appsBtn.classList.remove('active');
-        document.body.classList.add('folder-active');
-        // renderFolders will attach the sub-bar to the active folder
-        renderFolders();
-    }
-
-    applyClassroomFilter();
-    dispatchClassTasksRefresh(id === null ? 'home-opened' : 'folder-opened');
-}
-
-        // ---- REBUILD SUB-BAR FOR HOME (Icon + Color) ----
-        function rebuildSubBarForHome() {
-            subBar.innerHTML = '';
-
-            // Icon picker button
-            const homeIconBtn = document.createElement('div');
-            homeIconBtn.className = 'sub-bar-btn';
-            homeIconBtn.innerHTML = `
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-                <span>Icon</span>
-            `;
-            homeIconBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                openHomeIconPicker();
-            });
-
-            // Color picker button
-            const homeColorBtn = document.createElement('div');
-            homeColorBtn.className = 'sub-bar-btn';
-            homeColorBtn.innerHTML = `
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6" fill="currentColor"></circle></svg>
-                <span>Color</span>
-            `;
-            homeColorBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                openHomeColorPicker();
-            });
-
-            subBar.appendChild(homeIconBtn);
-            subBar.appendChild(homeColorBtn);
-
-            const spacer = document.createElement('div');
-            spacer.style.flex = '1';
-            subBar.appendChild(spacer);
+            activeFolderId = id;
+            updateSetHomeButtonState();
+            
+            // Update UI
+            if (id === null) {
+                appsBtn.classList.add('active');
+                subBar.classList.remove('visible');
+                document.body.classList.remove('folder-active');
+                if (subBar.parentNode) subBar.parentNode.removeChild(subBar);
+            } else {
+                appsBtn.classList.remove('active');
+                document.body.classList.add('folder-active');
+            }
+            renderFolders(); 
+            
+            // Trigger Filter
+            applyClassroomFilter();
         }
 
-        // ---- HOME ICON PICKER ----
-        function openHomeIconPicker() {
-            document.querySelector('.home-icon-picker-modal')?.remove();
-
-            const modal = document.createElement('div');
-            modal.className = 'home-icon-picker-modal';
-            modal.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: var(--cui-cardbg, #1e1e2f);
-                border: 1px solid rgba(255,255,255,0.1);
-                border-radius: 16px;
-                padding: 20px;
-                z-index: 99999;
-                max-height: 80vh;
-                overflow-y: auto;
-                width: 400px;
-                box-shadow: 0 20px 60px rgba(0,0,0,0.8);
-            `;
-
-            const title = document.createElement('h3');
-            title.textContent = 'Choose Home Icon';
-            title.style.margin = '0 0 12px 0';
-            modal.appendChild(title);
-
-            const grid = document.createElement('div');
-            grid.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fill, 40px); gap: 8px;';
-
-            const allIcons = [];
-            availableIcons.forEach(group => {
-                group.icons.forEach(iconName => {
-                    if (!allIcons.includes(iconName)) allIcons.push(iconName);
-                });
-            });
-
-            allIcons.forEach(iconName => {
-                const btn = document.createElement('div');
-                btn.style.cssText = `
-                    width: 40px;
-                    height: 40px;
-                    border: 2px solid ${homeSettings.icon === iconName ? 'var(--cui-primary, #6c5ce7)' : 'transparent'};
-                    border-radius: 8px;
-                    cursor: pointer;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    background: rgba(255,255,255,0.05);
-                `;
-                btn.innerHTML = `<img src="${chrome.runtime.getURL('Icons/' + iconName)}" style="width:24px; height:24px;">`;
-                btn.addEventListener('click', () => {
-                    homeSettings.icon = iconName;
-                    saveHomeSettings();
-                    const homeIcon = appsBtn.querySelector('.home-folder-icon-div');
-                    if (homeIcon) {
-                        homeIcon.style.setProperty('--dna-icon-url', `url("${chrome.runtime.getURL('Icons/' + iconName)}")`);
-                    }
-                    rebuildSubBarForHome();
-                    modal.remove();
-                });
-                grid.appendChild(btn);
-            });
-
-            modal.appendChild(grid);
-
-            const closeBtn = document.createElement('button');
-            closeBtn.textContent = 'Close';
-            closeBtn.style.cssText = `
-                margin-top: 16px;
-                padding: 8px 16px;
-                border: none;
-                border-radius: 8px;
-                cursor: pointer;
-                background: var(--cui-primary, #6c5ce7);
-                color: white;
-            `;
-            closeBtn.addEventListener('click', () => modal.remove());
-            modal.appendChild(closeBtn);
-
-            document.body.appendChild(modal);
-        }
-
-        // ---- HOME COLOR PICKER ----
-        function openHomeColorPicker() {
-            const input = document.createElement('input');
-            input.type = 'color';
-            input.value = homeSettings.color || '#6c5ce7';
-            input.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                width: 200px;
-                height: 200px;
-                z-index: 99999;
-                border: none;
-                padding: 0;
-                background: none;
-            `;
-            input.addEventListener('input', (e) => {
-                const color = e.target.value;
-                homeSettings.color = color;
-                saveHomeSettings();
-                const homeIcon = appsBtn.querySelector('.home-folder-icon-div');
-                const homeText = appsBtn.querySelector('.folder-name');
-                if (homeIcon) homeIcon.style.setProperty('background-color', color, 'important');
-                if (homeText) homeText.style.color = color;
-            });
-            input.addEventListener('blur', () => input.remove());
-            document.addEventListener('keydown', function handler(e) {
-                if (e.key === 'Escape') {
-                    input.remove();
-                    document.removeEventListener('keydown', handler);
-                }
-            });
-            document.body.appendChild(input);
-            input.click();
-        }
-
-        // ---- APPS BTN CLICK ----
         appsBtn.addEventListener('click', () => setActiveFolder(null));
         
-        // ---- PLUS BTN CLICK ----
         plusBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             if (plusBtn.classList.contains('editing')) return;
@@ -1638,6 +1387,7 @@
             input.placeholder = "Name";
             input.value = "New Folder";
             
+            // Select all text on focus
             setTimeout(() => input.select(), 0);
 
             const saveBtn = document.createElement('div');
@@ -1692,7 +1442,7 @@
             input.focus();
         });
 
-        // ---- FILTERING LOGIC ----
+        // --- Filtering Logic ---
         function getClassIdFromCard(card) {
             const link = card.querySelector('a[href*="/c/"]');
             if (link) {
@@ -1705,12 +1455,15 @@
         function getPrimaryClassTitleFromCard(card) {
             if (!card) return 'Unknown Class';
 
+            // Primary title used in Classroom cards
             const primary = card.querySelector('.ScpeUc');
             if (primary && primary.textContent) return primary.textContent.trim();
 
+            // Common alternative selectors without including subtitle containers
             const alt = card.querySelector('.onkcGd') || card.querySelector('h2 .Vu2fZd.XwD7Ke') || card.querySelector('h2 a div');
             if (alt && alt.textContent) return alt.textContent.trim();
 
+            // Last resort: first line of heading text
             const heading = card.querySelector('h2');
             if (heading && heading.textContent) {
                 const firstLine = heading.textContent.split('\n').map(s => s.trim()).find(Boolean);
@@ -1721,38 +1474,30 @@
         }
 
         function applyClassroomFilter() {
+            // Find class cards (usually li elements in an ol)
             const cards = document.querySelectorAll('ol li'); 
             
+            // Find active folder
             const activeFolder = folders.find(f => f.id === activeFolderId);
             const allowedCourses = activeFolder ? (activeFolder.courseIds || []) : [];
 
+            // Filter Main Cards
             cards.forEach(card => {
-                const isTodoPageAssignmentRow = !!card.closest('.pEwOBc .JQIfHf, .pEwOBc .ovsVve');
-                if (isTodoPageAssignmentRow) {
-                    if (card.dataset.mcFolderHidden === '1') {
-                        card.style.display = '';
-                        delete card.dataset.mcFolderHidden;
-                    }
-                    return;
-                }
-
                 const classId = getClassIdFromCard(card);
                 if (!classId) return;
 
                 if (activeFolderId === null) {
                     card.style.display = '';
-                    delete card.dataset.mcFolderHidden;
                 } else {
                     if (allowedCourses.includes(classId)) {
                         card.style.display = '';
-                        delete card.dataset.mcFolderHidden;
                     } else {
                         card.style.display = 'none';
-                        card.dataset.mcFolderHidden = '1';
                     }
                 }
             });
 
+            // Filter Sidebar Links
             const sidebarLinks = document.querySelectorAll('.STek2d a[href*="/c/"]');
             sidebarLinks.forEach(link => {
                 const match = link.getAttribute('href').match(/\/c\/([a-zA-Z0-9]+)/);
@@ -1774,8 +1519,8 @@
 
         function checkUrl() {
             const url = window.location.href;
-            const isHomePage = /^https:\/\/classroom\.google\.com(\/u\/\d+)?(\/h)?$/.test(url) || 
-                               url === "https://classroom.google.com/";
+            const isHomePage =
+                /^https:\/\/classroom\.google\.com(\/u\/\d+)?(\/h(\/.*)?)?\/?$/.test(url);;
             if (isHomePage) {
                 document.body.classList.add('homebar');
             } else {
@@ -1784,6 +1529,9 @@
         }
 
         let filterScheduled = false;
+        let lastObservedUrl = null;
+        let locationWatchTimer = null;
+
         function scheduleApplyClassroomFilter() {
             if (activeFolderId === null) return;
             if (filterScheduled) return;
@@ -1794,14 +1542,14 @@
             });
         }
 
-        function hookLocationChanges() {
-            const run = () => {
-                checkUrl();
-                if (activeFolderId !== null) {
-                    applyClassroomFilter();
-                }
-            };
+        function runLocationUpdate() {
+            checkUrl();
+            if (activeFolderId !== null) {
+                applyClassroomFilter();
+            }
+        }
 
+        function hookLocationChanges() {
             const originalPushState = history.pushState;
             const originalReplaceState = history.replaceState;
 
@@ -1816,7 +1564,18 @@
             };
 
             window.addEventListener('popstate', () => window.dispatchEvent(new Event('locationchange')));
-            window.addEventListener('locationchange', run);
+            window.addEventListener('hashchange', () => window.dispatchEvent(new Event('locationchange')));
+            window.addEventListener('locationchange', runLocationUpdate);
+
+            lastObservedUrl = window.location.href;
+            if (locationWatchTimer) clearInterval(locationWatchTimer);
+            locationWatchTimer = setInterval(() => {
+                const currentUrl = window.location.href;
+                if (currentUrl !== lastObservedUrl) {
+                    lastObservedUrl = currentUrl;
+                    runLocationUpdate();
+                }
+            }, 250);
         }
 
         try {
@@ -1850,6 +1609,8 @@
             setActiveFolder(defaultFolderId);
         }
     }
+
+    // Class Tasks removed — no host mounting required.
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {

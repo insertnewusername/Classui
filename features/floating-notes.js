@@ -56,10 +56,7 @@
                 <div class="mc-notes-add-shell">
                     <button class="mc-notes-add-section" type="button" aria-label="Add section" title="Add section">+</button>
                 </div>
-                <div class="mc-notes-class-tasks-actions-shell">
-                    <button class="mc-notes-class-tasks-action mc-notes-class-tasks-add-column" type="button" aria-label="Add class tasks column" title="Add column"></button>
-                    <button class="mc-notes-class-tasks-action mc-notes-class-tasks-clear-all" type="button" aria-label="Clear all class tasks" title="Clear all"></button>
-                </div>
+                
             </div>
             <div class="mc-notes-panel" role="dialog" aria-label="Notes panel">
                 <div class="mc-notes-tabs" role="tablist" aria-label="Notes tabs">
@@ -67,7 +64,7 @@
                         <div class="mc-notes-tab active" data-tab="starred" role="tab" aria-selected="true" tabindex="0">Saved</div>
                         <div class="mc-notes-tab" data-tab="todo" role="tab" aria-selected="false" tabindex="0">Todo</div>
                         <div class="mc-notes-tab" data-tab="notepad" role="tab" aria-selected="false" tabindex="0">Notepad</div>
-                        <div class="mc-notes-tab" data-tab="classTasks" role="tab" aria-selected="false" tabindex="0">Class Tasks</div>
+                        
                     </div>
                 </div>
                 <div class="mc-notes-body">
@@ -80,10 +77,7 @@
                     <div class="mc-notes-view" data-view="notepad">
                         <textarea class="mc-notes-textarea" placeholder="Note down..."></textarea>
                     </div>
-                    <div class="mc-notes-view" data-view="classTasks">
-                        <div class="mc-notes-class-tasks-empty">Class Tasks is available on the Classroom home page.</div>
-                        <div class="mc-notes-class-tasks-mount"></div>
-                    </div>
+                    
                 </div>
             </div>
         `;
@@ -103,11 +97,6 @@
 
         document.addEventListener('click', (event) => {
             if (!isClickOutsideNotesPanel(event.target)) return;
-            try {
-                window.dispatchEvent(new CustomEvent('mc-homepage-class-tasks-refresh', {
-                    detail: { reason: 'notes-outside-click' }
-                }));
-            } catch (_) {}
         }, true);
 
         const controlIsland = widget.querySelector('.mc-notes-control-island');
@@ -176,17 +165,13 @@
 
         const addShell = widget.querySelector('.mc-notes-add-shell');
         const addSectionBtn = widget.querySelector('.mc-notes-add-section');
-        const classTasksActionsShell = widget.querySelector('.mc-notes-class-tasks-actions-shell');
-        const classTasksAddColumnBtn = widget.querySelector('.mc-notes-class-tasks-add-column');
-        const classTasksClearAllBtn = widget.querySelector('.mc-notes-class-tasks-clear-all');
         const modeToggleBtn = widget.querySelector('.mc-notes-mode-toggle');
         const modeToggleIcon = widget.querySelector('.mc-notes-mode-icon');
         const lockToggleBtn = widget.querySelector('.mc-notes-lock-toggle');
         const todoList = widget.querySelector('.mc-notes-todo-list');
         const starredList = widget.querySelector('.mc-notes-starred-list');
         const textarea = widget.querySelector('.mc-notes-textarea');
-        const classTasksHost = widget.querySelector('.mc-notes-class-tasks-mount');
-        const classTasksEmpty = widget.querySelector('.mc-notes-class-tasks-empty');
+        
         const tabButtons = Array.from(widget.querySelectorAll('.mc-notes-tab'));
         const views = Array.from(widget.querySelectorAll('.mc-notes-view'));
         const resizeHandle = widget.querySelector('.mc-notes-resize-handle');
@@ -194,28 +179,11 @@
         let isFixedMode = false;
         let isPanelLocked = false;
 
-        function notifyClassTasksHostReady() {
-            if (!classTasksHost) return;
-            window.dispatchEvent(new CustomEvent('mc-notes-class-tasks-host-ready', {
-                detail: { host: classTasksHost }
-            }));
-        }
+        // Class Tasks feature removed.
 
-        function syncClassTasksEmptyState() {
-            if (!classTasksHost || !classTasksEmpty) return;
-            const hasMountedSection = !!classTasksHost.querySelector('.mc-homepage-class-tasks-section');
-            classTasksEmpty.hidden = hasMountedSection;
-        }
+        // Class Tasks feature removed; no host observer required.
 
-        notifyClassTasksHostReady();
-        syncClassTasksEmptyState();
-
-        if (classTasksHost && typeof MutationObserver !== 'undefined') {
-            const classTasksHostObserver = new MutationObserver(() => {
-                syncClassTasksEmptyState();
-            });
-            classTasksHostObserver.observe(classTasksHost, { childList: true, subtree: true });
-        }
+        // Class Tasks fallback removed.
 
         function applyPanelLockState(locked) {
             isPanelLocked = !!locked && !isFixedMode;
@@ -1266,11 +1234,7 @@
                 renderStarredAssignments();
                 return;
             }
-            if (currentTab === 'classTasks') {
-                notifyClassTasksHostReady();
-                syncClassTasksEmptyState();
-                return;
-            }
+            
             if (currentTab === 'notepad') {
                 textarea.value = state.text;
             }
@@ -1292,12 +1256,7 @@
             const showPlus = tabName === 'todo';
             addSectionBtn.disabled = !showPlus;
             addShell.classList.toggle('mc-notes-plus-visible', showPlus);
-            const showClassTasksActions = tabName === 'classTasks';
-            if (classTasksActionsShell) {
-                classTasksActionsShell.classList.toggle('mc-notes-class-tasks-actions-visible', showClassTasksActions);
-            }
-            if (classTasksAddColumnBtn) classTasksAddColumnBtn.disabled = !showClassTasksActions;
-            if (classTasksClearAllBtn) classTasksClearAllBtn.disabled = !showClassTasksActions;
+            
 
             if (!showPlus) {
                 addSectionBtn.classList.remove('mc-notes-plus-enter');
@@ -1387,17 +1346,7 @@
             savePanelMode(nextMode);
         });
 
-        if (classTasksAddColumnBtn) {
-            classTasksAddColumnBtn.addEventListener('click', () => {
-                window.dispatchEvent(new CustomEvent('mc-notes-class-tasks-add-column'));
-            });
-        }
-
-        if (classTasksClearAllBtn) {
-            classTasksClearAllBtn.addEventListener('click', () => {
-                window.dispatchEvent(new CustomEvent('mc-notes-class-tasks-clear-all'));
-            });
-        }
+        
 
         if (lockToggleBtn) {
             lockToggleBtn.addEventListener('click', () => {

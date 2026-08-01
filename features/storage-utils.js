@@ -3,9 +3,8 @@
  * Provides unified API for chrome.storage.sync with automatic migration from localStorage
  */
 
-// Storage keys used throughout the extension
 const STORAGE_KEYS = {
-  // Sidebar controls
+  // Sidebar
   HIDE_TODO: 'hideTodo',
   HIDE_CALENDAR: 'hideCalendar',
   SIDEBAR_SIZE: 'sidebarSize',
@@ -19,11 +18,11 @@ const STORAGE_KEYS = {
   DECORATION_SELECTED: 'decoration:selected',
   DECORATION_CUSTOM: 'decoration:custom',
   
-  // Card backgrounds
+  // Banners
   CARD_BACKGROUNDS: 'modernClassroom_card_backgrounds',
   IMAGE_PICKER_POS: 'modernClassroom_imagePicker_pos',
   
-  // Tutorial and updates
+  // Tutorial/Updates
   TUTORIAL_SEEN: 'modernClassroom_tutorialSeen',
   UPDATE_VERSION: 'modernClassroom_updateVersion',
   UPDATE_DISMISSED_VERSION: 'modernClassroom_updateDismissedVersion',
@@ -48,7 +47,7 @@ const STORAGE_KEYS = {
   // Dark mode
   DARK_MODE: 'modernGoogleClassroomDarkMode',
   
-  // Titles (from background.js)
+  // Classroom Nicknames
   TITLES: 'titles'
 };
 
@@ -423,7 +422,6 @@ async function migrateAllToSync() {
   const allKeys = [...staticKeys, ...dynamicKeys];
   let migratedCount = 0;
 
-  // Always attempt migration - this handles fresh installs and ensures data integrity
   for (const key of allKeys) {
     const migrated = await migrateKey(key);
     if (migrated) migratedCount++;

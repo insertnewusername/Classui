@@ -3,17 +3,6 @@
     const INCOMPLETE_CLASS = 'mc-assignment-state-incomplete';
     const CARD_SELECTOR = '[data-stream-item-type="1"]';
 
-    // ---- Lighten a hex colour (0 to 1) ----
-    function lightenHexColor(hex, percent) {
-        let r = parseInt(hex.slice(1,3), 16);
-        let g = parseInt(hex.slice(3,5), 16);
-        let b = parseInt(hex.slice(5,7), 16);
-        r = Math.min(255, Math.round(r + (255 - r) * percent));
-        g = Math.min(255, Math.round(g + (255 - g) * percent));
-        b = Math.min(255, Math.round(b + (255 - b) * percent));
-        return `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;
-    }
-
     // ---- Get active course ID ----
     function getActiveCourseId() {
         const activeLink = document.querySelector('a.uTwgne[aria-current="page"], a.uTwgne[aria-current="true"]');
@@ -56,21 +45,6 @@
         return null;
     }
 
-    // ---- Apply colour to badge ----
-    function applyColourToBadge(badge, colour, stateClass) {
-        if (colour) {
-            let finalColour = colour;
-            if (stateClass === COMPLETE_CLASS) {
-                finalColour = lightenHexColor(colour, 0.4);
-            }
-            badge.style.setProperty('background-color', finalColour, 'important');
-            badge.style.setProperty('--mgc-classwork-color', finalColour, 'important');
-        } else {
-            badge.style.removeProperty('background-color');
-            badge.style.removeProperty('--mgc-classwork-color');
-        }
-    }
-
     // ---- Detect state from badge text ----
     function detectCardState(card) {
         const badge = getAssignmentTypeBadge(card);
@@ -89,36 +63,10 @@
         return String(text || '').toLowerCase().replace(/\s+/g, ' ').trim();
     }
 
-    // ---- Update badge state and colour ----
-    async function updateAssignmentBadgeState(card, stateClass) {
-        const badge = getAssignmentTypeBadge(card);
-        if (!badge) return;
-
-        badge.classList.remove(COMPLETE_CLASS, INCOMPLETE_CLASS);
-        card.classList.add('mc-classwork-status-target');
-        badge.classList.add(stateClass);
-
-        const courseId = getActiveCourseId();
-        let colour = null;
-        if (courseId) {
-            colour = await getCourseColour(courseId);
-        }
-        applyColourToBadge(badge, colour, stateClass);
-    }
-
-    // ---- Clear legacy state classes ----
-    function clearAllStateClasses() {
-        document.querySelectorAll('.mc-assignment-state-complete, .mc-assignment-state-incomplete').forEach((node) => {
-            node.classList.remove(COMPLETE_CLASS, INCOMPLETE_CLASS);
-            node.style.removeProperty('background-color');
-            node.style.removeProperty('--mgc-classwork-color');
-        });
-        document.querySelectorAll('.mc-classwork-status-target').forEach((node) => node.classList.remove('mc-classwork-status-target'));
-    }
-
     // ---- Process all cards ----
     async function processCards() {
         if (!/\/w(?:\/|$)/.test(window.location.pathname)) {
+            document.documentElement.style.removeProperty('--mc-course-colour');
             clearAllStateClasses();
             return;
         }
@@ -126,27 +74,35 @@
         const cards = Array.from(document.querySelectorAll(CARD_SELECTOR));
         if (!cards.length) return;
 
-        // Pre-fetch colour once
+        // 1. Fetch colour once and set it as a CSS variable
         const courseId = getActiveCourseId();
         let colour = null;
         if (courseId) {
             colour = await getCourseColour(courseId);
         }
+        document.documentElement.style.setProperty('--mc-course-colour', colour || '');
 
+        // 2. Apply the correct state class to each badge
         for (const card of cards) {
             if (!(card instanceof Element)) continue;
             const state = detectCardState(card);
             const badge = getAssignmentTypeBadge(card);
             if (!badge) continue;
-            // Update class and style
             badge.classList.remove(COMPLETE_CLASS, INCOMPLETE_CLASS);
-            card.classList.add('mc-classwork-status-target');
             badge.classList.add(state);
-            applyColourToBadge(badge, colour, state);
+            card.classList.add('mc-classwork-status-target');
         }
     }
 
-    // ---- Immediately process on any change ----
+    // ---- Clear legacy state classes ----
+    function clearAllStateClasses() {
+        document.querySelectorAll('.mc-assignment-state-complete, .mc-assignment-state-incomplete').forEach((node) => {
+            node.classList.remove(COMPLETE_CLASS, INCOMPLETE_CLASS);
+        });
+        document.querySelectorAll('.mc-classwork-status-target').forEach((node) => node.classList.remove('mc-classwork-status-target'));
+    }
+
+    // ---- Debounced scheduler ----
     let processTimeout = null;
     function scheduleImmediateProcess() {
         if (processTimeout) {
@@ -155,7 +111,7 @@
         processTimeout = setTimeout(() => {
             processTimeout = null;
             processCards().catch(() => {});
-        }, 50); // small delay to batch mutations
+        }, 50);
     }
 
     // ---- MutationObserver ----
@@ -178,7 +134,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             processCards().catch(() => {});
             startObserver();
-            // additional safety: run every 500ms
+            // Periodic safety net
             setInterval(() => scheduleImmediateProcess(), 500);
         });
     } else {

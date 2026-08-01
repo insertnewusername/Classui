@@ -1,4 +1,4 @@
-
+ 
 
 
 body.dark-mode .gHz6xd {
@@ -115,7 +115,7 @@ body.dark-mode .k43Owe.mmOZjd::after {
 
 
 body.dark-mode .k43Owe.mmOZjd:hover::after {
-    transform: scale(1.1) !important;
+    transform: scale(1.1);
     box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.308) !important;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%23ffbd4b'%3E%3Cpath d='M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0 .39-.39.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z'/%3E%3C/svg%3E") !important;
@@ -227,9 +227,6 @@ body.dark-mode {
     background: #1c1b1d !important;
 }
 
-body.dark-mode .O68mGe-hqgu2c::before, body.dark-mode .tB5Jxf-xl07Ob-XxIAqe.tB5Jxf-xl07Ob-XxIAqe {
-    background: #19191d !important;
-}
 
 body.dark-mode .TQYOZc.clickable-added,
 body.dark-mode .TQYOZc.clickable-added * {
@@ -248,14 +245,38 @@ body.dark-mode #my-extension-settings-panel *:not(.decoration-item) {
 
 
 body.dark-mode #my-extension-settings-panel .mgc-scale-btn {
-    background: #212126 !important;
-    box-shadow: 0 0px 15px 0 rgba(0, 0, 0, 0.253) !important;
-    border: 1.5px solid rgba(67, 72, 111, 0.421) !important;
-    transition: all 0.3s ease !important;
+    box-shadow: rgba(0, 0, 0, 0.27) 0px 4px 32px 0px;
+    border-color: #3c3f6945;
+    background: transparent;
+    transition: all 0.3s ease;
 }
 
 body.dark-mode #my-extension-settings-panel .mgc-scale-btn:hover {
-    box-shadow: 0 0px 25px 0 rgba(0, 0, 0, 0.303) !important;
+    box-shadow: 0 0px 25px 0 rgba(0, 0, 0, 0.303);
+}
+
+body.dark-mode #my-extension-settings-panel .mgc-settings-tabs {
+    background: transparent;
+}
+
+body.dark-mode #my-extension-settings-panel .mgc-settings-tab {
+    background: #2a2b32;
+    color: #b8bbda;
+    box-shadow: 0 0px 25px 0 rgba(0, 0, 0, 0.277);
+}
+
+body.dark-mode #my-extension-settings-panel .mgc-settings-tab.active {
+    background: #2a2b32;
+    color: #d7dcff;
+    box-shadow: 0 0px 15px 0 rgba(0, 0, 0, 0.35) !important;
+}
+
+body.dark-mode #my-extension-settings-panel .mgc-settings-tab::before {
+    box-shadow: 4px 4px 0 4px #2a2b32;
+}
+
+body.dark-mode #my-extension-settings-panel .mgc-settings-tab::after {
+    box-shadow: -4px 4px 0 4px #2a2b32;
 }
 
 
@@ -619,16 +640,9 @@ body.dark-mode .Eajscb .vT1Gyc.F262Ye {
 }
 
 body.dark-mode .tutorial-modal {
-  background: #212126;
-  border: 1.5px solid rgba(43, 45, 63, 0.421);
+  background: #2a2b32;
 }
 
-
-
-
-body.dark-mode .tutorial-content {
-  background: #212126;
-}
 
 body.dark-mode .tutorial-feature-title {
   color: #ffffffe1;
@@ -649,12 +663,6 @@ body.dark-mode .tutorial-close {
 
 body.dark-mode .tutorial-close:hover {
   color: #ffffff80;
-}
-
-body.dark-mode .feedback-btn.tutorial-launch-btn {
-    background: #232634 !important;
-    color: #edf1ff !important;
-    border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
 body.dark-mode .AeBiU-LgbsSe {
@@ -836,32 +844,8 @@ body.dark-mode .decoration-item.selected {
 body.dark-mode .mc-has-decoration { background-attachment: fixed !important; }
 
 
-body.dark-mode .feedback-btn, body.dark-mode .rewatch-tutorial-btn, body.dark-mode .tutorial-btn {
-    background: #212126 !important;
-    box-shadow: 0 0px 15px 0 rgba(0, 0, 0, 0.253) !important;
-    border: 1.5px solid rgba(67, 72, 111, 0.421) !important;
-    transition: all 0.3s ease !important;
-}
-
-body.dark-mode .update-check-btn.is-success {
-    color: #9ee0b7 !important;
-    border-color: rgba(87, 177, 120, 0.52) !important;
-}
-
-body.dark-mode .update-check-btn.is-error {
-    color: #ffd59a !important;
-    border-color: rgba(198, 145, 70, 0.5) !important;
-}
-
-body.dark-mode .feedback-btn:hover, body.dark-mode .rewatch-tutorial-btn:hover, body.dark-mode .tutorial-btn:hover {
-    box-shadow: 0 0px 25px 0 rgba(0, 0, 0, 0.303) !important;
-}
 
 
-body.dark-mode .tutorial-btn {
-  color: #ffffffec !important;
-  transition: all 0.2s ease;
-}
 
 
 
@@ -874,10 +858,7 @@ body.dark-mode .uW2Fw-k2Wrsb, body.dark-mode .s8kmpb.qCWAqb {
 
 
 
-body.dark-mode .sidebar-option.selected {
-    box-shadow: 0 4px 32px 0 rgba(0, 0, 0, 0.223) !important;
-    border: 1.5px solid rgba(80, 86, 134, 0.475) !important;
-}
+
 
 body.dark-mode .TisIWb .kKn9Nc::before {
  background: rgba(255, 255, 255, 0) !important;
@@ -899,7 +880,8 @@ body.dark-mode .zyTWof-gIZMF {
 
 .dark-mode .setting-toggle-btn {
   background: transparent !important;
-  border: 1.5px solid rgba(43, 45, 63, 0.421) !important;
+  box-shadow: rgba(0, 0, 0, 0.114) 0px 0px 20px 0px;
+  border: solid 1.5px rgba(67, 72, 111, 0.2);
   color: #e8eaed;
 }
 
@@ -941,8 +923,7 @@ body.dark-mode .home-layout-btn:not(.enabled).hover {
 body.dark-mode .streamside-toggle-arrow-btn {
     background: #212126 !important;
     border: 1.5px solid rgba(43, 45, 63, 0.421) !important;
-    box-shadow: 0 0px 20px 0 rgba(0, 0, 0, 0.223) !important;
-
+    box-shadow: 0 0px 25px 0 rgba(0, 0, 0, 0.277) !important;
 }
 
 body.dark-mode .streamside-arrow {
@@ -987,8 +968,8 @@ body.dark-mode .mvRF3b, body.dark-mode .AX2up, body.dark-mode .LNBrBd {
 
 body.dark-mode .Utoz9b {
     background: #212126 !important;
-    border: 1.5px solid rgba(47, 49, 68, 0.558) !important;
-    box-shadow: 0 0px 20px 0 rgba(0, 0, 0, 0.18) !important;
+    border: 1.5px solid rgba(43, 45, 63, 0.421) !important;
+    box-shadow: 0 0px 25px 0 rgba(0, 0, 0, 0.277) !important;
 }
 
 body.dark-mode .Utoz9b:hover {
