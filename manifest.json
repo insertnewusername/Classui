@@ -21,7 +21,8 @@
          "features/sidebar-titles-banners.js",
          "features/storage-utils.js",
          "features/tutorial-content.js",
-         "features/tutorial-modal.js"
+         "features/tutorial-modal.js",
+         "features/hide-classroom-tools.js"
       ],
       "matches": [ "*://classroom.google.com/*" ]
    } ],
