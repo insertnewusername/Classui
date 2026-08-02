@@ -1,6 +1,110 @@
 /* ===============================================
    LIQUID GLASS - Unified & Clean
    =============================================== */
+
+   /* ==========================================================================
+   TO‑DO ASSIGNMENTS – Liquid Glass (matching stream posts)
+   ========================================================================== */
+body.cui-glass-enabled [data-role="task-row"] {
+    position: relative !important;
+    overflow: hidden !important;
+    border-radius: 16px !important;
+    background: rgba(255, 255, 255, 0.25) !important;
+    backdrop-filter: blur(8px) url(#glass-distortion) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
+    box-shadow: 
+        inset 0 0 0 1px rgba(255, 255, 255, 0.6),
+        inset 2px 3px 0 -2px rgba(255, 255, 255, 0.9),
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.8),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.6),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.12),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.2),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.2),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.1),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.1),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.08) !important;
+    border: none !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    margin-bottom: 8px !important;
+}
+/* Hover glow – same as stream */
+body.cui-glass-enabled .MHxtic.JUr7jb.gmNu1d.CNpREd::after {
+    content: '' !important;
+    position: absolute !important;
+    inset: 0 !important;
+    border-radius: inherit !important;
+    pointer-events: none !important;
+    z-index: 2 !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.3) 0%,
+        transparent 60%
+    ) !important;
+    opacity: 0 !important;
+    transition: opacity 0.3s ease !important;
+}
+body.cui-glass-enabled .MHxtic.JUr7jb.gmNu1d.CNpREd:hover::after {
+    opacity: 1 !important;
+}
+/* Content sits above glass */
+body.cui-glass-enabled .MHxtic.JUr7jb.gmNu1d.CNpREd > * {
+    position: relative !important;
+    z-index: 3 !important;
+}
+/* Hover lift – same as stream */
+body.cui-glass-enabled .MHxtic.JUr7jb.gmNu1d.CNpREd:hover {
+    transform: scale(1.015) !important;
+    box-shadow: 
+        inset 0 0 0 1px rgba(255, 255, 255, 0.7),
+        inset 2px 3px 0 -2px rgba(255, 255, 255, 1),
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.9),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.7),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.08),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.15),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.15),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.08),
+        0px 2px 8px 0px rgba(0, 0, 0, 0.12),
+        0px 8px 24px 0px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* ---- Dark mode for To‑Do assignments ---- */
+body.dark-mode.cui-glass-enabled .MHxtic.JUr7jb.gmNu1d.CNpREd {
+    background: var(--glass-dark-surface) !important;
+    border: 1px solid var(--glass-dark-border) !important;
+    box-shadow: 
+        inset 0 0 0 1px var(--glass-dark-border),
+        inset 2px 3px 0 -2px var(--glass-dark-inner),
+        inset -2px -2px 0 -2px var(--glass-dark-inner-soft),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.04),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.28),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.34),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.34),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.2),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.32),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.26) !important;
+}
+body.dark-mode.cui-glass-enabled .MHxtic.JUr7jb.gmNu1d.CNpREd:hover {
+    box-shadow: 
+        inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+        inset 2px 3px 0 -2px rgba(255, 255, 255, 0.12),
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.08),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.05),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.18),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.22),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.22),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.14),
+        0px 2px 8px 0px rgba(0, 0, 0, 0.38),
+        0px 8px 24px 0px rgba(0, 0, 0, 0.32) !important;
+}
+body.dark-mode.cui-glass-enabled .MHxtic.JUr7jb.gmNu1d.CNpREd::after {
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.08) 0%,
+        transparent 60%
+    ) !important;
+}
+
+
 /* ==========================================================================
    YOUR WORK PANEL – Liquid Glass (exact match to stream posts)
    ========================================================================== */
@@ -1409,7 +1513,7 @@ body.dark-mode.cui-glass-enabled [role="main"] .wBE4bf.TIunU::after {
 body.cui-glass-enabled .riU7le.FHXi2c,
 body.cui-glass-enabled .t2wIBc .riU7le.FHXi2c {
     position: relative !important;
-    border-radius: 16px !important;
+    border-radius: 24px !important;
     overflow: hidden !important;
     background: rgba(255, 255, 255, 0.35) !important;
     box-shadow: 
@@ -1744,166 +1848,7 @@ body.cui-glass-enabled [role="main"] .wBE4bf.TIunU [role="region"] * {
     box-shadow: none !important;
     border: none !important;
 }
-/* ==========================================================================
-   LIQUID GLASS BUTTONS Ã¢â‚¬â€œ with distortion layer (::before)
-   ========================================================================== */
-body.cui-glass-enabled button.eVOdue,
-body.cui-glass-enabled button.upBbve,
-body.cui-glass-enabled button[data-idom-class="eVOdue"],
-body.cui-glass-enabled button[data-idom-class="upBbve"] {
-    position: relative !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 4px !important;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.07) 100%) !important;
-    border-radius: 40px !important;
-    border: 1px solid rgba(255, 255, 255, 0.4) !important;
-    box-shadow: 
-        inset 0 1px 1px rgba(255, 255, 255, 0.3),
-        0 4px 15px rgba(0, 0, 0, 0.05),
-        0 1px 3px rgba(0, 0, 0, 0.03) !important;
-    padding: 4px 14px !important;
-    min-height: 34px !important;
-    height: auto !important;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
-    overflow: hidden !important;
-}
-body.cui-glass-enabled button.eVOdue::before,
-body.cui-glass-enabled button.upBbve::before {
-    content: "" !important;
-    position: absolute !important;
-    inset: 0 !important;
-    z-index: 0 !important;
-    pointer-events: none !important;
-    backdrop-filter: blur(16px) saturate(140%) !important;
-    -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
-    filter: url(#glass-distortion) !important;
-    border-radius: inherit !important;
-}
-body.cui-glass-enabled button.eVOdue::after,
-body.cui-glass-enabled button.upBbve::after {
-    content: "" !important;
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    height: 50% !important;
-    background: linear-gradient(rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0)) !important;
-    border-radius: 40px 40px 0 0 !important;
-    pointer-events: none !important;
-    z-index: 1 !important;
-}
-body.cui-glass-enabled button.eVOdue > *,
-body.cui-glass-enabled button.upBbve > * {
-    position: relative !important;
-    z-index: 2 !important;
-}
-body.cui-glass-enabled button.eVOdue .MMvswb,
-body.cui-glass-enabled button.upBbve .MMvswb,
-body.cui-glass-enabled button.eVOdue .AeBiU-RLmnJb,
-body.cui-glass-enabled button.upBbve .UywwFc-RLmnJb,
-body.cui-glass-enabled button.eVOdue .XjoK4b,
-body.cui-glass-enabled button.upBbve .XjoK4b,
-body.cui-glass-enabled button.eVOdue .UTNHae,
-body.cui-glass-enabled button.upBbve .UTNHae {
-    display: none !important;
-}
-body.cui-glass-enabled button.upBbve .AeBiU-vQzf8d,
-body.cui-glass-enabled button.upBbve .UywwFc-vQzf8d,
-body.cui-glass-enabled button.eVOdue .AeBiU-vQzf8d {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    line-height: 1 !important;
-}
-body.cui-glass-enabled button.eVOdue .AeBiU-kBDsod-Rtc0Jf,
-body.cui-glass-enabled button.upBbve .UywwFc-kBDsod-Rtc0Jf,
-body.cui-glass-enabled button.upBbve .AeBiU-kBDsod-Rtc0Jf {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    line-height: 1 !important;
-}
-body.cui-glass-enabled button.eVOdue i,
-body.cui-glass-enabled button.upBbve i {
-    line-height: 1 !important;
-    font-size: 20px !important;
-}
-body.cui-glass-enabled button.eVOdue .AeBiU-vQzf8d {
-    display: none !important;
-}
-body.cui-glass-enabled button.eVOdue .AeBiU-vQzf8d,
-body.cui-glass-enabled button.upBbve .AeBiU-vQzf8d,
-body.cui-glass-enabled button.upBbve .UywwFc-vQzf8d,
-body.cui-glass-enabled button.eVOdue i {
-    color: #1f1f1f !important;
-    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5) !important;
-    font-weight: 500 !important;
-}
-body.cui-glass-enabled button.eVOdue:hover,
-body.cui-glass-enabled button.upBbve:hover {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.32) 0%, rgba(255, 255, 255, 0.12) 100%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.55) !important;
-    transform: translateY(-1px) !important;
-    box-shadow: 
-        inset 0 1px 2px rgba(255, 255, 255, 0.4),
-        0 8px 20px rgba(0, 0, 0, 0.08) !important;
-}
-body.cui-glass-enabled button.eVOdue:active,
-body.cui-glass-enabled button.upBbve:active {
-    transform: translateY(1px) !important;
-    box-shadow: 
-        inset 0 1px 4px rgba(0, 0, 0, 0.1),
-        0 2px 5px rgba(0, 0, 0, 0.05) !important;
-}
-body.dark-mode.cui-glass-enabled .AeBiU-LgbsSe.upBbve,
-body.dark-mode.cui-glass-enabled .UywwFc-LgbsSe.upBbve {
-    background: var(--glass-dark-surface-soft) !important;
-    border: 1px solid var(--glass-dark-border) !important;
-    box-shadow: 
-        0 4px 20px rgba(0, 0, 0, 0.3),
-        inset 1px 1px 0 rgba(255, 255, 255, 0.08),
-        inset 0 0 5px rgba(255, 255, 255, 0.03) !important;
-}
-body.dark-mode.cui-glass-enabled .AeBiU-LgbsSe.upBbve:hover,
-body.dark-mode.cui-glass-enabled .UywwFc-LgbsSe.upBbve:hover {
-    box-shadow: 
-        0 8px 30px rgba(0, 0, 0, 0.42),
-        inset 1px 1px 0 rgba(255, 255, 255, 0.12),
-        inset 0 0 8px rgba(255, 255, 255, 0.05) !important;
-}
-body.dark-mode.cui-glass-enabled .AeBiU-LgbsSe.upBbve::after,
-body.dark-mode.cui-glass-enabled .UywwFc-LgbsSe.upBbve::after {
-    background: radial-gradient(
-        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-        rgba(255, 255, 255, 0.08) 0%,
-        transparent 60%
-    ) !important;
-}
-body.dark-mode.cui-glass-enabled button.eVOdue {
-    background: var(--glass-dark-surface-soft) !important;
-    border: 1px solid var(--glass-dark-border) !important;
-    box-shadow: 
-        0 4px 20px rgba(0, 0, 0, 0.3),
-        inset 1px 1px 0 rgba(255, 255, 255, 0.08),
-        inset 0 0 5px rgba(255, 255, 255, 0.03) !important;
-}
-body.dark-mode.cui-glass-enabled button.eVOdue:hover {
-    background: rgba(255, 255, 255, 0.12) !important;
-    border: 1px solid rgba(255, 255, 255, 0.16) !important;
-}
-body.dark-mode.cui-glass-enabled button.eVOdue .AeBiU-vQzf8d,
-body.dark-mode.cui-glass-enabled button.upBbve .AeBiU-vQzf8d,
-body.dark-mode.cui-glass-enabled button.upBbve .UywwFc-vQzf8d,
-body.dark-mode.cui-glass-enabled button.eVOdue i {
-    color: #ffffff !important;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
-}
+
 /* ==========================================================================
    DARK MODE Ã¢â‚¬â€œ Top navigation bar
    ========================================================================== */
