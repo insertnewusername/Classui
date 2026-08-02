@@ -160,6 +160,197 @@ body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .x4lrdf::after {
     ) !important;
 }
 
+
+/* ==========================================================================
+   QUICK LINKS & UPCOMING SIDEBAR – Liquid Glass (exact match to stream posts)
+   ========================================================================== */
+body.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc {
+    position: relative !important;
+    overflow: hidden !important;
+    border-radius: 16px !important;
+    background: rgba(255, 255, 255, 0.25) !important;
+    backdrop-filter: blur(8px) url(#glass-distortion) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
+    box-shadow: 
+        inset 0 0 0 1px rgba(255, 255, 255, 0.6),
+        inset 2px 3px 0 -2px rgba(255, 255, 255, 0.9),
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.8),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.6),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.12),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.2),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.2),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.1),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.1),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.08) !important;
+    border: none !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+/* Hover glow – exact same as stream posts */
+body.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc::after {
+    content: '' !important;
+    position: absolute !important;
+    inset: 0 !important;
+    border-radius: inherit !important;
+    pointer-events: none !important;
+    z-index: 2 !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.3) 0%,
+        transparent 60%
+    ) !important;
+    opacity: 0 !important;
+    transition: opacity 0.3s ease !important;
+}
+body.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc:hover::after {
+    opacity: 1 !important;
+}
+/* Content sits above the glass */
+body.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc > * {
+    position: relative !important;
+    z-index: 3 !important;
+}
+/* Hover lift – exact same as stream posts */
+body.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc:hover {
+    transform: scale(1.015) !important;
+    box-shadow: 
+        inset 0 0 0 1px rgba(255, 255, 255, 0.7),
+        inset 2px 3px 0 -2px rgba(255, 255, 255, 1),
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.9),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.7),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.08),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.15),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.15),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.08),
+        0px 2px 8px 0px rgba(0, 0, 0, 0.12),
+        0px 8px 24px 0px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* ---- Dark mode (exact match to stream posts) ---- */
+body.dark-mode.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc {
+    background: var(--glass-dark-surface) !important;
+    border: 1px solid var(--glass-dark-border) !important;
+    box-shadow: 
+        inset 0 0 0 1px var(--glass-dark-border),
+        inset 2px 3px 0 -2px var(--glass-dark-inner),
+        inset -2px -2px 0 -2px var(--glass-dark-inner-soft),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.04),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.28),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.34),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.34),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.2),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.32),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.26) !important;
+}
+body.dark-mode.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc:hover {
+    box-shadow: 
+        inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+        inset 2px 3px 0 -2px rgba(255, 255, 255, 0.12),
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.08),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.05),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.18),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.22),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.22),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.14),
+        0px 2px 8px 0px rgba(0, 0, 0, 0.38),
+        0px 8px 24px 0px rgba(0, 0, 0, 0.32) !important;
+}
+body.dark-mode.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc::after {
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.08) 0%,
+        transparent 60%
+    ) !important;
+}
+
+
+/* ==========================================================================
+   STREAMSIDE TOGGLE BUTTON – Liquid Glass (exact match to stream posts)
+   ========================================================================== */
+body.cui-glass-enabled .streamside-toggle-arrow-btn {
+    position: relative !important;
+    border-radius: 40px !important;
+    overflow: hidden !important;
+    background: rgba(255, 255, 255, 0.25) !important;
+    backdrop-filter: blur(8px) url(#glass-distortion) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
+    box-shadow: 
+        inset 0 0 0 1px rgba(255, 255, 255, 0.6),
+        inset 2px 3px 0 -2px rgba(255, 255, 255, 0.9),
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.8),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.6),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.1),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.08) !important;
+    border: none !important;
+    padding: 8px !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+/* Hover glow */
+body.cui-glass-enabled .streamside-toggle-arrow-btn::after {
+    content: '' !important;
+    position: absolute !important;
+    inset: 0 !important;
+    border-radius: inherit !important;
+    pointer-events: none !important;
+    z-index: 2 !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.3) 0%,
+        transparent 60%
+    ) !important;
+    opacity: 0 !important;
+    transition: opacity 0.3s ease !important;
+}
+body.cui-glass-enabled .streamside-toggle-arrow-btn:hover::after {
+    opacity: 1 !important;
+}
+/* Content sits above */
+body.cui-glass-enabled .streamside-toggle-arrow-btn > * {
+    position: relative !important;
+    z-index: 3 !important;
+}
+/* Hover lift */
+body.cui-glass-enabled .streamside-toggle-arrow-btn:hover {
+    transform: scale(1.05) !important;
+    box-shadow: 
+        inset 0 0 0 1px rgba(255, 255, 255, 0.7),
+        inset 2px 3px 0 -2px rgba(255, 255, 255, 1),
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.9),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.7),
+        0px 2px 8px 0px rgba(0, 0, 0, 0.12),
+        0px 8px 24px 0px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* ---- Dark mode ---- */
+body.dark-mode.cui-glass-enabled .streamside-toggle-arrow-btn {
+    background: var(--glass-dark-surface) !important;
+    border: 1px solid var(--glass-dark-border) !important;
+    box-shadow: 
+        inset 0 0 0 1px var(--glass-dark-border),
+        inset 2px 3px 0 -2px var(--glass-dark-inner),
+        inset -2px -2px 0 -2px var(--glass-dark-inner-soft),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.32),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.26) !important;
+}
+body.dark-mode.cui-glass-enabled .streamside-toggle-arrow-btn:hover {
+    box-shadow: 
+        inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+        inset 2px 3px 0 -2px rgba(255, 255, 255, 0.12),
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.08),
+        0px 2px 8px 0px rgba(0, 0, 0, 0.38),
+        0px 8px 24px 0px rgba(0, 0, 0, 0.32) !important;
+}
+body.dark-mode.cui-glass-enabled .streamside-toggle-arrow-btn::after {
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.08) 0%,
+        transparent 60%
+    ) !important;
+}
+
+
+
+
+
 /* ==========================================================================
    HOMEPAGE CLASS CARD ACTION BAR – Frosted Liquid Glass
    ========================================================================== */
