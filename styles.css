@@ -160,6 +160,128 @@ body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .x4lrdf::after {
     ) !important;
 }
 
+/* ==========================================================================
+   HOMEPAGE CLASS CARD ACTION BAR – Frosted Liquid Glass
+   ========================================================================== */
+/* --- The whole action bar container --- */
+body.cui-glass-enabled .SZ0kZe {
+    position: relative !important;
+    border-radius: 16px !important;
+    overflow: hidden !important;
+    background: rgba(255, 255, 255, 0.35) !important;
+    backdrop-filter: blur(8px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(180%) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05),
+                inset 1px 1px 0 rgba(255, 255, 255, 0.5),
+                inset -1px -1px 0 rgba(255, 255, 255, 0.3) !important;
+    border: 1px solid rgba(255, 255, 255, 0.35) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease !important;
+    display: flex !important;
+    align-items: center !important;
+}
+/* Distortion layer */
+body.cui-glass-enabled .SZ0kZe::before {
+    content: '' !important;
+    position: absolute !important;
+    inset: 0 !important;
+    border-radius: inherit !important;
+    z-index: 0 !important;
+    pointer-events: none !important;
+    filter: url(#glass-distortion) !important;
+}
+/* Hover glow */
+body.cui-glass-enabled .SZ0kZe::after {
+    content: '' !important;
+    position: absolute !important;
+    inset: 0 !important;
+    border-radius: inherit !important;
+    pointer-events: none !important;
+    z-index: 2 !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.35) 0%,
+        transparent 60%
+    ) !important;
+    opacity: 0 !important;
+    transition: opacity 0.3s ease !important;
+}
+body.cui-glass-enabled .SZ0kZe:hover::after {
+    opacity: 1 !important;
+}
+/* Keep child elements above the glass */
+body.cui-glass-enabled .SZ0kZe > * {
+    position: relative !important;
+    z-index: 3 !important;
+}
+/* Hover lift */
+body.cui-glass-enabled .SZ0kZe:hover {
+    transform: scale(1.015) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10),
+                inset 1px 1px 0 rgba(255, 255, 255, 0.6),
+                inset -1px -1px 0 rgba(255, 255, 255, 0.4) !important;
+    background: rgba(255, 255, 255, 0.45) !important;
+}
+
+/* --- Dark mode for the bar --- */
+body.dark-mode.cui-glass-enabled .SZ0kZe {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25),
+                inset 1px 1px 0 rgba(255, 255, 255, 0.06),
+                inset -1px -1px 0 rgba(255, 255, 255, 0.03) !important;
+}
+body.dark-mode.cui-glass-enabled .SZ0kZe:hover {
+    background: rgba(255, 255, 255, 0.14) !important;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35),
+                inset 1px 1px 0 rgba(255, 255, 255, 0.10),
+                inset -1px -1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+body.dark-mode.cui-glass-enabled .SZ0kZe::after {
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.12) 0%,
+        transparent 60%
+    ) !important;
+}
+
+/* --- Individual action buttons inside the bar (frosted glass pills) --- */
+body.cui-glass-enabled .SZ0kZe .pYTkkf-Bz112c-LgbsSe,
+body.cui-glass-enabled .SZ0kZe .my-extension-edit,
+body.cui-glass-enabled .SZ0kZe .my-extension-image {
+    position: relative !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+    backdrop-filter: blur(4px) saturate(120%) !important;
+    -webkit-backdrop-filter: blur(4px) saturate(120%) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease !important;
+}
+/* Button hover – scale & brighten */
+body.cui-glass-enabled .SZ0kZe .pYTkkf-Bz112c-LgbsSe:hover,
+body.cui-glass-enabled .SZ0kZe .my-extension-edit:hover,
+body.cui-glass-enabled .SZ0kZe .my-extension-image:hover {
+    background: rgba(255, 255, 255, 0.35) !important;
+    transform: scale(1.05) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08),
+                inset 1px 1px 0 rgba(255, 255, 255, 0.6) !important;
+}
+
+/* --- Dark mode for buttons --- */
+body.dark-mode.cui-glass-enabled .SZ0kZe .pYTkkf-Bz112c-LgbsSe,
+body.dark-mode.cui-glass-enabled .SZ0kZe .my-extension-edit,
+body.dark-mode.cui-glass-enabled .SZ0kZe .my-extension-image {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2),
+                inset 1px 1px 0 rgba(255, 255, 255, 0.04) !important;
+}
+body.dark-mode.cui-glass-enabled .SZ0kZe .pYTkkf-Bz112c-LgbsSe:hover,
+body.dark-mode.cui-glass-enabled .SZ0kZe .my-extension-edit:hover,
+body.dark-mode.cui-glass-enabled .SZ0kZe .my-extension-image:hover {
+    background: rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3),
+                inset 1px 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
 
 /* ==========================================================================
    SIDEBAR CONTAINER Ã¢â‚¬â€œ Glass (distortion on ::before, content stays crisp)
