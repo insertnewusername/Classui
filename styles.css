@@ -1,7 +1,397 @@
 /* ===============================================
    LIQUID GLASS - Unified & Clean
    =============================================== */
+/* ==========================================================================
+   YOUR WORK PANEL – Liquid Glass (exact match to stream posts)
+   ========================================================================== */
+body.cui-glass-enabled .K2hR3c.BiaLW .AJFihd.T25sKc.jlxRme {
+    position: relative !important;
+    overflow: hidden !important;
+    border-radius: 16px !important;
+    background: rgba(255, 255, 255, 0.25) !important;
+    backdrop-filter: blur(8px) url(#glass-distortion) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
+    box-shadow: 
+        inset 0 0 0 1px rgba(255, 255, 255, 0.6),
+        inset 2px 3px 0 -2px rgba(255, 255, 255, 0.9),
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.8),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.6),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.12),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.2),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.2),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.1),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.1),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.08) !important;
+    border: none !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    margin-bottom: 12px !important;
+}
+/* Hover glow */
+body.cui-glass-enabled .K2hR3c.BiaLW .AJFihd.T25sKc.jlxRme::after {
+    content: '' !important;
+    position: absolute !important;
+    inset: 0 !important;
+    border-radius: inherit !important;
+    pointer-events: none !important;
+    z-index: 2 !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.3) 0%,
+        transparent 60%
+    ) !important;
+    opacity: 0 !important;
+    transition: opacity 0.3s ease !important;
+}
+body.cui-glass-enabled .K2hR3c.BiaLW .AJFihd.T25sKc.jlxRme:hover::after {
+    opacity: 1 !important;
+}
+/* Content sits above glass */
+body.cui-glass-enabled .K2hR3c.BiaLW .AJFihd.T25sKc.jlxRme > * {
+    position: relative !important;
+    z-index: 3 !important;
+}
+/* Hover lift */
+body.cui-glass-enabled .K2hR3c.BiaLW .AJFihd.T25sKc.jlxRme:hover {
+    transform: scale(1.015) !important;
+    box-shadow: 
+        inset 0 0 0 1px rgba(255, 255, 255, 0.7),
+        inset 2px 3px 0 -2px rgba(255, 255, 255, 1),
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.9),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.7),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.08),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.15),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.15),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.08),
+        0px 2px 8px 0px rgba(0, 0, 0, 0.12),
+        0px 8px 24px 0px rgba(0, 0, 0, 0.1) !important;
+}
 
+/* ---- Dark mode ---- */
+body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .AJFihd.T25sKc.jlxRme {
+    background: var(--glass-dark-surface) !important;
+    border: 1px solid var(--glass-dark-border) !important;
+    box-shadow: 
+        inset 0 0 0 1px var(--glass-dark-border),
+        inset 2px 3px 0 -2px var(--glass-dark-inner),
+        inset -2px -2px 0 -2px var(--glass-dark-inner-soft),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.04),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.28),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.34),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.34),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.2),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.32),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.26) !important;
+}
+body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .AJFihd.T25sKc.jlxRme:hover {
+    box-shadow: 
+        inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+        inset 2px 3px 0 -2px rgba(255, 255, 255, 0.12),
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.08),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.05),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.18),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.22),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.22),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.14),
+        0px 2px 8px 0px rgba(0, 0, 0, 0.38),
+        0px 8px 24px 0px rgba(0, 0, 0, 0.32) !important;
+}
+body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .AJFihd.T25sKc.jlxRme::after {
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.08) 0%,
+        transparent 60%
+    ) !important;
+}
+
+
+/* ==========================================================================
+   PRIVATE COMMENTS SECTION – Liquid Glass
+   ========================================================================== */
+body.cui-glass-enabled .K2hR3c.BiaLW .PeGHgb.jbH5ac {
+    position: relative !important;
+    overflow: hidden !important;
+    border-radius: 16px !important;
+    background: rgba(255, 255, 255, 0.25) !important;
+    backdrop-filter: blur(8px) url(#glass-distortion) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
+    box-shadow: 
+        inset 0 0 0 1px rgba(255, 255, 255, 0.6),
+        inset 2px 3px 0 -2px rgba(255, 255, 255, 0.9),
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.8),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.6),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.12),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.2),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.2),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.1),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.1),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.08) !important;
+    border: none !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+/* Hover glow */
+body.cui-glass-enabled .K2hR3c.BiaLW .PeGHgb.jbH5ac::after {
+    content: '' !important;
+    position: absolute !important;
+    inset: 0 !important;
+    border-radius: inherit !important;
+    pointer-events: none !important;
+    z-index: 2 !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.3) 0%,
+        transparent 60%
+    ) !important;
+    opacity: 0 !important;
+    transition: opacity 0.3s ease !important;
+}
+body.cui-glass-enabled .K2hR3c.BiaLW .PeGHgb.jbH5ac:hover::after {
+    opacity: 1 !important;
+}
+/* Content sits above glass */
+body.cui-glass-enabled .K2hR3c.BiaLW .PeGHgb.jbH5ac > * {
+    position: relative !important;
+    z-index: 3 !important;
+}
+/* Hover lift */
+body.cui-glass-enabled .K2hR3c.BiaLW .PeGHgb.jbH5ac:hover {
+    transform: scale(1.015) !important;
+    box-shadow: 
+        inset 0 0 0 1px rgba(255, 255, 255, 0.7),
+        inset 2px 3px 0 -2px rgba(255, 255, 255, 1),
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.9),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.7),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.08),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.15),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.15),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.08),
+        0px 2px 8px 0px rgba(0, 0, 0, 0.12),
+        0px 8px 24px 0px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* ---- Dark mode ---- */
+body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .PeGHgb.jbH5ac {
+    background: var(--glass-dark-surface) !important;
+    border: 1px solid var(--glass-dark-border) !important;
+    box-shadow: 
+        inset 0 0 0 1px var(--glass-dark-border),
+        inset 2px 3px 0 -2px var(--glass-dark-inner),
+        inset -2px -2px 0 -2px var(--glass-dark-inner-soft),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.04),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.28),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.34),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.34),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.2),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.32),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.26) !important;
+}
+body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .PeGHgb.jbH5ac:hover {
+    box-shadow: 
+        inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+        inset 2px 3px 0 -2px rgba(255, 255, 255, 0.12),
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.08),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.05),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.18),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.22),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.22),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.14),
+        0px 2px 8px 0px rgba(0, 0, 0, 0.38),
+        0px 8px 24px 0px rgba(0, 0, 0, 0.32) !important;
+}
+body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .PeGHgb.jbH5ac::after {
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.08) 0%,
+        transparent 60%
+    ) !important;
+}
+
+
+/* ==========================================================================
+   MARK AS DONE BUTTON – Liquid Glass pill
+   ========================================================================== */
+body.cui-glass-enabled .K2hR3c.BiaLW .upBbve {
+    position: relative !important;
+    border-radius: 40px !important;
+    overflow: hidden !important;
+    background: rgba(255, 255, 255, 0.25) !important;
+    backdrop-filter: blur(8px) url(#glass-distortion) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
+    box-shadow: 
+        inset 0 0 0 1px rgba(255, 255, 255, 0.6),
+        inset 2px 3px 0 -2px rgba(255, 255, 255, 0.9),
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.8),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.6),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.1),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.08) !important;
+    border: none !important;
+    padding: 4px 16px !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    color: #1f1f1f !important;
+}
+/* Hover glow */
+body.cui-glass-enabled .K2hR3c.BiaLW .upBbve::after {
+    content: '' !important;
+    position: absolute !important;
+    inset: 0 !important;
+    border-radius: inherit !important;
+    pointer-events: none !important;
+    z-index: 2 !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.3) 0%,
+        transparent 60%
+    ) !important;
+    opacity: 0 !important;
+    transition: opacity 0.3s ease !important;
+}
+body.cui-glass-enabled .K2hR3c.BiaLW .upBbve:hover::after {
+    opacity: 1 !important;
+}
+/* Content sits above glass */
+body.cui-glass-enabled .K2hR3c.BiaLW .upBbve > * {
+    position: relative !important;
+    z-index: 3 !important;
+}
+/* Hover scale */
+body.cui-glass-enabled .K2hR3c.BiaLW .upBbve:hover {
+    transform: scale(1.05) !important;
+    box-shadow: 
+        inset 0 0 0 1px rgba(255, 255, 255, 0.7),
+        inset 2px 3px 0 -2px rgba(255, 255, 255, 1),
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.9),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.7),
+        0px 2px 8px 0px rgba(0, 0, 0, 0.12),
+        0px 8px 24px 0px rgba(0, 0, 0, 0.1) !important;
+}
+/* Text colour in light mode */
+body.cui-glass-enabled .K2hR3c.BiaLW .upBbve .UywwFc-vQzf8d {
+    color: #1f1f1f !important;
+}
+
+/* ---- Dark mode ---- */
+body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .upBbve {
+    background: var(--glass-dark-surface) !important;
+    border: 1px solid var(--glass-dark-border) !important;
+    box-shadow: 
+        inset 0 0 0 1px var(--glass-dark-border),
+        inset 2px 3px 0 -2px var(--glass-dark-inner),
+        inset -2px -2px 0 -2px var(--glass-dark-inner-soft),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.32),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.26) !important;
+}
+body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .upBbve:hover {
+    box-shadow: 
+        inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+        inset 2px 3px 0 -2px rgba(255, 255, 255, 0.12),
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.08),
+        0px 2px 8px 0px rgba(0, 0, 0, 0.38),
+        0px 8px 24px 0px rgba(0, 0, 0, 0.32) !important;
+}
+body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .upBbve::after {
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.08) 0%,
+        transparent 60%
+    ) !important;
+}
+body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .upBbve .UywwFc-vQzf8d {
+    color: #ffffff !important;
+}
+
+
+/* ==========================================================================
+   ADD OR CREATE (+) BUTTON – Liquid Glass pill
+   ========================================================================== */
+body.cui-glass-enabled .K2hR3c.BiaLW .eVOdue {
+    position: relative !important;
+    border-radius: 40px !important;
+    overflow: hidden !important;
+    background: rgba(255, 255, 255, 0.25) !important;
+    backdrop-filter: blur(8px) url(#glass-distortion) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
+    box-shadow: 
+        inset 0 0 0 1px rgba(255, 255, 255, 0.6),
+        inset 2px 3px 0 -2px rgba(255, 255, 255, 0.9),
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.8),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.6),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.1),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.08) !important;
+    border: none !important;
+    padding: 4px 12px !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    color: #1f1f1f !important;
+}
+/* Hover glow */
+body.cui-glass-enabled .K2hR3c.BiaLW .eVOdue::after {
+    content: '' !important;
+    position: absolute !important;
+    inset: 0 !important;
+    border-radius: inherit !important;
+    pointer-events: none !important;
+    z-index: 2 !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.3) 0%,
+        transparent 60%
+    ) !important;
+    opacity: 0 !important;
+    transition: opacity 0.3s ease !important;
+}
+body.cui-glass-enabled .K2hR3c.BiaLW .eVOdue:hover::after {
+    opacity: 1 !important;
+}
+/* Content sits above glass */
+body.cui-glass-enabled .K2hR3c.BiaLW .eVOdue > * {
+    position: relative !important;
+    z-index: 3 !important;
+}
+/* Hover scale */
+body.cui-glass-enabled .K2hR3c.BiaLW .eVOdue:hover {
+    transform: scale(1.05) !important;
+    box-shadow: 
+        inset 0 0 0 1px rgba(255, 255, 255, 0.7),
+        inset 2px 3px 0 -2px rgba(255, 255, 255, 1),
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.9),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.7),
+        0px 2px 8px 0px rgba(0, 0, 0, 0.12),
+        0px 8px 24px 0px rgba(0, 0, 0, 0.1) !important;
+}
+/* Text & icon colour in light mode */
+body.cui-glass-enabled .K2hR3c.BiaLW .eVOdue .AeBiU-vQzf8d,
+body.cui-glass-enabled .K2hR3c.BiaLW .eVOdue i {
+    color: #1f1f1f !important;
+}
+
+/* ---- Dark mode ---- */
+body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .eVOdue {
+    background: var(--glass-dark-surface) !important;
+    border: 1px solid var(--glass-dark-border) !important;
+    box-shadow: 
+        inset 0 0 0 1px var(--glass-dark-border),
+        inset 2px 3px 0 -2px var(--glass-dark-inner),
+        inset -2px -2px 0 -2px var(--glass-dark-inner-soft),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.32),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.26) !important;
+}
+body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .eVOdue:hover {
+    box-shadow: 
+        inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+        inset 2px 3px 0 -2px rgba(255, 255, 255, 0.12),
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.08),
+        0px 2px 8px 0px rgba(0, 0, 0, 0.38),
+        0px 8px 24px 0px rgba(0, 0, 0, 0.32) !important;
+}
+body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .eVOdue::after {
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.08) 0%,
+        transparent 60%
+    ) !important;
+}
+body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .eVOdue .AeBiU-vQzf8d,
+body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .eVOdue i {
+    color: #ffffff !important;
+}
 
    /* ==========================================================================
    DUE SOON / TO-DO PANELS – Liquid Glass
