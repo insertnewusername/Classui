@@ -11,6 +11,9 @@ Go to chrome://extensions<br>
 Press load unpacked<br>
 Select the folder that you have downloaded<br>
 Now go to google classroom! <br>
+IMPORTANT! GO TO GOOGLE CLASSROOM SETTINGS, BACKGROUND, AND ENABLE LIQUID GLASS
+<img width="1215" height="587" alt="Screenshot 2026-09-02 101317" src="https://github.com/user-attachments/assets/8fb76d90-d458-476c-9d92-6a2d1e807008" />
+
 
 <h2>Screenshots:</h2>
 
