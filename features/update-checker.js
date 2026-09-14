@@ -2,43 +2,39 @@
 (function() {
     const UPDATE_AVAILABLE_KEY = 'modernClassroom_updateAvailable';
     const UPDATE_PENDING_VERSION_KEY = 'modernClassroom_updatePendingVersion';
-    
+    const UPDATE_AVAILABLE_DISMISSED_KEY = 'modernClassroom_updateAvailableDismissed';
+
     async function getStoredValue(key, defaultValue = null) {
         if (typeof storageGet === 'function') {
             return storageGet(key, defaultValue);
         }
 
-        return new Promise((resolve) => {
-            if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.sync) {
-                resolve(defaultValue);
-                return;
-            }
-            chrome.storage.sync.get([key], (data) => {
-                if (chrome.runtime?.lastError) {
-                    resolve(defaultValue);
-                    return;
-                }
-                resolve(data[key] ?? defaultValue);
-            });
-        });
+        try {
+            const raw = localStorage.getItem(key);
+            if (raw === null) return defaultValue;
+            try { return JSON.parse(raw); } catch { return raw; }
+        } catch {
+            return defaultValue;
+        }
     }
-    
+
     async function setStoredValue(key, value) {
         if (typeof storageSet === 'function') {
             await storageSet(key, value);
             return;
         }
 
-        return new Promise((resolve) => {
-            if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.sync) {
-                resolve();
-                return;
-            }
-            chrome.storage.sync.set({ [key]: value }, () => resolve());
-        });
+        try {
+            const stringValue = typeof value === 'string' ? value : JSON.stringify(value);
+            localStorage.setItem(key, stringValue);
+        } catch (_) {}
     }
 
     function createUpdateAvailablePrompt() {
+        if (document.querySelector('.update-available-prompt')) {
+            return;
+        }
+
         const prompt = document.createElement('div');
         prompt.className = 'update-available-prompt';
         prompt.style.zIndex = '1500002';
@@ -61,15 +57,20 @@
         laterBtn.addEventListener('click', function(e) {
             e.preventDefault();
             dismissPrompt();
+            setStoredValue(UPDATE_AVAILABLE_KEY, false).catch(() => {});
+            setStoredValue(UPDATE_AVAILABLE_DISMISSED_KEY, true).catch(() => {});
         });
 
         updateBtn.addEventListener('click', function(e) {
             e.preventDefault();
+            setStoredValue(UPDATE_AVAILABLE_KEY, false).catch(() => {});
+            setStoredValue(UPDATE_AVAILABLE_DISMISSED_KEY, true).catch(() => {});
             try {
                 if (typeof chrome !== 'undefined' && chrome.runtime && typeof chrome.runtime.sendMessage === 'function') {
                     chrome.runtime.sendMessage({ action: 'applyUpdate' }, () => {});
                 }
             } catch (_) {}
+            dismissPrompt();
         });
 
         function dismissPrompt() {
@@ -78,32 +79,38 @@
                 prompt.remove();
             }, { once: true });
         }
-        
+
         document.body.appendChild(prompt);
-        
+
         requestAnimationFrame(() => {
             prompt.classList.add('show');
         });
     }
-    
+
     async function checkForUpdatePrompt() {
         const updateAvailable = await getStoredValue(UPDATE_AVAILABLE_KEY, false);
-        if (updateAvailable) {
+        const dismissed = await getStoredValue(UPDATE_AVAILABLE_DISMISSED_KEY, false);
+        if (updateAvailable && !dismissed) {
             createUpdateAvailablePrompt();
         }
     }
-    
+
     // Listen for messages from background script about available updates
     if (typeof chrome !== 'undefined' && chrome.runtime) {
         chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
             if (msg.action === 'updateAvailable') {
-                createUpdateAvailablePrompt();
-                setStoredValue(UPDATE_AVAILABLE_KEY, true).catch(() => {});
-                setStoredValue(UPDATE_PENDING_VERSION_KEY, msg.version || null).catch(() => {});
+                getStoredValue(UPDATE_AVAILABLE_DISMISSED_KEY, false).then((dismissed) => {
+                    if (dismissed) {
+                        return;
+                    }
+                    createUpdateAvailablePrompt();
+                    setStoredValue(UPDATE_AVAILABLE_KEY, true).catch(() => {});
+                    setStoredValue(UPDATE_PENDING_VERSION_KEY, msg.version || null).catch(() => {});
+                }).catch(() => {});
             }
         });
     }
-    
+
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', checkForUpdatePrompt);
     } else {

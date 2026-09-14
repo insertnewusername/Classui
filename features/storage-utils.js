@@ -1,319 +1,507 @@
 /**
  * Storage Utilities for Modern Classroom Extension
- * Provides unified API for chrome.storage.sync with automatic migration from localStorage
+ * Keeps settings local to the browser while syncing a single portable JSON snapshot
+ * to Chrome Sync using a write-through model.
  */
 
 const STORAGE_KEYS = {
-  // Sidebar
   HIDE_TODO: 'hideTodo',
   HIDE_CALENDAR: 'hideCalendar',
+  HIDE_GEMINI: 'hideGemini',
   SIDEBAR_SIZE: 'sidebarSize',
   SIDEBAR_HEIGHT_ADJUST: 'sidebarHeightAdjust',
   CLASSIC_SIDEBAR: 'classicSidebar',
-  
-  // Layout
   LAYOUT_MODE: 'layoutMode',
-  
-  // Decoration
   DECORATION_SELECTED: 'decoration:selected',
   DECORATION_CUSTOM: 'decoration:custom',
-  
-  // Banners
+  DECORATION_INVERT: 'decoration:invert',
   CARD_BACKGROUNDS: 'modernClassroom_card_backgrounds',
   IMAGE_PICKER_POS: 'modernClassroom_imagePicker_pos',
-  
-  // Tutorial/Updates
   TUTORIAL_SEEN: 'modernClassroom_tutorialSeen',
   UPDATE_VERSION: 'modernClassroom_updateVersion',
   UPDATE_DISMISSED_VERSION: 'modernClassroom_updateDismissedVersion',
-  
-  // Notes
   FLOATING_NOTES: 'modernClassroom_floatingNotes',
   STARRED_ASSIGNMENTS: 'modernClassroom_starredAssignments',
-  
-  // Homebar/Streamside
   STREAMSIDE_ENABLED: 'streamsideEnabled',
   HOME_MINI_WIDGET: 'homeMiniWidget',
+  HOME_WIDGET_WIDTH: 'homeWidgetWidth',
+  HOME_WIDGET_WIDTH_MODE: 'homeWidgetWidthMode',
   FOLDERS: 'modernClassroom_folders',
-  
-  // Timetable
   TIMETABLE_CLASSES: 'mcTimetableClasses',
   TIMETABLE_CLASSES_SHARED: 'mcTimetableClassesShared',
   TIMETABLE_PERIODS: 'mcTimetablePeriods',
   TIMETABLE_PERIODS_SHARED: 'mcTimetablePeriodsShared',
   TIMETABLE_CURRENT_INDEX: 'mcTimetableCurrentIndex',
   TIMETABLE_VIEW_RANGE: 'mcTimetableViewRange',
-  
-  // Dark mode
   DARK_MODE: 'modernGoogleClassroomDarkMode',
-  
-  // Classroom Nicknames
   TITLES: 'titles'
 };
 
-/**
- * Get a value from chrome.storage.sync
- * @param {string} key - Storage key
- * @param {*} defaultValue - Default value if key doesn't exist
- * @returns {Promise<*>} The stored value or default
- */
-async function storageGet(key, defaultValue = null) {
-  if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.sync) {
-    // Fallback to localStorage
+const CLOUD_STATE_KEY = 'modernClassroom_cloudState_v1';
+const CLOUD_STATE_MANIFEST_KEY = 'modernClassroom_cloudState_v1_manifest';
+const CLOUD_STATE_CHUNK_PREFIX = 'modernClassroom_cloudState_v1_chunk_';
+const CLOUD_STATE_CHUNK_SIZE = 7000;
+const CLOUD_STATE_LAST_APPLIED_KEY = 'modernClassroom_cloudState_lastAppliedAt';
+const CLOUD_STATE_LAST_SYNCED_KEY = 'modernClassroom_cloudState_lastSyncedAt';
+const EXCLUDED_SYNC_KEYS = new Set([
+  'customIcons',
+  'decoration:custom',
+  CLOUD_STATE_KEY,
+  CLOUD_STATE_LAST_APPLIED_KEY,
+  CLOUD_STATE_LAST_SYNCED_KEY
+]);
+let cloudWriteChain = Promise.resolve();
+let portableImportInProgress = false;
+let cloudHydrationPromise = null;
+
+function safeJsonParse(value) {
+  if (typeof value !== 'string') return value;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return value;
+  }
+}
+
+function readLocalStorageValue(key) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (raw === null) return undefined;
+    return safeJsonParse(raw);
+  } catch {
+    return undefined;
+  }
+}
+
+function writeLocalStorageValue(key, value) {
+  if (!key || EXCLUDED_SYNC_KEYS.has(key)) return false;
+  try {
+    const stringValue = typeof value === 'string' ? value : JSON.stringify(value);
+    localStorage.setItem(key, stringValue);
+    return true;
+  } catch (e) {
+    console.warn('localStorage.setItem failed:', e);
+    return false;
+  }
+}
+
+function queueCloudWrite() {
+  if (typeof window === 'undefined') return;
+  if (window.__modernClassroomCloudWriteTimer) return;
+  window.__modernClassroomCloudWriteTimer = setTimeout(async () => {
+    window.__modernClassroomCloudWriteTimer = null;
     try {
-      const raw = localStorage.getItem(key);
-      if (raw === null) return defaultValue;
-      try {
-        return JSON.parse(raw);
-      } catch {
-        return raw;
-      }
-    } catch {
-      return defaultValue;
+      await writeCloudStateSnapshot();
+    } catch (_) {}
+  }, 0);
+}
+
+function collectSyncSnapshot() {
+  const snapshot = {};
+  for (let index = 0; index < localStorage.length; index += 1) {
+    const key = localStorage.key(index);
+    if (!key || EXCLUDED_SYNC_KEYS.has(key)) continue;
+    const value = readLocalStorageValue(key);
+    if (typeof value !== 'undefined') {
+      snapshot[key] = value;
     }
   }
+  return snapshot;
+}
 
+function readChromeStorageArea(area) {
+  if (typeof chrome === 'undefined' || !chrome.storage?.[area]) return Promise.resolve({});
   return new Promise((resolve) => {
-    chrome.storage.sync.get([key], (result) => {
-      if (chrome.runtime.lastError) {
-        console.warn('storageGet error:', chrome.runtime.lastError);
-        // Fall back to localStorage on error
-        try {
-          const raw = localStorage.getItem(key);
-          if (raw !== null) {
-            try {
-              resolve(JSON.parse(raw));
-            } catch {
-              resolve(raw);
-            }
-            return;
-          }
-        } catch (e) {
-          console.warn('localStorage fallback failed:', e);
-        }
-        resolve(defaultValue);
-        return;
-      }
-      
-      // If chrome.storage.sync has the value, use it and sync to localStorage
-      if (result[key] !== undefined) {
-        const syncValue = result[key];
-        
-        // Write sync value to localStorage to keep them in sync
-        try {
-          const stringValue = typeof syncValue === 'string' ? syncValue : JSON.stringify(syncValue);
-          localStorage.setItem(key, stringValue);
-        } catch (e) {
-          console.warn('Failed to sync value to localStorage:', e);
-        }
-        
-        resolve(syncValue);
-        return;
-      }
-      
-      // Otherwise, try localStorage as fallback (for unpacked extensions)
-      try {
-        const raw = localStorage.getItem(key);
-        if (raw !== null) {
-          try {
-            resolve(JSON.parse(raw));
-          } catch {
-            resolve(raw);
-          }
-          return;
-        }
-      } catch (e) {
-        console.warn('localStorage fallback failed:', e);
-      }
-      
-      resolve(defaultValue);
+    chrome.storage[area].get(null, (items) => resolve(items || {}));
+  });
+}
+
+function portableTextHash(value) {
+  let hash = 0;
+  for (let index = 0; index < value.length; index += 1) {
+    hash = ((hash << 5) - hash) + value.charCodeAt(index);
+    hash |= 0;
+  }
+  return (hash >>> 0).toString(36);
+}
+
+function splitCloudState(serialized) {
+  const encoder = new TextEncoder();
+  const chunks = [];
+  let current = '';
+  let currentBytes = 0;
+
+  for (const character of serialized) {
+    const characterBytes = encoder.encode(character).length;
+    if (current && currentBytes + characterBytes > CLOUD_STATE_CHUNK_SIZE) {
+      chunks.push(current);
+      current = '';
+      currentBytes = 0;
+    }
+    current += character;
+    currentBytes += characterBytes;
+  }
+
+  if (current) chunks.push(current);
+  return chunks;
+}
+
+function addPortableClassAliases(snapshot) {
+  if (typeof document === 'undefined' || typeof location === 'undefined') return;
+  const baseKey = `dnaIconColors:${location.origin}`;
+  const maps = [snapshot[baseKey], snapshot[`${baseKey}:icons`]];
+  if (!maps.some((map) => map && typeof map === 'object' && !Array.isArray(map))) return;
+
+  document.querySelectorAll('.kWQ5wd').forEach((icon) => {
+    const anchor = icon.closest('a[href]');
+    if (!anchor) return;
+    const label = String(anchor.getAttribute('aria-label') || anchor.textContent || '').replace(/\s+/g, ' ').trim();
+    if (!label) return;
+    const courseMatch = anchor.href.match(/\/c\/([^/?#]+)/);
+    if (!courseMatch) return;
+    const labelKey = `class-label:${portableTextHash(label.toLowerCase())}`;
+
+    maps.forEach((map) => {
+      if (!map || typeof map !== 'object' || Array.isArray(map) || map[labelKey]) return;
+      const matchingKey = Object.keys(map).find((key) => {
+        if (!key.startsWith('course:') && !key.startsWith('href:')) return false;
+        const savedCourse = key.startsWith('course:') ? key.slice(7) : key.slice(5).match(/\/c\/([^/?#]+)/)?.[1];
+        return savedCourse === courseMatch[1];
+      });
+      if (matchingKey && map[matchingKey]) map[labelKey] = map[matchingKey];
     });
   });
 }
 
-/**
- * Set a value in chrome.storage.sync
- * @param {string} key - Storage key
- * @param {*} value - Value to store
- * @returns {Promise<void>}
- */
-async function storageSet(key, value) {
-  if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.sync) {
-    // Fallback to localStorage
-    try {
-      const stringValue = typeof value === 'string' ? value : JSON.stringify(value);
-      localStorage.setItem(key, stringValue);
-    } catch (e) {
-      console.warn('localStorage.setItem failed:', e);
-    }
-    return;
-  }
+async function buildPortableExportPayload() {
+  const [chromeLocal, chromeSync] = await Promise.all([
+    readChromeStorageArea('local'),
+    readChromeStorageArea('sync')
+  ]);
+  const localStorageSnapshot = collectSyncSnapshot();
+  const customIcons = readLocalStorageValue('customIcons');
+  if (typeof customIcons !== 'undefined') localStorageSnapshot.customIcons = customIcons;
+  addPortableClassAliases(localStorageSnapshot);
 
-  // Write to both chrome.storage.sync and localStorage for redundancy
-  // This ensures data persists even for unpacked extensions across reinstalls
-  return new Promise((resolve) => {
-    // First, save to localStorage immediately (synchronous backup)
-    try {
-      const stringValue = typeof value === 'string' ? value : JSON.stringify(value);
-      localStorage.setItem(key, stringValue);
-    } catch (e) {
-      console.warn('localStorage.setItem failed:', e);
+  return {
+    format: 'modern-classroom-customisations',
+    version: 2,
+    exportedAt: new Date().toISOString(),
+    localStorage: localStorageSnapshot,
+    chromeStorage: {
+      local: chromeLocal,
+      sync: chromeSync
     }
-    
-    // Then save to chrome.storage.sync for cross-device sync
-    chrome.storage.sync.set({ [key]: value }, () => {
-      if (chrome.runtime.lastError) {
-        // This may fail for unpacked extensions, but localStorage backup is already saved
-        console.debug('chrome.storage.sync.set info:', chrome.runtime.lastError.message);
-      }
-      resolve();
-    });
-  });
+  };
 }
 
-/**
- * Remove a key from chrome.storage.sync
- * @param {string} key - Storage key to remove
- * @returns {Promise<void>}
- */
-async function storageRemove(key) {
-  if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.sync) {
-    try {
-      localStorage.removeItem(key);
-    } catch (e) {
-      console.warn('localStorage.removeItem failed:', e);
-    }
-    return;
+async function applyPortableExportPayload(payload) {
+  if (!payload || payload.format !== 'modern-classroom-customisations' ||
+      ![1, 2].includes(payload.version)) {
+    return false;
   }
 
-  return new Promise((resolve) => {
-    chrome.storage.sync.remove(key, () => {
-      if (chrome.runtime.lastError) {
-        console.warn('storageRemove error:', chrome.runtime.lastError);
-      }
-      resolve();
-    });
-  });
-}
+  portableImportInProgress = true;
+  try {
+    const data = payload.version === 1 ? payload.data : payload.localStorage;
+    if (!data || typeof data !== 'object' || Array.isArray(data)) return false;
 
-/**
- * Get multiple values from chrome.storage.sync
- * @param {string[]} keys - Array of storage keys
- * @returns {Promise<Object>} Object with key-value pairs
- */
-async function storageGetMultiple(keys) {
-  if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.sync) {
-    const result = {};
-    keys.forEach(key => {
+    Object.entries(data).forEach(([key, value]) => {
+      if (!key || EXCLUDED_SYNC_KEYS.has(key)) return;
       try {
-        const raw = localStorage.getItem(key);
-        if (raw !== null) {
-          try {
-            result[key] = JSON.parse(raw);
-          } catch {
-            result[key] = raw;
-          }
-        }
-      } catch {
-        // ignore
-      }
+        localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));
+      } catch (_) {}
     });
-    return result;
-  }
 
-  return new Promise((resolve) => {
-    chrome.storage.sync.get(keys, (result) => {
-      if (chrome.runtime.lastError) {
-        console.warn('storageGetMultiple error:', chrome.runtime.lastError);
-        // Fall back to localStorage on error
-        const fallbackResult = {};
-        keys.forEach(key => {
-          try {
-            const raw = localStorage.getItem(key);
-            if (raw !== null) {
-              try {
-                fallbackResult[key] = JSON.parse(raw);
-              } catch {
-                fallbackResult[key] = raw;
-              }
-            }
-          } catch {
-            // ignore
-          }
-        });
-        resolve(fallbackResult);
-        return;
-      }
-      
-      // Merge chrome.storage.sync results with localStorage fallback for missing keys
-      const mergedResult = result || {};
-      keys.forEach(key => {
-        if (mergedResult[key] === undefined) {
-          try {
-            const raw = localStorage.getItem(key);
-            if (raw !== null) {
-              try {
-                mergedResult[key] = JSON.parse(raw);
-              } catch {
-                mergedResult[key] = raw;
-              }
-            }
-          } catch {
-            // ignore
-          }
+    if (Object.prototype.hasOwnProperty.call(data, 'customIcons')) {
+      try { localStorage.setItem('customIcons', JSON.stringify(data.customIcons)); } catch (_) {}
+    }
+
+    let customDecoration;
+    if (payload.version === 1 && Object.prototype.hasOwnProperty.call(data, 'decoration:custom')) {
+      customDecoration = data['decoration:custom'];
+    } else if (payload.version === 2 && payload.chromeStorage?.local &&
+        Object.prototype.hasOwnProperty.call(payload.chromeStorage.local, 'decoration:custom')) {
+      customDecoration = payload.chromeStorage.local['decoration:custom'];
+    }
+
+    if (typeof customDecoration !== 'undefined' && typeof chrome !== 'undefined' && chrome.storage?.local) {
+      await new Promise((resolve) => {
+        if (typeof customDecoration === 'string' && customDecoration) {
+          chrome.storage.local.set({ 'decoration:custom': customDecoration }, resolve);
+        } else {
+          chrome.storage.local.remove('decoration:custom', resolve);
         }
       });
-      resolve(mergedResult);
+    }
+
+    await writeCloudStateSnapshot();
+    try {
+      localStorage.setItem(CLOUD_STATE_LAST_APPLIED_KEY, JSON.stringify(new Date().toISOString()));
+    } catch (_) {}
+    return true;
+  } finally {
+    portableImportInProgress = false;
+  }
+}
+
+async function readRemoteCloudState() {
+  if (!chrome?.storage?.sync) return null;
+  return new Promise((resolve) => {
+    chrome.storage.sync.get([CLOUD_STATE_KEY, CLOUD_STATE_MANIFEST_KEY], (items) => {
+      if (chrome.runtime?.lastError || !items) {
+        resolve(null);
+        return;
+      }
+
+      const manifest = items[CLOUD_STATE_MANIFEST_KEY];
+      if (manifest && Number.isInteger(manifest.chunkCount) && manifest.chunkCount > 0) {
+        const chunkKeys = Array.from(
+          { length: manifest.chunkCount },
+          (_, index) => `${CLOUD_STATE_CHUNK_PREFIX}${index}`
+        );
+        chrome.storage.sync.get(chunkKeys, (chunks) => {
+          if (chrome.runtime?.lastError || !chunks) {
+            resolve(null);
+            return;
+          }
+
+          const serialized = chunkKeys.map((key) => chunks[key]).join('');
+          try {
+            const parsed = JSON.parse(serialized);
+            resolve(parsed && parsed.data ? parsed : null);
+          } catch {
+            resolve(null);
+          }
+        });
+        return;
+      }
+
+      try {
+        const parsed = JSON.parse(items[CLOUD_STATE_KEY]);
+        resolve(parsed && parsed.data ? parsed : null);
+      } catch {
+        resolve(null);
+      }
     });
   });
 }
 
-/**
- * Set multiple values in chrome.storage.sync
- * @param {Object} items - Object with key-value pairs to store
- * @returns {Promise<void>}
- */
-async function storageSetMultiple(items) {
-  if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.sync) {
-    Object.entries(items).forEach(([key, value]) => {
-      try {
-        const stringValue = typeof value === 'string' ? value : JSON.stringify(value);
-        localStorage.setItem(key, stringValue);
-      } catch (e) {
-        console.warn('localStorage.setItem failed:', e);
-      }
-    });
-    return;
+async function readRemoteCloudValue(key, defaultValue = undefined) {
+  const state = await readRemoteCloudState();
+  if (!state || typeof state !== 'object' || !state.data || typeof state.data !== 'object') {
+    return defaultValue;
   }
 
-  // Write to both chrome.storage.sync and localStorage for redundancy
-  return new Promise((resolve) => {
-    // First, save to localStorage immediately
-    Object.entries(items).forEach(([key, value]) => {
-      try {
-        const stringValue = typeof value === 'string' ? value : JSON.stringify(value);
-        localStorage.setItem(key, stringValue);
-      } catch (e) {
-        console.warn('localStorage.setItem failed:', e);
-      }
-    });
-    
-    // Then save to chrome.storage.sync
-    chrome.storage.sync.set(items, () => {
-      if (chrome.runtime.lastError) {
-        console.debug('chrome.storage.sync.set info:', chrome.runtime.lastError.message);
-      }
-      resolve();
-    });
-  });
+  if (Object.prototype.hasOwnProperty.call(state.data, key)) {
+    return state.data[key];
+  }
+
+  return defaultValue;
 }
 
-/**
- * Get boolean value from storage
- * @param {string} key - Storage key
- * @param {boolean} defaultValue - Default value
- * @returns {Promise<boolean>}
- */
+async function writeCloudStateSnapshotNow() {
+  if (!chrome?.storage?.sync) return false;
+
+  const snapshot = collectSyncSnapshot();
+  const payload = {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    data: snapshot
+  };
+
+  const guarded = !!window && !!window.__modernClassroomCloudSyncGuard;
+  if (!guarded) {
+    window.__modernClassroomCloudSyncGuard = true;
+  }
+
+  try {
+    const serialized = JSON.stringify(payload);
+    const chunks = splitCloudState(serialized);
+
+    const chunkPayload = {};
+    chunks.forEach((chunk, index) => {
+      chunkPayload[`${CLOUD_STATE_CHUNK_PREFIX}${index}`] = chunk;
+    });
+
+    const ok = await new Promise((resolve) => {
+      chrome.storage.sync.get(CLOUD_STATE_MANIFEST_KEY, (existingItems) => {
+        const existingManifest = existingItems?.[CLOUD_STATE_MANIFEST_KEY];
+        chrome.storage.sync.set(chunkPayload, () => {
+          if (chrome.runtime?.lastError) {
+            resolve(false);
+            return;
+          }
+
+          chrome.storage.sync.set({
+            [CLOUD_STATE_MANIFEST_KEY]: {
+              version: 1,
+              chunkCount: chunks.length,
+              exportedAt: payload.exportedAt
+            }
+          }, () => {
+            if (chrome.runtime?.lastError) {
+              resolve(false);
+              return;
+            }
+
+            const staleChunkKeys = [];
+            if (Number.isInteger(existingManifest?.chunkCount)) {
+              for (let index = chunks.length; index < existingManifest.chunkCount; index += 1) {
+                staleChunkKeys.push(`${CLOUD_STATE_CHUNK_PREFIX}${index}`);
+              }
+            }
+            staleChunkKeys.push(CLOUD_STATE_KEY);
+            if (staleChunkKeys.length) {
+              chrome.storage.sync.remove(staleChunkKeys, () => resolve(!chrome.runtime?.lastError));
+            } else {
+              resolve(true);
+            }
+          });
+        });
+      });
+    });
+
+    if (ok) {
+      try {
+        localStorage.setItem(CLOUD_STATE_LAST_SYNCED_KEY, JSON.stringify(payload.exportedAt));
+      } catch (_) {}
+    }
+
+    return ok;
+  } finally {
+    if (!guarded) {
+      delete window.__modernClassroomCloudSyncGuard;
+    }
+  }
+}
+
+function writeCloudStateSnapshot() {
+  const write = cloudWriteChain
+    .catch(() => {})
+    .then(() => writeCloudStateSnapshotNow());
+  cloudWriteChain = write;
+  return write;
+}
+
+function applyCloudPayload(payload) {
+  if (!payload || typeof payload !== 'object' || !payload.data || typeof payload.data !== 'object') {
+    return false;
+  }
+
+  let changed = false;
+  Object.entries(payload.data).forEach(([key, value]) => {
+    if (!key || EXCLUDED_SYNC_KEYS.has(key)) return;
+    const current = readLocalStorageValue(key);
+    if (JSON.stringify(current) !== JSON.stringify(value)) {
+      if (writeLocalStorageValue(key, value)) {
+        changed = true;
+      }
+    }
+  });
+
+  const keysToRemove = [];
+  for (let index = 0; index < localStorage.length; index += 1) {
+    const key = localStorage.key(index);
+    if (!key || EXCLUDED_SYNC_KEYS.has(key)) continue;
+    if (!Object.prototype.hasOwnProperty.call(payload.data, key)) {
+      keysToRemove.push(key);
+    }
+  }
+
+  keysToRemove.forEach((key) => {
+    try {
+      localStorage.removeItem(key);
+      changed = true;
+    } catch (_) {}
+  });
+
+  if (payload.exportedAt) {
+    try {
+      localStorage.setItem(CLOUD_STATE_LAST_APPLIED_KEY, JSON.stringify(payload.exportedAt));
+    } catch (_) {}
+  }
+
+  return changed;
+}
+
+async function hydrateFromCloudState() {
+  if (portableImportInProgress) return false;
+  if (cloudHydrationPromise) return cloudHydrationPromise;
+
+  cloudHydrationPromise = (async () => {
+    const state = await readRemoteCloudState();
+    if (portableImportInProgress) return false;
+    if (!state || typeof state !== 'object' || !state.data || typeof state.data !== 'object') {
+      return false;
+    }
+
+    const lastAppliedRaw = localStorage.getItem(CLOUD_STATE_LAST_APPLIED_KEY);
+    const lastApplied = lastAppliedRaw ? safeJsonParse(lastAppliedRaw) : null;
+    const thisExportAt = state.exportedAt || null;
+
+    if (thisExportAt && lastApplied && new Date(thisExportAt).getTime() <= new Date(lastApplied).getTime()) {
+      return false;
+    }
+
+    return applyCloudPayload(state);
+  })();
+
+  try {
+    return await cloudHydrationPromise;
+  } finally {
+    cloudHydrationPromise = null;
+  }
+}
+
+async function storageGet(key, defaultValue = null) {
+  try {
+    const localValue = readLocalStorageValue(key);
+    if (typeof localValue !== 'undefined') return localValue;
+  } catch {}
+
+  const remoteValue = await readRemoteCloudValue(key, undefined);
+  if (typeof remoteValue !== 'undefined') return remoteValue;
+
+  return defaultValue;
+}
+
+async function storageSet(key, value) {
+  if (!key || EXCLUDED_SYNC_KEYS.has(key)) return;
+  const didWrite = writeLocalStorageValue(key, value);
+  if (didWrite) {
+    queueCloudWrite();
+  }
+}
+
+async function storageRemove(key) {
+  if (!key || EXCLUDED_SYNC_KEYS.has(key)) return;
+  try {
+    localStorage.removeItem(key);
+    queueCloudWrite();
+  } catch (e) {
+    console.warn('localStorage.removeItem failed:', e);
+  }
+}
+
+async function storageGetMultiple(keys) {
+  const result = {};
+  for (const key of keys) {
+    const value = await storageGet(key, undefined);
+    if (typeof value !== 'undefined') {
+      result[key] = value;
+    }
+  }
+  return result;
+}
+
+async function storageSetMultiple(items) {
+  const entries = Object.entries(items || {});
+  for (const [key, value] of entries) {
+    await storageSet(key, value);
+  }
+}
+
 async function storageGetBool(key, defaultValue = false) {
   const value = await storageGet(key, defaultValue);
   if (typeof value === 'boolean') return value;
@@ -321,120 +509,33 @@ async function storageGetBool(key, defaultValue = false) {
   return !!value;
 }
 
-/**
- * Set boolean value in storage
- * @param {string} key - Storage key
- * @param {boolean} value - Boolean value to store
- * @returns {Promise<void>}
- */
 async function storageSetBool(key, value) {
   return storageSet(key, !!value);
 }
 
-/**
- * Migrate a single key from localStorage to chrome.storage.sync
- * @param {string} key - Storage key to migrate
- * @returns {Promise<boolean>} True if migration occurred
- */
-async function migrateKey(key) {
-  if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.sync) {
-    return false;
-  }
+if (typeof Storage !== 'undefined') {
+  const originalSetItem = Storage.prototype.setItem;
+  const originalRemoveItem = Storage.prototype.removeItem;
 
-  return new Promise((resolve) => {
-    // Check if already exists in chrome.storage.sync
-    chrome.storage.sync.get([key], (syncData) => {
-      if (chrome.runtime.lastError) {
-        resolve(false);
-        return;
-      }
-
-      // If already in sync storage, skip
-      if (syncData[key] !== undefined) {
-        resolve(false);
-        return;
-      }
-
-      // Try to get from localStorage
-      try {
-        const localValue = localStorage.getItem(key);
-        if (localValue !== null) {
-          let parsedValue;
-          try {
-            parsedValue = JSON.parse(localValue);
-          } catch {
-            parsedValue = localValue;
-          }
-
-          // Save to sync storage
-          chrome.storage.sync.set({ [key]: parsedValue }, () => {
-            if (chrome.runtime.lastError) {
-              console.warn(`Failed to migrate ${key}:`, chrome.runtime.lastError);
-              resolve(false);
-            } else {
-              console.log(`Migrated ${key} to cloud sync storage`);
-              resolve(true);
-            }
-          });
-        } else {
-          resolve(false);
-        }
-      } catch (e) {
-        console.warn(`Error reading ${key} from localStorage:`, e);
-        resolve(false);
-      }
-    });
-  });
-}
-
-/**
- * Migrate all known keys from localStorage to chrome.storage.sync
- * This runs on every extension load to ensure data is synced from localStorage if present
- * @returns {Promise<void>}
- */
-async function migrateAllToSync() {
-  if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.sync) {
-    console.log('Chrome storage API not available, skipping migration');
-    return;
-  }
-
-  console.log('Checking for settings in localStorage to migrate...');
-  
-  // Collect static keys from STORAGE_KEYS
-  const staticKeys = Object.values(STORAGE_KEYS);
-  
-  // Also scan localStorage for dynamic keys (timetable periods, icon colors, etc.)
-  const dynamicKeys = [];
-  try {
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && (
-        key.startsWith('mcTimetableClasses_') ||  // Timetable periods for different indices
-        key.startsWith('dnaIconColors:')          // Icon color customizations per site
-      )) {
-        dynamicKeys.push(key);
-      }
+  Storage.prototype.setItem = function patchedSetItem(key, value) {
+    const isLocalTarget = this === localStorage && typeof key === 'string';
+    const result = originalSetItem.call(this, key, value);
+    if (isLocalTarget && !EXCLUDED_SYNC_KEYS.has(key) && !window.__modernClassroomCloudSyncGuard) {
+      queueCloudWrite();
     }
-  } catch (e) {
-    console.warn('Error scanning localStorage for dynamic keys:', e);
-  }
-  
-  const allKeys = [...staticKeys, ...dynamicKeys];
-  let migratedCount = 0;
+    return result;
+  };
 
-  for (const key of allKeys) {
-    const migrated = await migrateKey(key);
-    if (migrated) migratedCount++;
-  }
-
-  if (migratedCount > 0) {
-    console.log(`Migrated ${migratedCount} settings to cloud sync storage.`);
-  } else {
-    console.log('No settings needed migration.');
-  }
+  Storage.prototype.removeItem = function patchedRemoveItem(key) {
+    const isLocalTarget = this === localStorage && typeof key === 'string';
+    const result = originalRemoveItem.call(this, key);
+    if (isLocalTarget && !EXCLUDED_SYNC_KEYS.has(key) && !window.__modernClassroomCloudSyncGuard) {
+      queueCloudWrite();
+    }
+    return result;
+  };
 }
 
-// Export functions for use in other modules
 if (typeof window !== 'undefined') {
   window.storageGet = storageGet;
   window.storageSet = storageSet;
@@ -443,6 +544,17 @@ if (typeof window !== 'undefined') {
   window.storageSetMultiple = storageSetMultiple;
   window.storageGetBool = storageGetBool;
   window.storageSetBool = storageSetBool;
-  window.migrateAllToSync = migrateAllToSync;
   window.STORAGE_KEYS = STORAGE_KEYS;
+  window.hydrateFromCloudState = hydrateFromCloudState;
+  window.writeCloudStateSnapshot = writeCloudStateSnapshot;
+  window.applyCloudPayload = applyCloudPayload;
+  window.buildPortableExportPayload = buildPortableExportPayload;
+  window.applyPortableExportPayload = applyPortableExportPayload;
+
+  const initialCloudHydration = hydrateFromCloudState().catch(() => false);
+  window.__modernClassroomInitialCloudHydration = initialCloudHydration;
+
+  if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', () => initialCloudHydration, { once: true });
+  }
 }

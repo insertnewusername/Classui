@@ -1,0 +1,35 @@
+{
+  "releases": [
+    {
+      "file": "Changelogs/3.15.14.json",
+      "title": "Colour!",
+      "version": "v3.15.14",
+      "date": "September 5 2026"
+    },
+    {
+      "file": "Changelogs/3.15.13.json",
+      "title": "The Clock is Back!",
+      "version": "v3.15.13",
+      "date": "September 1 2026"
+    },
+    {
+      "file": "Changelogs/3.15.12.json",
+      "title": "Import/Export, Hidden Classrooms, and more...",
+      "version": "v3.15.12",
+      "date": "August 24 2026"
+    },
+    {
+      "file": "Changelogs/3.15.11.json",
+      "title": "Minor Adjustments",
+      "version": "v3.15.11",
+      "date": "August 19 2026"
+    },
+    {
+      "file": "Changelogs/3.15.10.json",
+      "title": "Cloud Sync, Patch Notes, and other fixes",
+      "version": "v3.15.10",
+      "date": "August 16 2026"
+    }
+
+  ]
+}

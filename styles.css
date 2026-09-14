@@ -3,7 +3,7 @@
    =============================================== */
 
    /* ==========================================================================
-   TO‑DO ASSIGNMENTS – Liquid Glass (matching stream posts)
+   TOÃ¢â‚¬â€˜DO ASSIGNMENTS Ã¢â‚¬â€œ Liquid Glass (matching stream posts)
    ========================================================================== */
 body.cui-glass-enabled [data-role="task-row"] {
     position: relative !important;
@@ -12,7 +12,7 @@ body.cui-glass-enabled [data-role="task-row"] {
     background: rgba(255, 255, 255, 0.25) !important;
     backdrop-filter: blur(8px) url(#glass-distortion) saturate(150%) !important;
     -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.6),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.9),
         inset -2px -2px 0 -2px rgba(255, 255, 255, 0.8),
@@ -27,7 +27,7 @@ body.cui-glass-enabled [data-role="task-row"] {
     transition: transform 0.2s ease, box-shadow 0.2s ease !important;
     margin-bottom: 8px !important;
 }
-/* Hover glow – same as stream */
+/* Hover glow Ã¢â‚¬â€œ same as stream */
 body.cui-glass-enabled .MHxtic.JUr7jb.gmNu1d.CNpREd::after {
     content: '' !important;
     position: absolute !important;
@@ -51,10 +51,10 @@ body.cui-glass-enabled .MHxtic.JUr7jb.gmNu1d.CNpREd > * {
     position: relative !important;
     z-index: 3 !important;
 }
-/* Hover lift – same as stream */
+/* Hover lift Ã¢â‚¬â€œ same as stream */
 body.cui-glass-enabled .MHxtic.JUr7jb.gmNu1d.CNpREd:hover {
     transform: scale(1.015) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.7),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 1),
         inset -2px -2px 0 -2px rgba(255, 255, 255, 0.9),
@@ -67,11 +67,11 @@ body.cui-glass-enabled .MHxtic.JUr7jb.gmNu1d.CNpREd:hover {
         0px 8px 24px 0px rgba(0, 0, 0, 0.1) !important;
 }
 
-/* ---- Dark mode for To‑Do assignments ---- */
+/* ---- Dark mode for ToÃ¢â‚¬â€˜Do assignments ---- */
 body.dark-mode.cui-glass-enabled .MHxtic.JUr7jb.gmNu1d.CNpREd {
     background: var(--glass-dark-surface) !important;
     border: 1px solid var(--glass-dark-border) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px var(--glass-dark-border),
         inset 2px 3px 0 -2px var(--glass-dark-inner),
         inset -2px -2px 0 -2px var(--glass-dark-inner-soft),
@@ -84,7 +84,7 @@ body.dark-mode.cui-glass-enabled .MHxtic.JUr7jb.gmNu1d.CNpREd {
         0px 6px 16px 0px rgba(0, 0, 0, 0.26) !important;
 }
 body.dark-mode.cui-glass-enabled .MHxtic.JUr7jb.gmNu1d.CNpREd:hover {
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.18),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.12),
         inset -2px -2px 0 -2px rgba(255, 255, 255, 0.08),
@@ -106,7 +106,7 @@ body.dark-mode.cui-glass-enabled .MHxtic.JUr7jb.gmNu1d.CNpREd::after {
 
 
 /* ==========================================================================
-   YOUR WORK PANEL – Liquid Glass (exact match to stream posts)
+   YOUR WORK PANEL Ã¢â‚¬â€œ Liquid Glass (exact match to stream posts)
    ========================================================================== */
 body.cui-glass-enabled .K2hR3c.BiaLW .AJFihd.T25sKc.jlxRme {
     position: relative !important;
@@ -115,7 +115,7 @@ body.cui-glass-enabled .K2hR3c.BiaLW .AJFihd.T25sKc.jlxRme {
     background: rgba(255, 255, 255, 0.25) !important;
     backdrop-filter: blur(8px) url(#glass-distortion) saturate(150%) !important;
     -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.6),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.9),
         inset -2px -2px 0 -2px rgba(255, 255, 255, 0.8),
@@ -157,7 +157,7 @@ body.cui-glass-enabled .K2hR3c.BiaLW .AJFihd.T25sKc.jlxRme > * {
 /* Hover lift */
 body.cui-glass-enabled .K2hR3c.BiaLW .AJFihd.T25sKc.jlxRme:hover {
     transform: scale(1.015) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.7),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 1),
         inset -2px -2px 0 -2px rgba(255, 255, 255, 0.9),
@@ -174,7 +174,7 @@ body.cui-glass-enabled .K2hR3c.BiaLW .AJFihd.T25sKc.jlxRme:hover {
 body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .AJFihd.T25sKc.jlxRme {
     background: var(--glass-dark-surface) !important;
     border: 1px solid var(--glass-dark-border) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px var(--glass-dark-border),
         inset 2px 3px 0 -2px var(--glass-dark-inner),
         inset -2px -2px 0 -2px var(--glass-dark-inner-soft),
@@ -187,7 +187,7 @@ body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .AJFihd.T25sKc.jlxRme {
         0px 6px 16px 0px rgba(0, 0, 0, 0.26) !important;
 }
 body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .AJFihd.T25sKc.jlxRme:hover {
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.18),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.12),
         inset -2px -2px 0 -2px rgba(255, 255, 255, 0.08),
@@ -209,7 +209,7 @@ body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .AJFihd.T25sKc.jlxRme::after {
 
 
 /* ==========================================================================
-   PRIVATE COMMENTS SECTION – Liquid Glass
+   PRIVATE COMMENTS SECTION Ã¢â‚¬â€œ Liquid Glass
    ========================================================================== */
 body.cui-glass-enabled .K2hR3c.BiaLW .PeGHgb.jbH5ac {
     position: relative !important;
@@ -218,7 +218,7 @@ body.cui-glass-enabled .K2hR3c.BiaLW .PeGHgb.jbH5ac {
     background: rgba(255, 255, 255, 0.25) !important;
     backdrop-filter: blur(8px) url(#glass-distortion) saturate(150%) !important;
     -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.6),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.9),
         inset -2px -2px 0 -2px rgba(255, 255, 255, 0.8),
@@ -259,7 +259,7 @@ body.cui-glass-enabled .K2hR3c.BiaLW .PeGHgb.jbH5ac > * {
 /* Hover lift */
 body.cui-glass-enabled .K2hR3c.BiaLW .PeGHgb.jbH5ac:hover {
     transform: scale(1.015) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.7),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 1),
         inset -2px -2px 0 -2px rgba(255, 255, 255, 0.9),
@@ -276,7 +276,7 @@ body.cui-glass-enabled .K2hR3c.BiaLW .PeGHgb.jbH5ac:hover {
 body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .PeGHgb.jbH5ac {
     background: var(--glass-dark-surface) !important;
     border: 1px solid var(--glass-dark-border) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px var(--glass-dark-border),
         inset 2px 3px 0 -2px var(--glass-dark-inner),
         inset -2px -2px 0 -2px var(--glass-dark-inner-soft),
@@ -289,7 +289,7 @@ body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .PeGHgb.jbH5ac {
         0px 6px 16px 0px rgba(0, 0, 0, 0.26) !important;
 }
 body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .PeGHgb.jbH5ac:hover {
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.18),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.12),
         inset -2px -2px 0 -2px rgba(255, 255, 255, 0.08),
@@ -311,7 +311,7 @@ body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .PeGHgb.jbH5ac::after {
 
 
 /* ==========================================================================
-   MARK AS DONE BUTTON – Liquid Glass pill
+   MARK AS DONE BUTTON Ã¢â‚¬â€œ Liquid Glass pill
    ========================================================================== */
 body.cui-glass-enabled .K2hR3c.BiaLW .upBbve {
     position: relative !important;
@@ -320,7 +320,7 @@ body.cui-glass-enabled .K2hR3c.BiaLW .upBbve {
     background: rgba(255, 255, 255, 0.25) !important;
     backdrop-filter: blur(8px) url(#glass-distortion) saturate(150%) !important;
     -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.6),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.9),
         inset -2px -2px 0 -2px rgba(255, 255, 255, 0.8),
@@ -359,7 +359,7 @@ body.cui-glass-enabled .K2hR3c.BiaLW .upBbve > * {
 /* Hover scale */
 body.cui-glass-enabled .K2hR3c.BiaLW .upBbve:hover {
     transform: scale(1.05) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.7),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 1),
         inset -2px -2px 0 -2px rgba(255, 255, 255, 0.9),
@@ -376,7 +376,7 @@ body.cui-glass-enabled .K2hR3c.BiaLW .upBbve .UywwFc-vQzf8d {
 body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .upBbve {
     background: var(--glass-dark-surface) !important;
     border: 1px solid var(--glass-dark-border) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px var(--glass-dark-border),
         inset 2px 3px 0 -2px var(--glass-dark-inner),
         inset -2px -2px 0 -2px var(--glass-dark-inner-soft),
@@ -384,7 +384,7 @@ body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .upBbve {
         0px 6px 16px 0px rgba(0, 0, 0, 0.26) !important;
 }
 body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .upBbve:hover {
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.18),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.12),
         inset -2px -2px 0 -2px rgba(255, 255, 255, 0.08),
@@ -404,7 +404,7 @@ body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .upBbve .UywwFc-vQzf8d {
 
 
 /* ==========================================================================
-   ADD OR CREATE (+) BUTTON – Liquid Glass pill
+   ADD OR CREATE (+) BUTTON Ã¢â‚¬â€œ Liquid Glass pill
    ========================================================================== */
 body.cui-glass-enabled .K2hR3c.BiaLW .eVOdue {
     position: relative !important;
@@ -413,7 +413,7 @@ body.cui-glass-enabled .K2hR3c.BiaLW .eVOdue {
     background: rgba(255, 255, 255, 0.25) !important;
     backdrop-filter: blur(8px) url(#glass-distortion) saturate(150%) !important;
     -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.6),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.9),
         inset -2px -2px 0 -2px rgba(255, 255, 255, 0.8),
@@ -452,7 +452,7 @@ body.cui-glass-enabled .K2hR3c.BiaLW .eVOdue > * {
 /* Hover scale */
 body.cui-glass-enabled .K2hR3c.BiaLW .eVOdue:hover {
     transform: scale(1.05) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.7),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 1),
         inset -2px -2px 0 -2px rgba(255, 255, 255, 0.9),
@@ -470,7 +470,7 @@ body.cui-glass-enabled .K2hR3c.BiaLW .eVOdue i {
 body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .eVOdue {
     background: var(--glass-dark-surface) !important;
     border: 1px solid var(--glass-dark-border) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px var(--glass-dark-border),
         inset 2px 3px 0 -2px var(--glass-dark-inner),
         inset -2px -2px 0 -2px var(--glass-dark-inner-soft),
@@ -478,7 +478,7 @@ body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .eVOdue {
         0px 6px 16px 0px rgba(0, 0, 0, 0.26) !important;
 }
 body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .eVOdue:hover {
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.18),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.12),
         inset -2px -2px 0 -2px rgba(255, 255, 255, 0.08),
@@ -498,7 +498,7 @@ body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .eVOdue i {
 }
 
    /* ==========================================================================
-   DUE SOON / TO-DO PANELS – Liquid Glass
+   DUE SOON / TO-DO PANELS Ã¢â‚¬â€œ Liquid Glass
    ========================================================================== */
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme {
     position: relative !important;
@@ -563,7 +563,7 @@ body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme::after {
 }
 
 /* ==========================================================================
-   DUE SOON ASSIGNMENT CARDS – Frosted Glass (like sidebar icons)
+   DUE SOON ASSIGNMENT CARDS Ã¢â‚¬â€œ Frosted Glass (like sidebar icons)
    ========================================================================== */
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EO16hc,
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .x4lrdf {
@@ -656,7 +656,7 @@ body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .x4lrdf::after {
 
 
 /* ==========================================================================
-   QUICK LINKS & UPCOMING SIDEBAR – Liquid Glass (exact match to stream posts)
+   QUICK LINKS & UPCOMING SIDEBAR Ã¢â‚¬â€œ Liquid Glass (exact match to stream posts)
    ========================================================================== */
 body.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc {
     position: relative !important;
@@ -665,7 +665,7 @@ body.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc {
     background: rgba(255, 255, 255, 0.25) !important;
     backdrop-filter: blur(8px) url(#glass-distortion) saturate(150%) !important;
     -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.6),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.9),
         inset -2px -2px 0 -2px rgba(255, 255, 255, 0.8),
@@ -679,7 +679,7 @@ body.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc {
     border: none !important;
     transition: transform 0.2s ease, box-shadow 0.2s ease !important;
 }
-/* Hover glow – exact same as stream posts */
+/* Hover glow Ã¢â‚¬â€œ exact same as stream posts */
 body.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc::after {
     content: '' !important;
     position: absolute !important;
@@ -703,10 +703,10 @@ body.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc > * {
     position: relative !important;
     z-index: 3 !important;
 }
-/* Hover lift – exact same as stream posts */
+/* Hover lift Ã¢â‚¬â€œ exact same as stream posts */
 body.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc:hover {
     transform: scale(1.015) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.7),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 1),
         inset -2px -2px 0 -2px rgba(255, 255, 255, 0.9),
@@ -723,7 +723,7 @@ body.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc:hover {
 body.dark-mode.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc {
     background: var(--glass-dark-surface) !important;
     border: 1px solid var(--glass-dark-border) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px var(--glass-dark-border),
         inset 2px 3px 0 -2px var(--glass-dark-inner),
         inset -2px -2px 0 -2px var(--glass-dark-inner-soft),
@@ -736,7 +736,7 @@ body.dark-mode.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc {
         0px 6px 16px 0px rgba(0, 0, 0, 0.26) !important;
 }
 body.dark-mode.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc:hover {
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.18),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.12),
         inset -2px -2px 0 -2px rgba(255, 255, 255, 0.08),
@@ -758,7 +758,7 @@ body.dark-mode.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc::after {
 
 
 /* ==========================================================================
-   STREAMSIDE TOGGLE BUTTON – Liquid Glass (exact match to stream posts)
+   STREAMSIDE TOGGLE BUTTON Ã¢â‚¬â€œ Liquid Glass (exact match to stream posts)
    ========================================================================== */
 body.cui-glass-enabled .streamside-toggle-arrow-btn {
     position: relative !important;
@@ -767,7 +767,7 @@ body.cui-glass-enabled .streamside-toggle-arrow-btn {
     background: rgba(255, 255, 255, 0.25) !important;
     backdrop-filter: blur(8px) url(#glass-distortion) saturate(150%) !important;
     -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.6),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.9),
         inset -2px -2px 0 -2px rgba(255, 255, 255, 0.8),
@@ -805,7 +805,7 @@ body.cui-glass-enabled .streamside-toggle-arrow-btn > * {
 /* Hover lift */
 body.cui-glass-enabled .streamside-toggle-arrow-btn:hover {
     transform: scale(1.05) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.7),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 1),
         inset -2px -2px 0 -2px rgba(255, 255, 255, 0.9),
@@ -818,7 +818,7 @@ body.cui-glass-enabled .streamside-toggle-arrow-btn:hover {
 body.dark-mode.cui-glass-enabled .streamside-toggle-arrow-btn {
     background: var(--glass-dark-surface) !important;
     border: 1px solid var(--glass-dark-border) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px var(--glass-dark-border),
         inset 2px 3px 0 -2px var(--glass-dark-inner),
         inset -2px -2px 0 -2px var(--glass-dark-inner-soft),
@@ -826,7 +826,7 @@ body.dark-mode.cui-glass-enabled .streamside-toggle-arrow-btn {
         0px 6px 16px 0px rgba(0, 0, 0, 0.26) !important;
 }
 body.dark-mode.cui-glass-enabled .streamside-toggle-arrow-btn:hover {
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.18),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.12),
         inset -2px -2px 0 -2px rgba(255, 255, 255, 0.08),
@@ -846,7 +846,7 @@ body.dark-mode.cui-glass-enabled .streamside-toggle-arrow-btn::after {
 
 
 /* ==========================================================================
-   HOMEPAGE CLASS CARD ACTION BAR – Frosted Liquid Glass
+   HOMEPAGE CLASS CARD ACTION BAR Ã¢â‚¬â€œ Frosted Liquid Glass
    ========================================================================== */
 /* --- The whole action bar container --- */
 body.cui-glass-enabled .SZ0kZe {
@@ -941,7 +941,7 @@ body.cui-glass-enabled .SZ0kZe .my-extension-image {
     -webkit-backdrop-filter: blur(4px) saturate(120%) !important;
     transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease !important;
 }
-/* Button hover – scale & brighten */
+/* Button hover Ã¢â‚¬â€œ scale & brighten */
 body.cui-glass-enabled .SZ0kZe .pYTkkf-Bz112c-LgbsSe:hover,
 body.cui-glass-enabled .SZ0kZe .my-extension-edit:hover,
 body.cui-glass-enabled .SZ0kZe .my-extension-image:hover {
@@ -969,7 +969,7 @@ body.dark-mode.cui-glass-enabled .SZ0kZe .my-extension-image:hover {
 }
 
 /* ==========================================================================
-   SIDEBAR CONTAINER Ã¢â‚¬â€œ Glass (distortion on ::before, content stays crisp)
+   SIDEBAR CONTAINER ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ Glass (distortion on ::before, content stays crisp)
    ========================================================================== */
 
 body.cui-glass-enabled .rknsod {
@@ -977,18 +977,18 @@ body.cui-glass-enabled .rknsod {
     overflow: hidden !important;
     border-radius: 20px !important;
     margin: 8px !important;
-    
+
     background: rgba(255, 255, 255, 0.35) !important;
     box-shadow:
         0 4px 20px rgba(0, 0, 0, 0.08),
         inset 2px 2px 1px 0 rgba(255, 255, 255, 0.5),
         inset -1px -1px 1px 1px rgba(255, 255, 255, 0.5) !important;
     border: 1px solid rgba(255, 255, 255, 0.3) !important;
-    
+
     filter: none !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
-    
+
     overflow-y: auto !important;
     max-height: calc(100vh - 120px) !important;
 }
@@ -1030,7 +1030,7 @@ body.dark-mode.cui-glass-enabled .rknsod {
     backdrop-filter: blur(8px) saturate(150%) !important;
     -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
     border: 1px solid rgba(255, 255, 255, 0.14) !important;
-    box-shadow: 
+    box-shadow:
         0 4px 18px rgba(0, 0, 0, 0.2),
         inset 1px 1px 0 rgba(255, 255, 255, 0.12),
         inset -1px -1px 1px 1px rgba(255, 255, 255, 0.06) !important;
@@ -1050,7 +1050,7 @@ body.dark-mode.cui-glass-enabled .rknsod .uTwgne {
     margin: 4px 8px !important;
     overflow: hidden !important;
     background: rgba(255, 255, 255, 0.12) !important;
-    box-shadow: 
+    box-shadow:
         0 4px 15px rgba(0, 0, 0, 0.16),
         inset 2px 2px 1px 0 rgba(255, 255, 255, 0.18),
         inset -1px -1px 1px 1px rgba(255, 255, 255, 0.12) !important;
@@ -1097,7 +1097,7 @@ body.dark-mode.cui-glass-enabled .rknsod .uTwgne > * {
 body.dark-mode.cui-glass-enabled .uTwgne:hover,
 body.dark-mode.cui-glass-enabled .rknsod .uTwgne:hover {
     transform: scale(1.015) !important;
-    box-shadow: 
+    box-shadow:
         0 8px 22px rgba(0, 0, 0, 0.2),
         inset 2px 2px 1px 0 rgba(255, 255, 255, 0.22),
         inset -1px -1px 1px 1px rgba(255, 255, 255, 0.14) !important;
@@ -1115,7 +1115,7 @@ body.dark-mode.cui-glass-enabled {
     --glass-dark-shadow-hover: 0 14px 40px rgba(0, 0, 0, 0.52);
 }
 /* ==========================================================================
-   CLASSROOM TABS Ã¢â‚¬â€œ Outer glass pill + inner glass tabs (demo style)
+   CLASSROOM TABS ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ Outer glass pill + inner glass tabs (demo style)
    ========================================================================== */
 body.cui-glass-enabled .xHPsid {
     position: relative !important;
@@ -1127,7 +1127,7 @@ body.cui-glass-enabled .xHPsid {
     background: rgba(255, 255, 255, 0.25) !important;
     backdrop-filter: blur(8px) url(#glass-distortion) saturate(150%) !important;
     -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.6),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.9),
         inset -2px -2px 0 -2px rgba(255, 255, 255, 0.8),
@@ -1168,13 +1168,13 @@ body.cui-glass-enabled .hN1OOc {
     background: rgba(255, 255, 255, 0.15) !important;
     backdrop-filter: blur(4px) url(#glass-distortion) saturate(120%) !important;
     -webkit-backdrop-filter: blur(4px) saturate(120%) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.3),
         inset 1px 2px 0 -1px rgba(255, 255, 255, 0.5),
         inset -1px -1px 0 -1px rgba(255, 255, 255, 0.3),
         0px 1px 2px 0px rgba(0, 0, 0, 0.05) !important;
     border: none !important;
-    transition: 
+    transition:
         background 0.2s ease,
         box-shadow 0.2s ease,
         transform 0.2s ease !important;
@@ -1185,7 +1185,7 @@ body.cui-glass-enabled .hN1OOc > * {
 }
 body.cui-glass-enabled .hN1OOc:hover {
     background: rgba(255, 255, 255, 0.3) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.4),
         inset 1px 2px 0 -1px rgba(255, 255, 255, 0.7),
         inset -1px -1px 0 -1px rgba(255, 255, 255, 0.4),
@@ -1195,7 +1195,7 @@ body.cui-glass-enabled .hN1OOc:hover {
 body.cui-glass-enabled .hN1OOc.eumXzf,
 body.cui-glass-enabled .hN1OOc[aria-current="page"] {
     background: rgba(255, 255, 255, 0.45) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.6),
         inset 1px 2px 0 -1px rgba(255, 255, 255, 0.9),
         inset -1px -1px 0 -1px rgba(255, 255, 255, 0.5),
@@ -1223,7 +1223,7 @@ body.cui-glass-enabled .hN1OOc:hover::after {
 body.dark-mode.cui-glass-enabled .xHPsid {
     background: var(--glass-dark-surface-soft) !important;
     border: 1px solid var(--glass-dark-border) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px var(--glass-dark-border),
         inset 2px 3px 0 -2px var(--glass-dark-inner),
         inset -2px -2px 0 -2px var(--glass-dark-inner-soft),
@@ -1238,7 +1238,7 @@ body.dark-mode.cui-glass-enabled .xHPsid {
 body.dark-mode.cui-glass-enabled .hN1OOc {
     background: rgba(255, 255, 255, 0.05) !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.07),
         inset 1px 2px 0 -1px rgba(255, 255, 255, 0.05),
         inset -1px -1px 0 -1px rgba(255, 255, 255, 0.035),
@@ -1246,7 +1246,7 @@ body.dark-mode.cui-glass-enabled .hN1OOc {
 }
 body.dark-mode.cui-glass-enabled .hN1OOc:hover {
     background: rgba(255, 255, 255, 0.1) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.12),
         inset 1px 2px 0 -1px rgba(255, 255, 255, 0.09),
         inset -1px -1px 0 -1px rgba(255, 255, 255, 0.06),
@@ -1255,14 +1255,14 @@ body.dark-mode.cui-glass-enabled .hN1OOc:hover {
 body.dark-mode.cui-glass-enabled .hN1OOc.eumXzf,
 body.dark-mode.cui-glass-enabled .hN1OOc[aria-current="page"] {
     background: rgba(255, 255, 255, 0.13) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.16),
         inset 1px 2px 0 -1px rgba(255, 255, 255, 0.12),
         inset -1px -1px 0 -1px rgba(255, 255, 255, 0.08),
         0px 2px 8px 0px rgba(0, 0, 0, 0.24) !important;
 }
 /* ==========================================================================
-   SIDEBAR CLASS CARDS Ã¢â‚¬â€œ Advanced Glass
+   SIDEBAR CLASS CARDS ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ Advanced Glass
    ========================================================================== */
 body.cui-glass-enabled .uTwgne,
 body.cui-glass-enabled .rknsod .uTwgne {
@@ -1271,7 +1271,7 @@ body.cui-glass-enabled .rknsod .uTwgne {
     margin: 4px 8px !important;
     overflow: hidden !important;
     background: rgba(255, 255, 255, 0.35) !important;
-    box-shadow: 
+    box-shadow:
         0 4px 15px rgba(0, 0, 0, 0.06),
         inset 2px 2px 1px 0 rgba(255, 255, 255, 0.5),
         inset -1px -1px 1px 1px rgba(255, 255, 255, 0.5) !important;
@@ -1318,13 +1318,13 @@ body.cui-glass-enabled .rknsod .uTwgne > * {
 body.cui-glass-enabled .uTwgne:hover,
 body.cui-glass-enabled .rknsod .uTwgne:hover {
     transform: scale(1.015) !important;
-    box-shadow: 
+    box-shadow:
         0 8px 30px rgba(0, 0, 0, 0.12),
         inset 2px 2px 1px 0 rgba(255, 255, 255, 0.5),
         inset -1px -1px 1px 1px rgba(255, 255, 255, 0.5) !important;
 }
 /* ==========================================================================
-   HOMEPAGE CLASS CARDS Ã¢â‚¬â€œ Liquid Glass (DEMO EXACT)
+   HOMEPAGE CLASS CARDS ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ Liquid Glass (DEMO EXACT)
    ========================================================================== */
 body.cui-glass-enabled .gHz6xd {
     position: relative !important;
@@ -1332,7 +1332,7 @@ body.cui-glass-enabled .gHz6xd {
     border-radius: 16px !important;
     margin: 4px 8px !important;
     background: transparent !important;
-    box-shadow: 
+    box-shadow:
         0 4px 4px rgba(0, 0, 0, 0.15),
         0 0 12px rgba(0, 0, 0, 0.08) !important;
     border: 1px solid rgba(255, 255, 255, 0.3) !important;
@@ -1356,7 +1356,7 @@ body.cui-glass-enabled .gHz6xd::after {
     border-radius: inherit !important;
     pointer-events: none !important;
     z-index: 2 !important;
-    box-shadow: 
+    box-shadow:
         inset 3px 3px 3px 0 rgba(255, 255, 255, 0.45),
         inset -3px -3px 3px 0 rgba(255, 255, 255, 0.45) !important;
     background: radial-gradient(
@@ -1376,19 +1376,19 @@ body.cui-glass-enabled .gHz6xd > * {
 }
 body.cui-glass-enabled .gHz6xd:hover {
     transform: scale(1.015) !important;
-    box-shadow: 
+    box-shadow:
         0 8px 16px rgba(0, 0, 0, 0.2),
         0 0 20px rgba(0, 0, 0, 0.12) !important;
 }
 body.dark-mode.cui-glass-enabled .gHz6xd {
     background: rgba(18, 20, 26, 0.56) !important;
     border-color: rgba(255, 255, 255, 0.1) !important;
-    box-shadow: 
+    box-shadow:
         0 4px 10px rgba(0, 0, 0, 0.36),
         0 0 14px rgba(0, 0, 0, 0.28) !important;
 }
 body.dark-mode.cui-glass-enabled .gHz6xd:hover {
-    box-shadow: 
+    box-shadow:
         0 10px 24px rgba(0, 0, 0, 0.5),
         0 0 24px rgba(0, 0, 0, 0.38) !important;
 }
@@ -1400,7 +1400,7 @@ body.dark-mode.cui-glass-enabled .gHz6xd::after {
     ) !important;
 }
 /* ==========================================================================
-   MAIN STREAM CARDS Ã¢â‚¬â€œ OUTER GLASS PILL STYLE
+   MAIN STREAM CARDS ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ OUTER GLASS PILL STYLE
    ========================================================================== */
 body.cui-glass-enabled [role="main"] .wBE4bf.TIunU {
     position: relative !important;
@@ -1409,7 +1409,7 @@ body.cui-glass-enabled [role="main"] .wBE4bf.TIunU {
     background: rgba(255, 255, 255, 0.25) !important;
     backdrop-filter: blur(8px) url(#glass-distortion) saturate(150%) !important;
     -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.6),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.9),
         inset -2px -2px 0 -2px rgba(255, 255, 255, 0.8),
@@ -1447,7 +1447,7 @@ body.cui-glass-enabled [role="main"] .wBE4bf.TIunU > * {
 }
 body.cui-glass-enabled [role="main"] .wBE4bf.TIunU:hover {
     transform: scale(1.015) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.7),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 1),
         inset -2px -2px 0 -2px rgba(255, 255, 255, 0.9),
@@ -1475,7 +1475,7 @@ body.cui-glass-enabled [role="main"] .wBE4bf.TIunU h2 {
 body.dark-mode.cui-glass-enabled [role="main"] .wBE4bf.TIunU {
     background: var(--glass-dark-surface) !important;
     border: 1px solid var(--glass-dark-border) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px var(--glass-dark-border),
         inset 2px 3px 0 -2px var(--glass-dark-inner),
         inset -2px -2px 0 -2px var(--glass-dark-inner-soft),
@@ -1488,7 +1488,7 @@ body.dark-mode.cui-glass-enabled [role="main"] .wBE4bf.TIunU {
         0px 6px 16px 0px rgba(0, 0, 0, 0.26) !important;
 }
 body.dark-mode.cui-glass-enabled [role="main"] .wBE4bf.TIunU:hover {
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.18),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.12),
         inset -2px -2px 0 -2px rgba(255, 255, 255, 0.08),
@@ -1516,7 +1516,7 @@ body.cui-glass-enabled .t2wIBc .riU7le.FHXi2c {
     border-radius: 24px !important;
     overflow: hidden !important;
     background: rgba(255, 255, 255, 0.35) !important;
-    box-shadow: 
+    box-shadow:
         0 4px 12px rgba(0, 0, 0, 0.06),
         inset 1px 1px 0 rgba(255, 255, 255, 0.75),
         inset 0 0 5px rgba(255, 255, 255, 0.75) !important;
@@ -1570,7 +1570,7 @@ body.cui-glass-enabled .t2wIBc .riU7le.FHXi2c > * {
 body.cui-glass-enabled .riU7le.FHXi2c:hover,
 body.cui-glass-enabled .t2wIBc .riU7le.FHXi2c:hover {
     transform: scale(1.015) !important;
-    box-shadow: 
+    box-shadow:
         0 8px 24px rgba(0, 0, 0, 0.12),
         inset 1px 1px 0 rgba(255, 255, 255, 0.9),
         inset 0 0 8px rgba(255, 255, 255, 0.9) !important;
@@ -1580,14 +1580,14 @@ body.dark-mode.cui-glass-enabled .riU7le.FHXi2c,
 body.dark-mode.cui-glass-enabled .t2wIBc .riU7le.FHXi2c {
     background: var(--glass-dark-surface-soft) !important;
     border: 1px solid var(--glass-dark-border) !important;
-    box-shadow: 
+    box-shadow:
         0 4px 20px rgba(0, 0, 0, 0.3),
         inset 1px 1px 0 rgba(255, 255, 255, 0.08),
         inset 0 0 5px rgba(255, 255, 255, 0.03) !important;
 }
 body.dark-mode.cui-glass-enabled .riU7le.FHXi2c:hover,
 body.dark-mode.cui-glass-enabled .t2wIBc .riU7le.FHXi2c:hover {
-    box-shadow: 
+    box-shadow:
         0 8px 30px rgba(0, 0, 0, 0.42),
         inset 1px 1px 0 rgba(255, 255, 255, 0.12),
         inset 0 0 8px rgba(255, 255, 255, 0.05) !important;
@@ -1601,7 +1601,7 @@ body.dark-mode.cui-glass-enabled .t2wIBc .riU7le.FHXi2c::after {
     ) !important;
 }
 /* ==========================================================================
-   NEW ANNOUNCEMENT BUTTON Ã¢â‚¬â€œ Liquid Glass Pill
+   NEW ANNOUNCEMENT BUTTON ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ Liquid Glass Pill
    ========================================================================== */
 body.cui-glass-enabled .Utoz9b {
     position: relative !important;
@@ -1617,7 +1617,7 @@ body.cui-glass-enabled .Utoz9b {
     background: rgba(255, 255, 255, 0.25) !important;
     backdrop-filter: blur(8px) url(#glass-distortion) saturate(150%) !important;
     -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.6),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.9),
         inset -2px -2px 0 -2px rgba(255, 255, 255, 0.8),
@@ -1638,7 +1638,7 @@ body.cui-glass-enabled .Utoz9b > * {
 body.cui-glass-enabled .Utoz9b:hover {
     background: rgba(255, 255, 255, 0.4) !important;
     transform: translateY(-2px) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.8),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 1),
         inset -2px -2px 0 -2px rgba(255, 255, 255, 0.9),
@@ -1676,7 +1676,7 @@ body.cui-glass-enabled .Utoz9b .UywwFc-vQzf8d {
 body.dark-mode.cui-glass-enabled .Utoz9b {
     background: var(--glass-dark-surface-soft) !important;
     border: 1px solid var(--glass-dark-border) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.08),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.08),
         inset -2px -2px 0 -2px rgba(255, 255, 255, 0.05),
@@ -1690,7 +1690,7 @@ body.dark-mode.cui-glass-enabled .Utoz9b {
 }
 body.dark-mode.cui-glass-enabled .Utoz9b:hover {
     background: rgba(255, 255, 255, 0.14) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.12),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.1),
         inset -2px -2px 0 -2px rgba(255, 255, 255, 0.08),
@@ -1710,14 +1710,14 @@ body.dark-mode.cui-glass-enabled .Utoz9b::after {
     ) !important;
 }
 /* ==========================================================================
-   CLASSWORK TOPIC BOXES Ã¢â‚¬â€œ Liquid Glass
+   CLASSWORK TOPIC BOXES ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ Liquid Glass
    ========================================================================== */
 body.cui-glass-enabled .jHgkif.KSMuDe.u0dx8e {
     position: relative !important;
     border-radius: 16px !important;
     overflow: hidden !important;
     background: rgba(255, 255, 255, 0.35) !important;
-    box-shadow: 
+    box-shadow:
         0 4px 12px rgba(0, 0, 0, 0.06),
         inset 1px 1px 0 rgba(255, 255, 255, 0.75),
         inset 0 0 5px rgba(255, 255, 255, 0.75) !important;
@@ -1768,7 +1768,7 @@ body.cui-glass-enabled .jHgkif.KSMuDe.u0dx8e .iBZDFb {
 body.dark-mode.cui-glass-enabled .jHgkif.KSMuDe.u0dx8e {
     background: var(--glass-dark-surface-soft) !important;
     border: 1px solid var(--glass-dark-border) !important;
-    box-shadow: 
+    box-shadow:
         0 4px 20px rgba(0, 0, 0, 0.3),
         inset 1px 1px 0 rgba(255, 255, 255, 0.08),
         inset 0 0 5px rgba(255, 255, 255, 0.03) !important;
@@ -1814,14 +1814,14 @@ body.cui-glass-enabled [role="main"] .wBE4bf.TIunU:has([aria-label*="Material"])
     line-height: normal !important;
 }
 /* ==========================================================================
-   ANNOUNCEMENTS Ã¢â‚¬â€œ no extra padding overrides
+   ANNOUNCEMENTS ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ no extra padding overrides
    ========================================================================== */
 body.cui-glass-enabled [role="main"] .wBE4bf.TIunU:not(:has([aria-label*="Assignment"])) .pco8Kc,
 body.cui-glass-enabled [role="main"] .wBE4bf.TIunU:not(:has([aria-label*="Assignment"])) .GQW44b {
     padding-right: 0 !important;
 }
 /* ==========================================================================
-   COMMENTS Ã¢â‚¬â€œ remove glass from comment sections inside stream cards
+   COMMENTS ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ remove glass from comment sections inside stream cards
    ========================================================================== */
 body.cui-glass-enabled [role="main"] .wBE4bf.TIunU .s2g3Xd,
 body.cui-glass-enabled [role="main"] .wBE4bf.TIunU .PeGHgb,
@@ -1850,7 +1850,7 @@ body.cui-glass-enabled [role="main"] .wBE4bf.TIunU [role="region"] * {
 }
 
 /* ==========================================================================
-   DARK MODE Ã¢â‚¬â€œ Top navigation bar
+   DARK MODE ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ Top navigation bar
    ========================================================================== */
 body.dark-mode.cui-glass-enabled .joJglb,
 body.dark-mode.cui-glass-enabled header[role="banner"] {
@@ -1863,7 +1863,7 @@ body.dark-mode.cui-glass-enabled [role="main"] .wBE4bf.TIunU {
     background: rgba(255, 255, 255, 0.11) !important;
     backdrop-filter: blur(8px) url(#glass-distortion) saturate(150%) !important;
     -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.22),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.18),
         inset -2px -2px 0 -2px rgba(255, 255, 255, 0.14),
@@ -1879,7 +1879,7 @@ body.dark-mode.cui-glass-enabled [role="main"] .wBE4bf.TIunU {
 body.dark-mode.cui-glass-enabled [role="main"] .wBE4bf.TIunU:hover {
     background: rgba(255, 255, 255, 0.16) !important;
     border-color: rgba(255, 255, 255, 0.24) !important;
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.32),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.24),
         inset -2px -2px 0 -2px rgba(255, 255, 255, 0.18),
@@ -1929,7 +1929,7 @@ body.dark-mode.cui-glass-enabled [role="main"] .wBE4bf.TIunU::after {
     opacity: 0.18 !important;
 }
 body.dark-mode.cui-glass-enabled [role="main"] .wBE4bf.TIunU:hover {
-    box-shadow: 
+    box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.32),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.24),
         inset -2px -2px 0 -2px rgba(255, 255, 255, 0.18),
@@ -2083,7 +2083,7 @@ body.dark-mode.cui-glass-enabled .eqqrO .PeGHgb:not(.jbH5ac) {
         0 4px 16px rgba(0, 0, 0, 0.24),
         inset 1px 1px 0 rgba(255, 255, 255, 0.06) !important;
 }
-/* --- END LIQUID GLASS ---*/ 
+/* --- END LIQUID GLASS ---*/
 
 
 
@@ -2106,20 +2106,20 @@ body.dark-mode .update-popup-message[data-color] {
 }
 .decoration-row { margin-top: 0px; }
 .decoration-grid { display:flex; gap:8px; flex-wrap:wrap; padding: 18px; justify-content: center; }
-.decoration-item { 
+.decoration-item {
     position: relative;
     border: 1.5px solid rgba(235, 237, 255, 0.58);
     box-shadow: 0 4px 20px 0 rgba(31, 38, 135, 0.079);
-    padding:6px; 
-    border-radius:15px; 
-    text-align:center; 
-    cursor:pointer; 
-    width:135px; 
-    box-sizing:border-box; 
-    display:flex; align-items:center; 
-    justify-content:center; 
-    height:50px; 
-    font-weight:500; 
+    padding:6px;
+    border-radius:15px;
+    text-align:center;
+    cursor:pointer;
+    width:135px;
+    box-sizing:border-box;
+    display:flex; align-items:center;
+    justify-content:center;
+    height:50px;
+    font-weight:500;
     color: rgba(0, 0, 0, 0.5);
     overflow: hidden;
     transition: color 0.3s ease;
@@ -2176,9 +2176,9 @@ body:not(.dark-mode) .decoration-item[data-filename="Colours.png"]::before {
     box-shadow: none;
     transform: scale(0.95);
 }
-.decoration-item.selected { 
+.decoration-item.selected {
     box-shadow: 0 4px 32px 0 rgba(31, 38, 135, 0.15);
-    border: 1.5px solid rgba(182, 189, 255, 0.643); 
+    border: 1.5px solid rgba(182, 189, 255, 0.643);
     color: unset;
     transform: scale(1.03);
 }
@@ -2202,7 +2202,7 @@ body:not(.dark-mode) .decoration-item[data-filename="Colours.png"]::before {
     border: 1.5px solid rgba(235, 237, 255, 0.58) !important;
     border-radius: 44px !important;
     corner-shape: squircle !important;
-    margin-right: 12px !important; 
+    margin-right: 12px !important;
     margin-bottom: 12px !important;
     height: 260px !important;
     transform: scale(1) !important;
@@ -2226,7 +2226,7 @@ body:not(.dark-mode) .decoration-item[data-filename="Colours.png"]::before {
     border-radius: 200px !important;
     corner-shape: squircle !important;
     transition: all 0.3s ease !important;
-    margin-bottom: 0px !important; 
+    margin-bottom: 0px !important;
     border: 1.5px solid rgba(235, 237, 255, 0.58) !important;
     padding: 7px !important;
 }
@@ -2245,17 +2245,17 @@ body.sbsmall { --sidebar-scale: 0.8; }
 body.sbmedium { --sidebar-scale: 0.9; }
 .STek2d div[role="group"] {
     max-height: calc((100vh - var(--enrolled-height-adjust)) / var(--sidebar-scale)) !important;
-    height: auto !important; 
-    overflow-y: auto !important; 
-    overflow-x: visible !important; 
-    width: auto !important; 
-    min-width: fit-content !important; 
+    height: auto !important;
+    overflow-y: auto !important;
+    overflow-x: visible !important;
+    width: auto !important;
+    min-width: fit-content !important;
 }
 body.calendar-hidden .STek2d div[role="group"] {
     max-height: calc((100vh - var(--enrolled-height-adjust) + 52px) / var(--sidebar-scale)) !important;
 }
 .STek2d div[role="group"]::-webkit-scrollbar {
-    width: 0px !important; 
+    width: 0px !important;
     background: transparent !important;
 }
 .STek2d div[role="group"]::-webkit-scrollbar-track, .STek2d div[role="group"]::-webkit-scrollbar-thumb, .STek2d div[role="group"]::-webkit-scrollbar-thumb:hover {
@@ -2266,7 +2266,7 @@ body.calendar-hidden .STek2d div[role="group"] {
     box-shadow: 0 5px 25px 0 rgba(31, 38, 135, 0.2) !important;
     border-radius: 28px !important;
     transition: all 0.3s ease !important;
-    margin-bottom: 15px !important; 
+    margin-bottom: 15px !important;
     border: 1.5px solid rgba(235, 237, 255, 0.58) !important;
 }
 .vZimUe, .KIdaEf {
@@ -2368,8 +2368,8 @@ body.calendar-hidden .STek2d div[role="group"] {
     background: rgba(255, 255, 255, 0.2) !important;
     backdrop-filter: blur(10px) !important;
     -webkit-backdrop-filter: blur(10px) !important;
-    box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.25) !important; 
-    border: none !important; 
+    box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.25) !important;
+    border: none !important;
     border-radius: 40px !important;
     corner-shape: squircle !important;
     transition: all 0.3s ease !important;
@@ -2384,14 +2384,14 @@ body.calendar-hidden .STek2d div[role="group"] {
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15) !important;
     border: 1px solid rgba(255, 255, 255, 0.18) !important;
     border-radius: 16px !important;
-    transition: all 0.3s ease !important; 
+    transition: all 0.3s ease !important;
 }
 .qk0lee.QRiHXd.DJLg5c {
-    outline: none !important; 
-    box-shadow: none !important; 
+    outline: none !important;
+    box-shadow: none !important;
     border-color: transparent !important;
 }
-.qk0lee.QRiHXd.DJLg5c:focus, 
+.qk0lee.QRiHXd.DJLg5c:focus,
 .qk0lee.QRiHXd.DJLg5c:focus-visible {
     outline: none !important;
     box-shadow: none !important;
@@ -2400,10 +2400,10 @@ body.calendar-hidden .STek2d div[role="group"] {
     background: rgba(255, 255, 255, 0.2) !important;
     backdrop-filter: blur(10px) !important;
     -webkit-backdrop-filter: blur(10px) !important;
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15) !important; 
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15) !important;
     border: 1px solid rgba(255, 255, 255, 0.18) !important;
     border-radius: 16px !important;
-    transition: all 0.3s ease !important; 
+    transition: all 0.3s ease !important;
 }
 .jHgkif.raZwr.u0dx8e:hover {
     transform: translateY(-5px) !important;
@@ -2425,7 +2425,7 @@ body.calendar-hidden .STek2d div[role="group"] {
     padding-right: 0px !important;
     border-radius: 20px !important;
     opacity: 1 !important;
-    background-color: #f8fafd !important; 
+    background-color: #f8fafd !important;
     outline: none !important;
 }
 .uTwgne:hover {
@@ -2506,7 +2506,7 @@ body.sidebar-expand-all-hover .joJglb:not(:hover) .uTwgne {
 .pzaVke {
     display: block !important;
     visibility: visible !important;
-    opacity: 1 !important; 
+    opacity: 1 !important;
     border-radius: 20px !important;
 }
 .tCcYY.ZtINmf.yWU57c {
@@ -2542,11 +2542,11 @@ body.sbmedium.classic-sidebar .tCcYY.yWU57c, body.sbmedium .aBPWdf {
     background: rgba(255, 255, 255, 0.2) !important;
     backdrop-filter: blur(10px) !important;
     -webkit-backdrop-filter: blur(10px) !important;
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15) !important; 
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15) !important;
     border: none !important;
     border-radius: 40px !important;
     corner-shape: squircle !important;
-    transition: all 0.3s ease !important; 
+    transition: all 0.3s ease !important;
 }
 .GWZ7yf.LBlAUc * {
     transition: all 0.3s ease !important;
@@ -2561,8 +2561,8 @@ body.sbmedium.classic-sidebar .tCcYY.yWU57c, body.sbmedium .aBPWdf {
     transition: all 0.3s ease !important;
 }
 .pOf0gc.QRiHXd.Aopndd.M4LFnf:hover {
-    transform: translateY(-3px) !important; 
-    box-shadow: 0 6px 20px 0 rgba(31, 38, 135, 0.15) !important; 
+    transform: translateY(-3px) !important;
+    box-shadow: 0 6px 20px 0 rgba(31, 38, 135, 0.15) !important;
     cursor: pointer !important;
 }
 .pOf0gc.QRiHXd.Aopndd.M4LFnf * {
@@ -2626,7 +2626,7 @@ body.classic-sidebar .g0zrjc {
 }
 .mSaSG.pEwOBc.Aopndd, #my-extension-settings-panel {
     background: #f8fafd !important;
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15) !important; 
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15) !important;
     border: 1.5px solid rgba(235, 237, 255, 0.58) !important;
     border-radius: 30px !important;
     transition: all 0.3s ease !important;
@@ -2740,7 +2740,7 @@ body.dark-mode .mgc-settings-tab-content {
     margin-bottom: 0 !important;
 }
 .VfPpkd-P5QLlc {
-    background: #ffffff !important; 
+    background: #ffffff !important;
     backdrop-filter: blur(1px) !important;
     -webkit-backdrop-filter: blur(1px) !important;
     box-shadow: 0 6px 20px 0 rgba(31, 38, 135, 0.1) !important;
@@ -2754,7 +2754,7 @@ body.dark-mode .mgc-settings-tab-content {
 .VfPpkd-P5QLlc:hover {
     transform: none !important;
     box-shadow: 0 6px 20px 0 rgba(31, 38, 135, 0.1) !important;
-    background: #ffffff !important; 
+    background: #ffffff !important;
     cursor: default !important;
 }
 .VfPpkd-P5QLlc * {
@@ -2767,8 +2767,8 @@ body.dark-mode .mgc-settings-tab-content {
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15) !important;
     border: 1px solid rgba(255, 255, 255, 0.18) !important;
     border-radius: 16px !important;
-    transition: all 0.3s ease !important; 
-    animation: none !important; 
+    transition: all 0.3s ease !important;
+    animation: none !important;
 }
 .zaxms.NyxV9b.Aopndd:hover {
     transform: translateY(-5px) !important;
@@ -3073,7 +3073,7 @@ body.dark-mode .hN1OOc.eumXzf {
     border-radius: 15px !important;
     padding: 5px !important;
 }
- 
+
 #dd1347comtp2 {
     border-radius: 15px !important;
 }
@@ -3261,7 +3261,7 @@ body.classic-sidebar.dark-mode .tCcYY {
     border-radius: 15px !important;
     border-bottom: none !important;
     background: #ffffff !important;
-    box-shadow: 0 0px 20px 0 rgba(44, 50, 126, 0.15) !important; 
+    box-shadow: 0 0px 20px 0 rgba(44, 50, 126, 0.15) !important;
 }
 .etr9pd.jlxRme.Aopndd.xWw7yd.TIunU {
     padding: 25px !important
@@ -3499,9 +3499,9 @@ button {
 .switch input:checked + .slider:before {
   transform: translateX(18px);
 }
-.sb-size-row { 
-    width: 180px !important; 
-    display: flex; 
+.sb-size-row {
+    width: 180px !important;
+    display: flex;
     flex-direction: column;
     align-items: center;
     padding: 10px;
@@ -3613,7 +3613,7 @@ body.dark-mode .sidebar-height-slider::-webkit-slider-thumb:hover {
   transform: scale(1.05);
 }
 .image-picker-popup {
-  background: #f8fafd; 
+  background: #f8fafd;
   border: 1.5px solid rgba(235, 237, 255, 0.58) !important;
   box-shadow: 0 16px 40px 0 rgba(31, 38, 135, 0.24) !important;
   border-radius: 24px;
@@ -4002,12 +4002,12 @@ body.dark-mode .image-picker-custom-action-save {
 .image-picker-custom-error { color:#d9534f; font-size:12px; margin-top:6px; text-align:center; padding:0 6px; }
 .image-picker-custom.selected { opacity: 0.3; transform: scale(0.95); box-shadow: 0 0px 12px rgba(31,38,135,0.12); }
 /* Expanded editing mode for custom banner */
-.image-picker-item.image-picker-custom.editing-expanded { 
-  width: 100% !important; 
+.image-picker-item.image-picker-custom.editing-expanded {
+  width: 100% !important;
   grid-column: 1 / -1;
-  height: auto !important; 
+  height: auto !important;
   min-height: 100%;
-  transform: none !important; 
+  transform: none !important;
   opacity: 1 !important;
     align-items: flex-start;
     justify-content: flex-start;
@@ -4327,8 +4327,8 @@ body.dark-mode .image-picker-overlay { background: rgba(255,255,255,0.12); color
     width: 200px;
   background: none;
   overflow-y: scroll;
-  scrollbar-width: thin; 
-  scrollbar-color: rgba(0,0,0,0.32) transparent; 
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,0,0,0.32) transparent;
   border-radius: 10px !important;
   flex-shrink: 0;
   height: fit-content;
@@ -4530,7 +4530,7 @@ body.classic-sidebar.joJglb {
   background: transparent !important;
   border: none !important;
   padding: none !important;
-  color: inherit !important;  
+  color: inherit !important;
 }
 .PFLqgc {
     border-radius: 40px !important;
@@ -4568,7 +4568,7 @@ body.classic-sidebar.joJglb {
 }
 .bHOAdb {
     border-radius: 28px !important;
-    corner-shape: squircle !important; 
+    corner-shape: squircle !important;
 }
 .tjHubc.TFxDge {
     padding-top: 9px !important;
@@ -4755,7 +4755,7 @@ body.dark-mode .LdvLn .snByac {
     height: 5px !important;
 }
 .rjqfkb::-webkit-scrollbar-thumb {
-    background: rgba(135, 135, 135, 0.369) !important; 
+    background: rgba(135, 135, 135, 0.369) !important;
     border-radius: 99px !important;
 }
 .OK63Pb:not(:last-child) {
@@ -5335,7 +5335,7 @@ body.classic-sidebar.sbsmallest .home-indicator {
     left: 64px;
 }
 @media (max-width: 65.125rem) {
-        .home-indicator { 
+        .home-indicator {
         left: 24px !important;
         transition: all 0.2s ease;
         }
@@ -5634,7 +5634,7 @@ body.dark-mode .mc-clock-widget .mc-clock-weather-icon {
     pointer-events: auto;
     display: flex;
     align-items: center;
-    gap: 4px; 
+    gap: 4px;
     background: #f8fafd;
     padding: 5px;
     border-radius: 50px;
@@ -6117,35 +6117,35 @@ body.dark-mode .sub-bar-input {
     background: rgba(0, 0, 0, 0.3);
 }
 .home-icon-btn {
-    width: 35px; 
-    height: 35px; 
-    border-radius: 12px; 
-    background: #fff; 
-    border: 1.5px solid rgba(235, 237, 255, 0.58) !important; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
+    width: 35px;
+    height: 35px;
+    border-radius: 12px;
+    background: #fff;
+    border: 1.5px solid rgba(235, 237, 255, 0.58) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     transition: 0.2s;
     cursor: pointer;
     opacity: 0.6;
 }
-.home-icon-btn:hover { 
-    transform: scale(1.05); 
+.home-icon-btn:hover {
+    transform: scale(1.05);
     opacity: 0.7;
 }
 .home-icon-btn.selected {
     border: 1.5px solid rgba(235, 237, 255, 0.58) !important;
     background: rgb(255, 255, 255);
-    transform: scale(1.1); 
+    transform: scale(1.1);
     box-shadow: 0 0px 10px 0 rgba(31, 38, 135, 0.1) !important;
     opacity: 1;
 }
 .home-icon-img {
-    width: 20px; 
+    width: 20px;
     height: 20px;
 }
 body.dark-mode .home-icon-btn {
-    background: #2a2a30ff; 
+    background: #2a2a30ff;
     border: 1.5px solid rgba(43, 45, 63, 0.421) !important;
 }
 body.dark-mode .home-icon-btn.selected {
@@ -6180,16 +6180,16 @@ body.dark-mode .home-icon-img {
     mask-repeat: no-repeat;
     -webkit-mask-position: center;
     mask-position: center;
-    background-color: #98aaea; 
+    background-color: #98aaea;
 }
 body.dark-mode .home-folder-icon-div {
-    background-color: #9598e1; 
+    background-color: #9598e1;
 }
 .home-folder-icon-div.home-icon {
     background-color: #b8c7ff;
 }
 body.dark-mode .home-folder-icon-div.home-icon {
-    background-color: #a6b7ffde; 
+    background-color: #a6b7ffde;
 }
 .home-folder-item:hover .home-folder-icon-div,
 .home-folder-item.active .home-folder-icon-div {
@@ -6291,7 +6291,7 @@ body.dark-mode .home-hex-input {
     max-height: 300px;
     overflow-y: auto;
     padding: 4px;
-    width: 376.36px; 
+    width: 376.36px;
 }
 .classroom-picker-item {
     display: flex;
@@ -6312,11 +6312,11 @@ body.dark-mode .home-hex-input {
 }
 .classroom-picker-item.added {
     color: #19238fb0;
-    box-shadow: 0 4px 7px 0 rgba(51, 60, 186, 0.08) !important; 
+    box-shadow: 0 4px 7px 0 rgba(51, 60, 186, 0.08) !important;
     transform: translateY(-4px) !important;
 }
 .classroom-picker-item.not-added:hover {
-    box-shadow: 0 2px 3px 0 rgba(51, 60, 186, 0.08) !important; 
+    box-shadow: 0 2px 3px 0 rgba(51, 60, 186, 0.08) !important;
     transform: translateY(-2px) !important;
 }
 body.dark-mode .classroom-picker-item {
@@ -6325,10 +6325,10 @@ body.dark-mode .classroom-picker-item {
 }
 body.dark-mode .classroom-picker-item.added {
     color: #ffffff;
-    box-shadow: 0 4px 7px 0 rgba(0, 0, 0, 0.18) !important; 
+    box-shadow: 0 4px 7px 0 rgba(0, 0, 0, 0.18) !important;
 }
 body.dark-mode .classroom-picker-item.not-added:hover {
-    box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.1) !important; 
+    box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.1) !important;
 }
 .classroom-picker-name {
     font-size: 11px;
@@ -6661,7 +6661,7 @@ body.dark-mode .XLVGDd {
 .uW2Fw-cnG4Wd {
     border-radius: 0px !important;
 }
-.YFzCae { 
+.YFzCae {
     width: fit-content !important;
     height: fit-content !important;
     left: 0 !important;
@@ -7073,10 +7073,10 @@ body.dark-mode .mc-edit-panel {color: #e8e8ea;}
     width: 600px;
     height: 300px;
 }
-.mc-view-controls { 
-    display:flex; 
-    justify-content:center; 
-    padding:0; 
+.mc-view-controls {
+    display:flex;
+    justify-content:center;
+    padding:0;
     z-index: 10;
     position: relative;
     margin-bottom: -4px;
@@ -7097,15 +7097,15 @@ body.dark-mode .mc-edit-panel {color: #e8e8ea;}
     gap: 20px;
 }
 .mc-view-controls-inner,
-.mc-view-import-trigger { 
-    width:fit-content; 
-    display:flex; 
-    align-items:center; 
-    gap:12px; 
-    border-radius:20px 20px 0 0; 
-    background: rgba(255,255,255); 
-    padding:8px 16px; 
-    border: 1.5px solid rgba(235, 237, 255, 0.58); 
+.mc-view-import-trigger {
+    width:fit-content;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    border-radius:20px 20px 0 0;
+    background: rgba(255,255,255);
+    padding:8px 16px;
+    border: 1.5px solid rgba(235, 237, 255, 0.58);
     border-bottom: none;
     position: relative;
 }
@@ -7146,9 +7146,9 @@ body.dark-mode .mc-edit-panel {color: #e8e8ea;}
     clip-path: inset(0 0 0 0);
 }
 body.dark-mode .mc-view-controls-inner,
-body.dark-mode .mc-view-import-trigger { 
-    background: #212126; 
-    border: 1.5px solid rgba(43, 45, 63, 0.421); 
+body.dark-mode .mc-view-import-trigger {
+    background: #212126;
+    border: 1.5px solid rgba(43, 45, 63, 0.421);
     border-bottom: none;
 }
 body.dark-mode .mc-view-import-trigger { color: #e8e8ea; }
@@ -7302,7 +7302,7 @@ body.dark-mode .mc-import-confirm {
 body.dark-mode .mc-import-disclaimer {
     color: rgba(232,232,234,0.66);
 }
-.mc-edit-list { 
+.mc-edit-list {
     width: 170px;
     display:flex;
     flex-direction:column;
@@ -7349,7 +7349,7 @@ body.dark-mode .mc-schedule-editor-card {
 .mc-add-class-btn { background: transparent; border: none; padding: 4px 6px; padding-right: 10px; border-radius: 4px; cursor: pointer; font-size: 18px; line-height: 1; color: rgba(60,64,67,0.6); transition: background 0.2s, color 0.2s; }\n.mc-add-class-btn:hover { background: rgba(60,64,67,0.08); color: rgba(60,64,67,0.87); }
 body.dark-mode .mc-add-class-btn {color: black; filter: invert(1);}
 .mc-add-class-input { padding:6px 8px; border:1px solid rgba(0,0,0,0.08); border-radius:8px; display:inline-block; }
-body.dark-mode .mc-add-class-input { background: #0f0f12; color: #e8e8ea; border-color: rgba(255,255,255,0.04);} 
+body.dark-mode .mc-add-class-input { background: #0f0f12; color: #e8e8ea; border-color: rgba(255,255,255,0.04);}
 .mc-class-list { padding: 5px; overflow:auto; display:flex; flex-direction:column; gap:4px; height: 100%; }
 .mc-class-item { display:flex; gap:8px; align-items:center; padding:8px; border-radius:15px; cursor:pointer; justify-content:space-between; transition: 0.1s ease; outline: none !important; border: 1.5px solid rgb(43 45 63 / 0%)}
 .mc-class-item:hover { transition: 0.2s ease; border: 1.5px solid rgba(235, 237, 255, 0.58) }
@@ -10705,7 +10705,7 @@ body.dark-mode .qdOxv-fmcmS-yrriRe-OWXEXe-INsAgc:not(.qdOxv-fmcmS-yrriRe-OWXEXe-
     min-height: 40px !important;
 }
 .bHOAdb {
-    height: 70px !important;    
+    height: 70px !important;
 }
 .AJFihd {
     background: #f8fafd !important;
@@ -10907,7 +10907,7 @@ body.dark-mode .IGYnJe.qoXqmb, body.dark-mode .mz03v.qoXqmb {
 }
 .ovsVve.PM0jOb.jlxRme {
     padding-right: 12px !important;
-    border: 1.5px solid rgba(235, 237, 255, 0.58) !important; 
+    border: 1.5px solid rgba(235, 237, 255, 0.58) !important;
 }
 body.dark-mode .ovsVve.PM0jOb.jlxRme {
     border: 1.5px solid rgba(43, 45, 63, 0.421) !important;
@@ -10918,3 +10918,716 @@ body.dark-mode .ovsVve.PM0jOb.jlxRme {
     padding-left: 0px !important;
     padding-right: 0px !important;
 }
+/* Imported 3.15.15 layout and clock styles. */
+    cursor: pointer !important;
+    transition: transform 0.28s cubic-bezier(0.22, 0.9, 0.3, 1), box-shadow 0.22s ease, height 0.2s ease, border 0.2s, background 0.2s !important;
+
+}
+
+body.mc-home-widget-manual .gHz6xd {
+    width: var(--mc-home-widget-width) !important;
+}
+
+.wBE4bf.TIunU.xo7QFd:not([data-mgc-stream-cursor-bound="true"]):hover {
+    transform: translateY(-5px) !important;
+    box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.25) !important;
+    transition: transform 0.1s cubic-bezier(0.34, 1.25, 0.64, 1), box-shadow 0.125s cubic-bezier(0.34, 1.25, 0.64, 1);
+    cursor: pointer !important;
+}
+
+.riU7le.FHXi2c {
+    background: #ffffff !important;
+    box-shadow: 0 5px 15px 0 rgba(31, 38, 135, 0.097) !important;
+    border-radius: 200px !important;
+    corner-shape: squircle !important;
+.mc-clock-widget:not(.mc-clock-hero) .mc-clock-hero-setting {
+    display: none;
+}
+
+.mc-clock-widget .mc-clock-time {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    color: #33415f;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    line-height: 1;
+    font-weight: 700;
+    letter-spacing: 0.0em;
+}
+
+.mc-clock-widget .mc-clock-date {
+    display: inline-flex;
+    display: none !important;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    line-height: 1;
+}
+
+.mc-clock-widget .mc-clock-weather {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 4px;
+    filter: opacity(1);
+}
+
+.mc-clock-widget .mc-clock-weather-icon {
+    font-size: 13px;
+    line-height: 1;
+    color: rgba(255, 255, 255, 0);
+    text-shadow: 0 0 0 #33415f;
+}
+
+/* The hero layout lives at the top of Classroom's main stream rather than in the titlebar. */
+.mc-clock-widget.mc-clock-hero {
+    position: relative;
+    top: auto !important;
+    left: auto !important;
+    z-index: 5;
+    width: 100%;
+    height: auto !important;
+    min-height: 0;
+    justify-content: center;
+    padding: 2px 0 20px;
+    border: 0 !important;
+    border-radius: 0;
+    background: transparent !important;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+}
+
+.mc-clock-widget.mc-clock-hero .mc-clock-content {
+    display: grid;
+    grid-template-columns: max-content max-content;
+    grid-template-areas:
+        "date weather"
+        "time time";
+    align-items: center;
+    justify-items: center;
+    column-gap: 10px;
+    row-gap: 7px;
+}
+
+.mc-clock-widget.mc-clock-hero .mc-clock-date {
+    display: inline-flex !important;
+    grid-area: date;
+    font-size: 14px;
+    font-weight: 650;
+    color: var(--mc-clock-hero-color, #33415f);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+
+}
+
+.mc-clock-widget.mc-clock-hero .mc-clock-weather {
+    grid-area: weather;
+    margin-left: 0;
+    font-size: 12px;
+    color: var(--mc-clock-hero-color, #33415f);
+    gap: 3px;
+}
+
+.mc-clock-widget.mc-clock-hero .mc-clock-temp {
+    color: var(--mc-clock-hero-color, #33415f);
+}
+
+.mc-clock-widget.mc-clock-hero .mc-clock-weather-icon {
+    font-size: 15px;
+    text-shadow: 0 0 0 var(--mc-clock-hero-color, #33415f);
+}
+
+.mc-clock-widget.mc-clock-hero .mc-clock-time {
+    grid-area: time;
+    font-family: var(--mc-clock-hero-font-family, inherit);
+    font-size: var(--mc-clock-hero-time-size, clamp(56px, 7vw, 104px));
+    line-height: 0.95;
+    font-weight: 700;
+    letter-spacing: 0em;
+    color: var(--mc-clock-hero-color, #33415f);
+}
+
+.mc-clock-align-left {
+    align-items: flex-start !important
+}
+
+.mc-clock-align-left .mc-clock-content {
+    justify-items: start !important;
+}
+
+.mc-clock-widget.mc-clock-hero.mc-clock-size-small {
+    --mc-clock-hero-time-size: clamp(46px, 13vw, 76px);
+}
+
+.mc-clock-widget.mc-clock-hero.mc-clock-size-medium {
+    --mc-clock-hero-time-size: clamp(56px, 13vw, 100px);
+}
+
+.mc-clock-widget.mc-clock-hero.mc-clock-size-large {
+    --mc-clock-hero-time-size: clamp(68px, 13vw, 128px);
+}
+
+.mc-clock-widget.mc-clock-hero.mc-clock-expanded {
+    width: 100% !important;
+    height: auto !important;
+    top: auto !important;
+    left: auto !important;
+    padding: 2px 0 20px !important;
+    border: none !important;
+    border-radius: 0;
+    background: transparent;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+}
+
+.mc-clock-widget.mc-clock-hero.mc-clock-expanded .mc-clock-content {
+    opacity: 1;
+    visibility: visible;
+}
+
+
+
+
+
+.mc-clock-widget.mc-clock-hero.mc-clock-expanded .mc-clock-setting-item {
+    width: auto;
+}
+
+body.classic-sidebar .mc-clock-widget, body.classic-sidebar.dark-mode .mc-clock-widget {
+    border: solid 0px transparent !important;
+    height: 19px !important;
+    margin-left: 1.3px !important;
+}
+
+body.classic-sidebar .mc-clock-widget.mc-clock-hero,
+body.classic-sidebar.dark-mode .mc-clock-widget.mc-clock-hero {
+    height: auto !important;
+    margin-left: 0 !important;
+}
+
+body.classic-sidebar:not(.homebar) .Hwv4mb.rIyhE, body.classic-sidebar.dark-mode:not(.homebar) .Hwv4mb.rIyhE {
+    margin-left: 1.3px !important;
+    border: solid 0px transparent !important;
+    height: 35px !important;
+}
+
+body.dark-mode .mc-clock-widget:not(.mc-clock-hero) .mc-clock-weather-icon {
+    text-shadow: 0 0 0 #ffffff;
+}
+
+body.dark-mode .mc-clock-widget.mc-clock-hero .mc-clock-weather-icon {
+    text-shadow: 0 0 0 var(--mc-clock-hero-color, #ffffff);
+}
+
+.home-buttons-container {
+    display: flex;
+    gap: 8px;
+    background: #f8fafd;
+    padding: 5px;
+    border-radius: 20.5px;
+    pointer-events: auto;
+    align-items: center;
+    border: 1.5px solid rgba(235, 237, 255, 0.58) !important;
+    width: 125px;
+    height: 41px;
+    position: relative;
+    z-index: 10010;
+    box-sizing: border-box;
+    overflow: hidden;
+    left: 0px;
+    top: 0px;
+    transition: width 0.36s cubic-bezier(0.22, 0.85, 0.28, 1),
+                height 0.36s cubic-bezier(0.22, 0.85, 0.28, 1),
+                margin-right 0.36s cubic-bezier(0.22, 0.85, 0.28, 1),
+                border-radius 0.36s ease,
+                box-shadow 0.34s ease,
+                background 0.34s ease,
+                top 0.36s cubic-bezier(0.22, 0.85, 0.28, 1),
+                left 0.36s cubic-bezier(0.22, 0.85, 0.28, 1);
+}
+
+.home-buttons-container.expanded {
+    width: 343px;
+    height: 355px;
+    padding: 8px;
+    border-radius: 20.5px 20.5px 20.5px 20.5px;
+    box-shadow: 0 12px 28px rgba(31, 38, 135, 0.08);
+    z-index: 10012;
+    overflow: hidden;
+    align-items: flex-start;
+    margin-right: -218px;
+    left: 50px;
+    top: 50px;
+}
+
+body.mc-home-widget-manual .home-buttons-container.expanded {
+    height: 420px;
+}
+
+.home-buttons-container.expanded > .home-btn:not(.home-customize-btn) {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+body.dark-mode .home-buttons-container.expanded {
+    box-shadow: 0 0 25px 0 rgba(0, 0, 0, 0.277);
+}
+
+.home-hidden-classes-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    min-width: 40px;
+    height: 40px;
+    padding: 5px;
+    box-sizing: border-box;
+    background: #f8fafd;
+    border: 1.5px solid rgba(235, 237, 255, 0.58) !important;
+    border-radius: 50px;
+    pointer-events: auto;
+    position: relative;
+    z-index: 10010;
+}
+
+.home-hidden-classes-container[hidden] {
+    display: none;
+}
+
+.home-panel-anchor {
+    position: static;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 0;
+    min-width: 0;
+    height: 0;
+    padding: 0;
+    box-sizing: border-box;
+    background: transparent;
+    border: none !important;
+    border-radius: 50%;
+    pointer-events: auto;
+    overflow: visible;
+    flex: 0 0 auto;
+}
+
+.home-btn {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: none;
+    background-color: transparent;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #c3d0ff83;
+    font-weight: 500;
+    font-size: 13px;
+}
+
+.home-btn:hover {
+    background-color: #ffffff;
+}
+
+.home-btn.active {
+    background-color: #ffffff;
+    color: #b8c7ff;
+    width: 40px !important;
+    border-radius: 20px !important;
+    box-shadow: rgba(31, 38, 135, 0.08) 0px 0px 20px 0px;
+}
+
+.home-btn-icon {
+    width: 28px !important;
+}
+
+.home-hidden-classes-btn[hidden] {
+    display: none;
+}
+
+.home-hidden-classes-icon {
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+    background-color: currentColor;
+    -webkit-mask-image: var(--home-hidden-icon-url);
+    mask-image: var(--home-hidden-icon-url);
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+}
+
+.home-customize-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: #98aaea !important;
+    background: transparent;
+    flex: 0 0 auto;
+    z-index: 2;
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    transition: opacity 0.18s ease, visibility 0.18s ease, transform 0.18s ease;
+}
+
+.home-customize-btn:hover {
+    color: #8ea3f0 !important;
+}
+
+.home-customize-btn.active {
+    background: #ffffff;
+    box-shadow: 0 0 20px rgba(31, 38, 135, 0.08);
+}
+
+.home-buttons-container.expanded .home-customize-btn {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+}
+
+.home-customize-icon {
+    width: 14px;
+    height: 14px;
+    opacity: 1;
+    display: block;
+    background-color: currentColor;
+    -webkit-mask-image: var(--home-customize-icon-url);
+.classroom-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 4px;
+    width: calc(100% - 8px);
+}
+
+.classroom-picker-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 12px;
+    background: rgb(255, 255, 255);
+    transition: all 0.2s ease;
+    text-align: center;
+    width: calc(100% - 16px);
+    height: 26.39px;
+    overflow-wrap: break-word;
+    overflow:hidden;
+}
+
+.classroom-picker-item.added {
+    color: #19238fb0;
+    box-shadow: 0 4px 7px 0 rgba(51, 60, 186, 0.08) !important;
+    transform: translateY(-4px) !important;
+}
+
+.classroom-picker-item.not-added:hover {
+    box-shadow: 0 2px 3px 0 rgba(51, 60, 186, 0.08) !important;
+    transform: translateY(-2px) !important;
+}
+
+
+body.dark-mode .classroom-picker-item {
+    color: #90909e;
+    background: #27272f;
+}
+
+body.dark-mode .classroom-picker-item.added {
+    color: #ffffff;
+    box-shadow: 0 4px 7px 0 rgba(0, 0, 0, 0.18) !important;
+}
+
+body.dark-mode .classroom-picker-item.not-added:hover {
+    box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.1) !important;
+}
+
+
+
+.classroom-picker-name {
+    font-size: 11px;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+.mc-input-title::placeholder { color: rgba(0,0,0,0.18); font-size:14px; }
+
+.mc-input-room[name="room"] {
+    width: 80px !important;
+}
+
+.mc-mid-row .mc-two-col { display:flex; gap:8px; align-items: stretch; }
+.mc-two-col-item { display:flex; flex-direction:column; gap:6px; min-width: 0; }
+.mc-two-col-item input { padding:7px 12px; font-size:14px; }
+
+.mc-periods-card { border-radius: 25px; border:1px solid rgba(0,0,0,0.06); padding:12px; background: rgba(255,255,255,0.98); overflow-x: visible; overflow-y: auto; }
+body.dark-mode .mc-periods-card { background: transparent; border: none; border: 1px solid rgba(255,255,255,0.08);}
+.mc-periods-card-header { display:flex; align-items:center; justify-content:space-between; padding-left: 10px; }
+.mc-periods-title { font-size:16px; font-weight:700; }
+.mc-add-period-toggle { width:36px; height:36px; border-radius: var(--mc-small-radius); border: none; background:transparent; cursor:pointer; font-weight:700; font-size:18px; margin-right: 5px; }
+body.dark-mode .mc-add-period-toggle { filter: invert(1); }
+
+.mc-periods-body { display:flex; flex-direction:column; gap:10px; overflow-x: visible; }
+.mc-periods-controls { display:flex; gap:8px; align-items:center; }
+.mc-periods-controls input[type="time"], .mc-periods-controls select, .mc-periods-controls input[type="text"] { padding:8px 10px; border-radius: var(--mc-small-radius); border:1px solid rgba(0,0,0,0.06); font-size:13px; }
+.mc-periods-controls input::placeholder { color: rgba(0,0,0,0.18); }
+.mc-two-col-item input::placeholder { color: rgba(0,0,0,0.18); }
+body.dark-mode .mc-periods-controls input::placeholder,
+body.dark-mode .mc-two-col-item input::placeholder,
+body.dark-mode .mc-input-title::placeholder { color: rgba(232,232,234,0.45); }
+
+
+.mc-periods-list { display:flex; flex-direction:column; gap:8px; overflow:auto; height:0px; }
+
+
+
+body.expclock.htoprow .T9UoTd, body.expclock .T9UoTd {
+    padding-top: 80px !important;
+    transition: 0.2s ease !important;
+}
+
+body.expclock.htoprow.folder-active .T9UoTd, body.expclock.folder-active .T9UoTd {
+    padding-top: 130px !important;
+    transition: 0.2s ease !important;
+}
+
+.T9UoTd>[data-role=header] {
+    display: none !important;
+}
+
+
+body.expclock .mc-clock-settings {
+    position: static;
+    display: flex;
+    width: 384px;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 8px;
+    border: 1.5px solid rgba(235, 237, 255, 0.58);
+    border-radius: 18px;
+    background: #f8fafd;
+    flex-direction: row;
+    margin-top: -91px;
+    border-radius: 24px;
+    transition: 0.2s ease;
+    z-index: 20;
+    overflow: visible;
+    scale: 0.5;
+}
+
+body.expclock.dark-mode .mc-clock-settings {
+    background: #212126;
+    border: 1.5px solid rgba(43, 45, 63, 0.421);
+}
+
+body.expclock .mc-clock-widget.mc-clock-expanded .mc-clock-settings {
+    margin-top: 0px;
+    width: 384px;
+    transition: 0.2s ease;
+    scale: 1;
+    overflow: visible;
+}
+
+.mc-clock-widget.mc-clock-hero {
+    cursor: unset !important;
+}
+
+.mc-clock-widget.mc-clock-hero .mc-clock-content {
+    cursor: pointer !important;
+}
+
+.a0ueee .T4tcpe.KFl4Z, .PFLqgc.KFl4Z {
+    border-radius: 40px;
+    corner-shape: squircle;
+}
+
+.mc-people-view-control {
+    position: fixed;
+    top: 130px;
+    right: 20px;
+    background: #6e3d3d6b;
+    border-radius: 30px;
+    padding: 5px;
+    backdrop-filter: blur(4px);
+    box-shadow: rgba(31, 38, 135, 0.1) 0px 0px 16px 0px;
+    background: rgba(247, 247, 255, 0.49);
+    z-index: 1;
+    transition: 0.2s;
+}
+
+
+/* Liquid-glass homepage spacing. */
+body.cui-glass-enabled .home-buttons-container:not(.expanded) {
+    width: 164px !important;
+    min-height: 48px !important;
+    height: 48px !important;
+    gap: 12px !important;
+    padding: 7px 10px !important;
+}
+body.cui-glass-enabled .home-buttons-container:not(.expanded) > .home-btn {
+    flex: 0 0 32px;
+    width: 32px !important;
+    height: 32px !important;
+}
+body.cui-glass-enabled .gHz6xd {
+    margin-bottom: 18px !important;
+}
+body.cui-glass-enabled .gHz6xd + .gHz6xd {
+    margin-top: 18px !important;
+}
+
+/* Imported 3.15.15 dark-mode clock refinements. */
+body.dark-mode .home-buttons-container,
+body.dark-mode .home-folders-container,
+body.dark-mode .home-hidden-classes-container {
+    background: #212126;
+    border: 1.5px solid rgba(43, 45, 63, 0.421) !important;
+}
+
+body.dark-mode .mc-clock-widget {
+    background: #212126;
+    border: 1.5px solid rgba(43, 45, 63, 0.421);
+    color: #dfe5ff;
+}
+
+body.dark-mode .mc-clock-widget:not(.mc-clock-hero) .mc-clock-time {
+    color: #ffffff;
+}
+
+body.dark-mode .mc-clock-widget.mc-clock-hero .mc-clock-time {
+    color: var(--mc-clock-hero-color, #ffffff);
+}
+
+body.dark-mode .mc-clock-widget:not(.mc-clock-hero) .mc-clock-temp {
+    color: #ffffff;
+}
+
+body.dark-mode .mc-clock-widget.mc-clock-hero .mc-clock-temp {
+    color: var(--mc-clock-hero-color, #f3f6ff);
+}
+
+body.dark-mode .mc-clock-format-toggle {
+    background: rgba(43, 45, 63, 0.6);
+}
+
+body.dark-mode .mc-clock-format-btn {
+    color: #dfe5ff;
+}
+
+body.dark-mode .mc-clock-format-btn:hover {
+    background: rgba(43, 45, 63, 0.8);
+}
+
+body.dark-mode .mc-clock-format-btn.active {
+    background: #cbcbff21;
+    color: #f3f6ff;
+}
+
+body.dark-mode .mc-clock-setting-item label {
+    color: #dfe5ff;
+}
+
+body.dark-mode .mc-clock-temp-toggle {
+    background: rgba(43, 45, 63, 0.6) !important;
+}
+
+body.dark-mode .mc-clock-temp-btn {
+    color: #dfe5ff;
+}
+
+body.dark-mode .mc-clock-temp-btn:hover {
+    background: rgba(43, 45, 63, 0.8) !important;
+}
+
+body.dark-mode .mc-clock-temp-btn.active {
+    background: #cbcbff21 !important;
+    color: #f3f6ff;
+}
+
+body.dark-mode .mc-clock-layout-toggle {
+    background: rgba(43, 45, 63, 0.6) !important;
+}
+
+body.dark-mode .mc-clock-layout-btn {
+    color: #dfe5ff;
+}
+
+body.dark-mode .mc-clock-layout-btn:hover {
+    background: rgba(43, 45, 63, 0.8) !important;
+}
+
+body.dark-mode .mc-clock-layout-btn.active {
+    background: #cbcbff21 !important;
+    color: #f3f6ff;
+}
+
+body.dark-mode .mc-clock-alignment-toggle,
+body.dark-mode .mc-clock-size-toggle {
+    background: rgba(43, 45, 63, 0.6) !important;
+}
+
+body.dark-mode .mc-clock-font-select {
+    background-color: rgba(43, 45, 63, 0.6);
+    color: #dfe5ff;
+    background-image: linear-gradient(45deg, transparent 50%, #dfe5ff 50%), linear-gradient(135deg, #dfe5ff 50%, transparent 50%);
+}
+
+body.dark-mode .mc-clock-alignment-btn,
+body.dark-mode .mc-clock-size-btn {
+    color: #dfe5ff;
+}
+
+body.dark-mode .mc-clock-alignment-btn:hover,
+body.dark-mode .mc-clock-size-btn:hover {
+    background: rgba(43, 45, 63, 0.8) !important;
+}
+
+body.dark-mode .mc-clock-alignment-btn.active,
+body.dark-mode .mc-clock-size-btn.active {
+    background: #cbcbff21 !important;
+    color: #f3f6ff;
+}
+
+body.dark-mode .mc-clock-widget.mc-clock-hero .mc-clock-date {
+    color: var(--mc-clock-hero-color, #fff);
+}
+
+body.dark-mode .mc-clock-widget.mc-clock-hero .mc-clock-weather-icon {
+    text-shadow: 0 0 0 var(--mc-clock-hero-color, #ffffff);
+}
+
+body.dark-mode .mc-clock-widget.mc-clock-hero.mc-clock-expanded {
+    background: transparent;
+}
+
+body.dark-mode .mc-clock-widget.mc-clock-hero.mc-clock-expanded .mc-clock-settings {
+    background: #212126;
+    border-color: rgba(43, 45, 63, 0.421);
+}
+
+body.dark-mode .home-btn {

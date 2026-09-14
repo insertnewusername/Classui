@@ -1,0 +1,36 @@
+{
+  "id": "3.15.13",
+  "title": "The Clock is Back!",
+  "version": "v3.15.13",
+  "date": "September 1 2026",
+  "sections": [
+    {
+      "title": "The home page clock is back!",
+      "items": [
+        "If you've been a long time user, you might know a large clock shown on the home screen above your classes was more recently replaced witht the small pill in the top left corner",
+        "This large clock has now been brought back!",
+        "By clicking the existing clock, you can now select the 'expanded' view, which replaces the smaller clock on the home page with a much larger clock. ",
+        "You can click this clock to open a similar menu, where you can adjust size and alignment, or revert back to the smaller clock",
+        "**Some of you may also remember there was a 'Your Day' feature which displayed your timetable directly on the home page - If you would like this to return please let me know!"
+
+      ]
+    },
+    {
+      "title": "Other Changes",
+      "items": [
+        "- Minor visual changes to the folder editing bar",
+        "- The clock pill now expands to show settings without moving",
+        "- Settings panel buttons now expand to fill the space",
+        "- The sidebar scale indicator has been moved above the sidebar scale buttons, and now visually display 'largest' and 'smallest'",
+        "- Timetable edit panel appearance has been reverted to be one slab instead of multiple seperate components",
+        "- The 'View class work' button has been removed from home page classroom widgets"
+      ]
+    },
+    {
+      "title": "Closing Notes",
+      "items": [
+        "Please report any bugs or request changes through the 'Feedback' button in the settings. Thank you for using Modern Classroom!"
+      ]
+    }
+  ]
+}

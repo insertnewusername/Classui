@@ -1,0 +1,46 @@
+{
+  "id": "3.15.12",
+  "title": "Import/Export, Hidden Classrooms, and more...",
+  "version": "v3.15.12",
+  "date": "August 24 2026",
+  "sections": [
+    {
+      "title": "Hidden Classrooms",
+      "items": [
+        "The 'Show hidden classes (#)' button has been removed, being replaced with a folder accessible from the top of the homepage",
+        "This should make your home page look cleaner, while still keeping these classrooms accessible"
+      ]
+    },
+    {
+      "title": "Import/Export",
+      "items": [
+        "While the cloud sync feature works well, it is relient on your browser being signed into the same google account",
+        "In cases where this is not possible or not convenient, a new import/export system is acessible through settings.",
+        "Clicking the export button downloads a file containing all of your customisations, including things such as the timetable, sidebar icons, classroom nicknames, etc.",
+        "You can then take this file, and import it via the import button to restore everything to how you want it to be (Or share yours with friends!)",
+        "-- Please create a bug report if this feature is not working as expected"
+      ]
+    },
+    {
+      "title": "Tutorial Visual Refresh",
+      "items": [
+        "The aesthetics of the tutorial/guide found in settings has been refreshed to feel more modern and intuitive",
+        "Please provide any feedback on this, as it is a continual effort to make it feel welcoming and easy to use."
+      ]
+    },
+    {
+      "title": "Other minor changes",
+      "items": [
+        "- The new home page settings panel, accessible through the adjustments icon to the left of your folders, has been moved back in with the widget appearance toggle for a cleaner, less cluttered menu bar",
+        "- The timetable panel now fills more of your screen to make it easier to make adjustments",
+        "- The list of your saved assignments has been simplified, where you are now able to edit the saved title instead of adding a note underneath"
+      ]
+    },
+    {
+      "title": "Closing Notes",
+      "items": [
+        "Please report any bugs or request changes through the 'Feedback' button in the settings. Thank you for using Modern Classroom!"
+      ]
+    }
+  ]
+}

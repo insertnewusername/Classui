@@ -108,10 +108,12 @@
     const targetWrapper = document.querySelector(TARGET_WRAPPER_SELECTOR);
 
     if (!shouldSync()) {
-      document.documentElement.style.removeProperty(WIDTH_VAR);
+      if (document.documentElement.style.getPropertyValue(WIDTH_VAR)) {
+        document.documentElement.style.removeProperty(WIDTH_VAR);
+      }
       if (targetWrapper) {
-        targetWrapper.style.removeProperty('width');
-        targetWrapper.style.removeProperty('flex');
+        if (targetWrapper.style.getPropertyValue('width')) targetWrapper.style.removeProperty('width');
+        if (targetWrapper.style.getPropertyValue('flex')) targetWrapper.style.removeProperty('flex');
       }
       return;
     }
@@ -121,10 +123,17 @@
     const rect = shell.getBoundingClientRect();
     const width = Math.max(0, Math.round(rect.width));
     if (width > 0) {
-      document.documentElement.style.setProperty(WIDTH_VAR, `${width}px`);
+      const widthValue = `${width}px`;
+      if (document.documentElement.style.getPropertyValue(WIDTH_VAR) !== widthValue) {
+        document.documentElement.style.setProperty(WIDTH_VAR, widthValue);
+      }
       if (targetWrapper) {
-        targetWrapper.style.setProperty('width', `${width}px`, 'important');
-        targetWrapper.style.setProperty('flex', 'none', 'important');
+        if (targetWrapper.style.getPropertyValue('width') !== widthValue) {
+          targetWrapper.style.setProperty('width', widthValue, 'important');
+        }
+        if (targetWrapper.style.getPropertyValue('flex') !== 'none') {
+          targetWrapper.style.setProperty('flex', 'none', 'important');
+        }
       }
     }
   }
@@ -433,13 +442,24 @@ function setupToggle(inputId, selector, storageKey, cssClass) {
 
 function setupToggleButton(buttonId, selector, storageKey, cssClass) {
   const button = document.querySelector(buttonId);
-  const target = document.querySelector(selector);
-  if (!button || !target) return;
+  if (!button) return;
+
+  // A dynamically discovered target can call this setup more than once.
+  if (button.__mgcToggleButtonSetup) return;
+  button.__mgcToggleButtonSetup = true;
 
   const applyState = (hidden) => {
-    target.style.display = hidden ? 'none' : '';
-    button.classList.toggle('active', !hidden);
-    if (cssClass) document.body.classList.toggle(cssClass, hidden);
+    document.querySelectorAll(selector).forEach(target => {
+      const display = hidden ? 'none' : '';
+      if (target.style.display !== display) target.style.display = display;
+    });
+    const active = !hidden;
+    if (button.classList.contains('active') !== active) {
+      button.classList.toggle('active', active);
+    }
+    if (cssClass && document.body.classList.contains(cssClass) !== hidden) {
+      document.body.classList.toggle(cssClass, hidden);
+    }
   };
 
   const readLocalHidden = () => {
@@ -463,6 +483,30 @@ function setupToggleButton(buttonId, selector, storageKey, cssClass) {
     }).catch(() => {});
   }
 
+  if (typeof MutationObserver === 'function' && document.documentElement) {
+    let applyScheduled = false;
+    const observer = new MutationObserver((mutations) => {
+      const targetAdded = mutations.some(mutation => {
+        if (mutation.type === 'attributes') {
+          return mutation.target.matches(selector);
+        }
+        return Array.from(mutation.addedNodes).some(node => {
+          if (!(node instanceof Element)) return false;
+          return node.matches(selector) || !!node.querySelector(selector);
+        });
+      });
+      if (!targetAdded || applyScheduled) return;
+      applyScheduled = true;
+      const run = () => {
+        applyScheduled = false;
+        applyState(hidden);
+      };
+      if (typeof requestAnimationFrame === 'function') requestAnimationFrame(run);
+      else setTimeout(run, 16);
+    });
+    observer.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['aria-label', 'href'] });
+  }
+
   button.addEventListener('click', () => {
     hidden = button.classList.contains('active');
     applyState(hidden);
@@ -474,7 +518,7 @@ function setupToggleButton(buttonId, selector, storageKey, cssClass) {
   });
 }
 
-const PREF_KEYS = ['hideTodo', 'hideCalendar', 'sidebarSize', 'sidebarHeightAdjust'];
+const PREF_KEYS = ['hideTodo', 'hideCalendar', 'hideGemini', 'sidebarSize', 'sidebarHeightAdjust'];
 let prefsSyncLoaded = false;
 
 function applySavedPreferences(prefSource) {
@@ -482,28 +526,32 @@ function applySavedPreferences(prefSource) {
   // Read from localStorage synchronously for immediate application
   let todoHidden = false;
   let calHidden = false;
+  let geminiHidden = false;
   let sidebarSize = null;
-  let sidebarHeightAdjust = 312;
-  
+  let sidebarHeightAdjust = 420;
+
   if (prefSource) {
     todoHidden = !!prefSource.hideTodo;
     calHidden = !!prefSource.hideCalendar;
+    geminiHidden = !!prefSource.hideGemini;
     if (prefSource.sidebarSize !== null && prefSource.sidebarSize !== undefined) {
       sidebarSize = parseInt(prefSource.sidebarSize, 10);
     }
     sidebarHeightAdjust = parseInt(prefSource.sidebarHeightAdjust, 10);
-    if (!Number.isFinite(sidebarHeightAdjust)) sidebarHeightAdjust = 312;
+    if (!Number.isFinite(sidebarHeightAdjust)) sidebarHeightAdjust = 420;
   } else {
     try {
       const todoRaw = localStorage.getItem('hideTodo');
       todoHidden = todoRaw === 'true' || todoRaw === true;
       const calRaw = localStorage.getItem('hideCalendar');
       calHidden = calRaw === 'true' || calRaw === true;
+      const geminiRaw = localStorage.getItem('hideGemini');
+      geminiHidden = geminiRaw === 'true' || geminiRaw === true;
       const sizeRaw = localStorage.getItem('sidebarSize');
       if (sizeRaw !== null) sidebarSize = parseInt(sizeRaw, 10);
       const heightRaw = localStorage.getItem('sidebarHeightAdjust');
       if (heightRaw !== null) sidebarHeightAdjust = parseInt(heightRaw, 10);
-      if (!Number.isFinite(sidebarHeightAdjust)) sidebarHeightAdjust = 312;
+      if (!Number.isFinite(sidebarHeightAdjust)) sidebarHeightAdjust = 420;
     } catch (_) {}
   }
 
@@ -513,12 +561,15 @@ function applySavedPreferences(prefSource) {
     }
   } catch (_) {}
 
-  const todo = document.querySelector('[aria-label="To-do"], [aria-label="To do"]');
+  const todoSelector = '[aria-label="To-do"], [aria-label="To do"], [href*="/todo"], [data-href*="/todo"]';
+  const todos = document.querySelectorAll(todoSelector);
   const calendar = document.querySelector('[aria-label="Calendar"]');
+  const gemini = document.querySelector('[aria-label="Gemini"], a[href="/u/0/ai"], a[href*="/ai"]');
 
-  if (todo) todo.style.display = todoHidden ? 'none' : '';
+  todos.forEach(todo => { todo.style.display = todoHidden ? 'none' : ''; });
   if (calendar) calendar.style.display = calHidden ? 'none' : '';
-  
+  if (gemini) gemini.style.display = geminiHidden ? 'none' : '';
+
   try {
     if (calHidden) {
       document.body.classList.add('calendar-hidden');
@@ -541,7 +592,7 @@ function applySavedPreferences(prefSource) {
       if (document.body) document.body.style.setProperty('--enrolled-height-adjust', adjustedValue + 'px');
     } catch (_) {}
   } catch (_) {}
-  
+
 }
 
 function loadSyncPreferencesOnce() {
@@ -553,11 +604,13 @@ function loadSyncPreferencesOnce() {
     : Promise.all([
         storageGet('hideTodo', false),
         storageGet('hideCalendar', false),
+        storageGet('hideGemini', false),
         storageGet('sidebarSize', null),
         storageGet('sidebarHeightAdjust', 312)
-      ]).then(([hideTodo, hideCalendar, sidebarSize, sidebarHeightAdjust]) => ({
+      ]).then(([hideTodo, hideCalendar, hideGemini, sidebarSize, sidebarHeightAdjust]) => ({
         hideTodo,
         hideCalendar,
+        hideGemini,
         sidebarSize,
         sidebarHeightAdjust
       }));
@@ -586,8 +639,9 @@ function observeSettingsPanel() {
     const container = document.body;
     if (!container) return;
     let panelInserted = false;
-    const todoSelector = '[aria-label="To-do"], [aria-label="To do"]';
+    const todoSelector = '[aria-label="To-do"], [aria-label="To do"], [href*="/todo"], [data-href*="/todo"]';
     const calendarSelector = '[aria-label="Calendar"]';
+    const geminiSelector = '[aria-label="Gemini"], a[href="/u/0/ai"], a[href*="/ai"]';
   const panelSelector = '.mSaSG.pEwOBc.Aopndd, .mSaSG.pEwOBc';
     const observer = new MutationObserver((mutations, obs) => {
         let shouldApply = false;
@@ -598,8 +652,10 @@ function observeSettingsPanel() {
                 if (!shouldApply && (
                   node.matches(todoSelector) ||
                   node.matches(calendarSelector) ||
+                  node.matches(geminiSelector) ||
                   node.querySelector(todoSelector) ||
-                  node.querySelector(calendarSelector)
+                  node.querySelector(calendarSelector) ||
+                  node.querySelector(geminiSelector)
                 )) {
                   shouldApply = true;
                 }
@@ -641,5 +697,3 @@ if (document.readyState === 'loading') {
 } else {
   initSidebarControls();
 }
-
-

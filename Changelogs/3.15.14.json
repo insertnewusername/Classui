@@ -1,0 +1,35 @@
+{
+  "id": "3.15.14",
+  "title": "Colour!",
+  "version": "v3.15.14",
+  "date": "September 5 2026",
+  "sections": [
+    {
+      "title": "Colourful Refresh",
+      "items": [
+        "All colour inputs have been refined, and now have a consistent look",
+        "As well as this, you are now able to save a colour to a colour pallete to quickly apply that colour to a variety of things.",
+        "-- This pallete shows your 10 most recent saved colours"
+      ]
+    },
+    {
+      "title": "Clock Changes",
+      "items": [
+        "You can now adjust the font and colour of the large central clock!",
+        "Collapsed it and don't know how to get the large clock back? - just click on the smaller, collapsed clock in the top left and tap the 'Expanded' button!"
+      ]
+    },
+    {
+      "title": "Other Changes",
+      "items": [
+        "- The 'people' tab can now be reverted to show a list of people instead of a grid"
+      ]
+    },
+    {
+      "title": "Closing Notes",
+      "items": [
+        "Please report any bugs or request changes through the 'Feedback' button in the settings. Thank you for using Modern Classroom!"
+      ]
+    }
+  ]
+}

@@ -3,9 +3,10 @@
       "service_worker": "background.js"
    },
    "content_scripts": [ {
-      "css": [ "styles.css", "dark.css", "features/homepage-redesign.css" ],
+      "css": [ "styles.css", "dark.css", "color-pickers.css" ],
       "js": [
          "features/storage-utils.js",
+         "features/cloud-sync.js",
          "features/assignment-stars.js",
          "features/classwork-completion-indicator.js",
          "features/clock.js",
@@ -24,7 +25,6 @@
          "features/hide-classroom-tools.js",
          "features/updates-popup.js",
          "features/update-checker.js",
-         "features/homepage-redesign.js",
          "content.js"
       ],
       "matches": [ "*://classroom.google.com/*" ]
@@ -37,9 +37,9 @@
    "manifest_version": 3,
    "name": "GC Visuals",
    "permissions": [ "storage" ],
-   "version": "3.14.2",
+   "version": "3.15.15",
    "web_accessible_resources": [ {
       "matches": [ "*://classroom.google.com/*" ],
-      "resources": [ "Icons/*", "Tutorial/*", "Decoration/*" ]
+      "resources": [ "Icons/*", "Tutorial/*", "Decoration/*", "Changelogs/*", "color-pickers.css" ]
    } ]
 }

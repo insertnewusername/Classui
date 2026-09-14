@@ -1,0 +1,43 @@
+{
+  "id": "3.15.10",
+  "title": "Cloud Sync, Patch Notes, and other fixes",
+  "version": "v3.15.10",
+  "date": "August 16 2026",
+  "sections": [
+    {
+      "title": "New Patch Notes",
+      "items": [
+        "Welcome to Patch Notes!",
+        "From here you will be able to more easily read what's new, and look back at the most recent updates",
+        "You can view the Patch Notes at any time through the new button found in settings."
+      ]
+    },
+    {
+      "title": "Cloud Sync",
+      "items": [
+        "Your settings and personalisation now sync across devices.",
+        "This should be working properly, though please submit a bug report if you experience issues!"
+      ]
+    },
+    {
+      "title": "Other Changes",
+      "items": [
+        "- Clicking the star/save assignment button within the stream now usually saves the assignment as intended",
+        "- The download button now expands when hovering or clicking on the collapsed download button to make it less obtrusive",
+        "- It is now easier to add and remove classes from the class list in the timetable editor",
+        "- The timetable and block editor now have more consistent theming",
+        "- The Google Gemini page has more consistent theming",
+        "- The Google Gemini icon in the sidebar is now toggleable in settings",
+        "- The home page settings panel has been redesigned (Accessible through the 3rd button, before the folder island on the home page)",
+        "- The top section (e.g. Due Soon, Class Learning Tools) can now be hidden through the home page menu found as mentioned above"
+      ]
+    },
+    {
+      "title": "Closing Notes",
+      "items": [
+        "Apologies for the slew of updates. The cross-device sync system was being tested, then fixed, and now this update is to finish the final implementation, while fixing one annoying bug that was introduced, as well as this new patch notes system!",
+        "Please report any bugs or request changes through the 'Feedback' button in the settings. Thank you for using Modern Classroom!"
+      ]
+    }
+  ]
+}

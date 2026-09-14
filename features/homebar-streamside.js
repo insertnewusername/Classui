@@ -40,11 +40,11 @@
                 if (isEnabled) {
                     document.body.classList.remove('streamside');
                     toggleBtn.classList.remove('enabled');
-                    chrome.storage.sync.set({ 'streamsideEnabled': false });
+                    try { localStorage.setItem('streamsideEnabled', JSON.stringify(false)); } catch (_) {}
                 } else {
                     document.body.classList.add('streamside');
                     toggleBtn.classList.add('enabled');
-                    chrome.storage.sync.set({ 'streamsideEnabled': true });
+                    try { localStorage.setItem('streamsideEnabled', JSON.stringify(true)); } catch (_) {}
                 }
             });
 
@@ -57,15 +57,20 @@
             });
 
             // Check saved preference
-            chrome.storage.sync.get('streamsideEnabled', (result) => {
-                if (result.streamsideEnabled) {
+            try {
+                const raw = localStorage.getItem('streamsideEnabled');
+                const enabled = raw === null ? false : JSON.parse(raw);
+                if (enabled) {
                     document.body.classList.add('streamside');
                     toggleBtn.classList.add('enabled');
                 } else {
                     document.body.classList.remove('streamside');
                     toggleBtn.classList.remove('enabled');
                 }
-            });
+            } catch (_) {
+                document.body.classList.remove('streamside');
+                toggleBtn.classList.remove('enabled');
+            }
 
             buttonWrapper.appendChild(toggleBtn);
 
@@ -79,7 +84,7 @@
             targetElement.parentElement.insertBefore(flexContainer, targetElement);
             flexContainer.appendChild(buttonWrapper);
             flexContainer.appendChild(targetElement);
-            
+
             // Mark element so we don't add button twice
             targetElement.setAttribute('data-streamside-button-added', 'true');
             return true;
@@ -95,7 +100,7 @@
         // Aggressive observer that watches for new target elements
         const observer = new MutationObserver((mutations) => {
             let shouldCheck = false;
-            
+
             for (let mutation of mutations) {
                 if (mutation.type === 'childList') {
                     for (let node of mutation.addedNodes) {
@@ -133,22 +138,13 @@
         const displayToggleStorageKey = 'homeDisplayToggles';
         const displayToggleVersionKey = 'homeDisplayTogglesVersion';
         const displayToggleClasses = {
-            movement: 'hmove',
             title: 'htitle',
             subtitle: 'hsubt',
             teacher: 'hteach',
             profile: 'hpfp'
         };
-        const displayToggleLabels = {
-            movement: 'Magnetic Cursor',
-            title: 'Name',
-            subtitle: 'Section',
-            teacher: 'Teacher',
-            profile: 'Profile'
-        };
         const displayToggleControls = {};
         let displayToggleState = {
-            movement: true,
             title: true,
             subtitle: true,
             teacher: true,
@@ -157,17 +153,73 @@
 
         const indicator = document.createElement('div');
         indicator.className = 'home-indicator';
-        
+
         const container = document.createElement('div');
         container.className = 'home-buttons-container';
-        
+
         const btn1 = document.createElement('button');
         btn1.className = 'home-btn';
         btn1.innerHTML = '<div class="home-icon-stack"><div class="home-rect"></div></div>';
-        
+
         const btn2 = document.createElement('button');
         btn2.className = 'home-btn';
         btn2.innerHTML = '<div class="home-icon-single"><div class="home-rect-full"></div></div>';
+
+        const hiddenClassesBtn = document.createElement('button');
+        hiddenClassesBtn.type = 'button';
+        hiddenClassesBtn.className = 'home-btn home-hidden-classes-btn';
+        hiddenClassesBtn.setAttribute('aria-label', 'Show hidden classes');
+        hiddenClassesBtn.title = 'Show hidden classes';
+        const hiddenClassesIcon = document.createElement('span');
+        hiddenClassesIcon.className = 'home-hidden-classes-icon';
+        hiddenClassesIcon.setAttribute('aria-hidden', 'true');
+        hiddenClassesIcon.style.setProperty('--home-hidden-icon-url', `url("${chrome.runtime.getURL('Icons/Hidden.svg')}")`);
+        hiddenClassesBtn.appendChild(hiddenClassesIcon);
+        hiddenClassesBtn.hidden = true;
+
+        const hiddenClassesContainer = document.createElement('div');
+        hiddenClassesContainer.className = 'home-hidden-classes-container';
+        hiddenClassesContainer.hidden = true;
+        hiddenClassesContainer.appendChild(hiddenClassesBtn);
+
+        function syncHiddenClassesButton() {
+            const nativeButton = document.querySelector('button[aria-label="Hidden classes"]');
+            hiddenClassesBtn.hidden = !nativeButton;
+            hiddenClassesContainer.hidden = !nativeButton;
+            if (!nativeButton) {
+                document.body.classList.remove('hiddenclasses');
+                return;
+            }
+
+            const isExpanded = nativeButton.getAttribute('aria-expanded') === 'true';
+            hiddenClassesBtn.setAttribute('aria-expanded', String(isExpanded));
+            hiddenClassesBtn.classList.toggle('active', isExpanded);
+            document.body.classList.toggle('hiddenclasses', isExpanded);
+        }
+
+        function deactivateHiddenClasses() {
+            const nativeButton = document.querySelector('button[aria-label="Hidden classes"]');
+            if (nativeButton && nativeButton.getAttribute('aria-expanded') === 'true') {
+                nativeButton.click();
+            }
+            document.body.classList.remove('hiddenclasses');
+            setTimeout(syncHiddenClassesButton, 0);
+        }
+
+        hiddenClassesBtn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const nativeButton = document.querySelector('button[aria-label="Hidden classes"]');
+            if (nativeButton) nativeButton.click();
+            setTimeout(syncHiddenClassesButton, 0);
+        });
+
+        document.addEventListener('click', (event) => {
+            if (event.target.closest && event.target.closest('button[aria-label="Hidden classes"]')) {
+                setTimeout(syncHiddenClassesButton, 0);
+            }
+        }, true);
+        setInterval(syncHiddenClassesButton, 1000);
+        syncHiddenClassesButton();
 
         const customizeWrapper = document.createElement('div');
         customizeWrapper.className = 'home-panel-anchor';
@@ -184,11 +236,14 @@
         customizePanel.className = 'home-customize-panel';
 
         function persistDisplayToggleState() {
+            const safeState = { ...displayToggleState };
+            delete safeState.movement;
+
             if (typeof storageSet === 'function') {
-                storageSet(displayToggleStorageKey, displayToggleState);
+                storageSet(displayToggleStorageKey, safeState);
             } else {
                 try {
-                    localStorage.setItem(displayToggleStorageKey, JSON.stringify(displayToggleState));
+                    localStorage.setItem(displayToggleStorageKey, JSON.stringify(safeState));
                 } catch (_) {}
             }
         }
@@ -212,7 +267,7 @@
             });
 
             window.dispatchEvent(new CustomEvent('mc-home-movement-toggle-changed', {
-                detail: { enabled: displayToggleState.movement !== false }
+                detail: { enabled: true }
             }));
 
             syncDisplayToggleControls();
@@ -229,6 +284,11 @@
                 return normalizedState;
             }
 
+            const legacyMovement = Object.prototype.hasOwnProperty.call(savedState, 'movement');
+            if (legacyMovement) {
+                delete savedState.movement;
+            }
+
             Object.keys(normalizedState).forEach((key) => {
                 if (typeof savedState[key] === 'boolean') {
                     normalizedState[key] = shouldInvert ? !savedState[key] : savedState[key];
@@ -239,30 +299,315 @@
         }
 
         function setCustomizePanelOpen(isOpen) {
+            container.classList.toggle('expanded', isOpen);
             customizePanel.classList.toggle('visible', isOpen);
             customizeBtn.classList.toggle('active', isOpen);
             customizeBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
         }
 
-        Object.entries(displayToggleLabels).forEach(([key, label]) => {
-            const optionBtn = document.createElement('button');
-            optionBtn.className = 'home-display-toggle';
-            optionBtn.type = 'button';
-            optionBtn.setAttribute('role', 'switch');
-            optionBtn.setAttribute('aria-checked', 'false');
-            optionBtn.innerHTML = `
-                <span class="home-display-toggle-label">${label}</span>
-                <span class="home-display-toggle-track">
-                    <span class="home-display-toggle-thumb"></span>
-                </span>
-            `;
-            optionBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                applyDisplayToggleState({ [key]: !displayToggleState[key] });
-            });
-            displayToggleControls[key] = optionBtn;
-            customizePanel.appendChild(optionBtn);
+        const topRowHiddenStorageKey = 'homeTopRowHidden';
+
+        const topRowTitle = document.createElement('div');
+        topRowTitle.className = 'home-customize-section-title';
+        topRowTitle.textContent = 'Top Row';
+        customizePanel.appendChild(topRowTitle);
+
+        const topRowControl = document.createElement('div');
+        topRowControl.className = 'home-customize-top-row-control';
+
+        const topRowPills = document.createElement('div');
+        topRowPills.className = 'home-customize-top-row-pills';
+
+        const dueSoonPill = document.createElement('button');
+        dueSoonPill.type = 'button';
+        dueSoonPill.className = 'home-customize-pill';
+        const dueSoonText = document.createElement('span');
+        dueSoonText.textContent = 'Due Soon';
+        const dueSoonIcon = document.createElement('img');
+        dueSoonIcon.src = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL)
+            ? chrome.runtime.getURL('Icons/expandcontent.svg')
+            : 'Icons/expandcontent.svg';
+        dueSoonIcon.className = 'home-customize-pill-icon';
+        dueSoonIcon.alt = '';
+        dueSoonPill.appendChild(dueSoonText);
+        dueSoonPill.appendChild(dueSoonIcon);
+        dueSoonPill.addEventListener('click', (e) => {
+            e.stopPropagation();
+            document.body.classList.toggle('htoprow', false);
         });
+
+        const learningToolsPill = document.createElement('button');
+        learningToolsPill.type = 'button';
+        learningToolsPill.className = 'home-customize-pill';
+        const learningToolsText = document.createElement('span');
+        learningToolsText.textContent = 'Learning Tools';
+        const learningToolsIcon = document.createElement('img');
+        learningToolsIcon.src = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL)
+            ? chrome.runtime.getURL('Icons/expandcontent.svg')
+            : 'Icons/expandcontent.svg';
+        learningToolsIcon.className = 'home-customize-pill-icon';
+        learningToolsIcon.alt = '';
+        learningToolsPill.appendChild(learningToolsText);
+        learningToolsPill.appendChild(learningToolsIcon);
+        learningToolsPill.addEventListener('click', (e) => {
+            e.stopPropagation();
+            document.body.classList.toggle('htoprow', false);
+        });
+
+        topRowPills.appendChild(dueSoonPill);
+        topRowPills.appendChild(learningToolsPill);
+
+        const hideTopRowToggle = document.createElement('button');
+        hideTopRowToggle.type = 'button';
+        hideTopRowToggle.className = 'home-customize-inline-toggle';
+        hideTopRowToggle.setAttribute('role', 'switch');
+        hideTopRowToggle.setAttribute('aria-checked', String(!document.body.classList.contains('htoprow')));
+        hideTopRowToggle.setAttribute('aria-label', 'Hide top row');
+        hideTopRowToggle.innerHTML = `
+            <span class="home-customize-inline-toggle-track">
+                <span class="home-customize-inline-toggle-thumb"></span>
+            </span>
+        `;
+        function applyTopRowHiddenState(isHidden, persist = true) {
+            document.body.classList.toggle('htoprow', !isHidden);
+            hideTopRowToggle.setAttribute('aria-checked', String(isHidden));
+            hideTopRowToggle.classList.toggle('active', isHidden);
+
+            if (persist) {
+                if (typeof storageSet === 'function') {
+                    storageSet(topRowHiddenStorageKey, isHidden);
+                } else {
+                    try {
+                        localStorage.setItem(topRowHiddenStorageKey, isHidden ? 'true' : 'false');
+                    } catch (_) {}
+                }
+            }
+        }
+
+        hideTopRowToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isNowActive = hideTopRowToggle.classList.contains('active');
+            const isNowHidden = !isNowActive;
+            applyTopRowHiddenState(isNowHidden, true);
+        });
+
+        topRowControl.appendChild(topRowPills);
+        topRowControl.appendChild(hideTopRowToggle);
+        customizePanel.appendChild(topRowControl);
+
+        const widgetWidthStorageKey = 'homeWidgetWidth';
+        const widgetWidthModeStorageKey = 'homeWidgetWidthMode';
+        const widgetWidthTitle = document.createElement('div');
+        widgetWidthTitle.className = 'home-customize-section-title';
+        widgetWidthTitle.textContent = 'Widget Width';
+        customizePanel.appendChild(widgetWidthTitle);
+
+        const widgetWidthControl = document.createElement('div');
+        widgetWidthControl.className = 'home-customize-width-control';
+
+        const widgetWidthModes = document.createElement('div');
+        widgetWidthModes.className = 'home-customize-width-modes';
+
+        const manualWidthButton = document.createElement('button');
+        manualWidthButton.type = 'button';
+        manualWidthButton.className = 'home-customize-width-mode';
+        manualWidthButton.textContent = 'Manual';
+        manualWidthButton.setAttribute('aria-pressed', 'true');
+
+        const autoWidthButton = document.createElement('button');
+        autoWidthButton.type = 'button';
+        autoWidthButton.className = 'home-customize-width-mode';
+        autoWidthButton.textContent = 'Auto';
+        autoWidthButton.setAttribute('aria-pressed', 'false');
+
+        const widgetWidthSliderRow = document.createElement('div');
+        widgetWidthSliderRow.className = 'home-customize-width-slider-row';
+
+        const decreaseWidthButton = document.createElement('button');
+        decreaseWidthButton.type = 'button';
+        decreaseWidthButton.className = 'home-customize-width-stepper';
+        decreaseWidthButton.textContent = '-';
+        decreaseWidthButton.setAttribute('aria-label', 'Decrease widget width');
+
+        const widgetWidthSlider = document.createElement('input');
+        widgetWidthSlider.type = 'range';
+        widgetWidthSlider.className = 'home-customize-width-slider';
+        widgetWidthSlider.min = '250';
+        widgetWidthSlider.max = '350';
+        widgetWidthSlider.step = '10';
+        widgetWidthSlider.value = '300';
+        widgetWidthSlider.setAttribute('aria-label', 'Widget width in pixels');
+
+        const increaseWidthButton = document.createElement('button');
+        increaseWidthButton.type = 'button';
+        increaseWidthButton.className = 'home-customize-width-stepper';
+        increaseWidthButton.textContent = '+';
+        increaseWidthButton.setAttribute('aria-label', 'Increase widget width');
+
+        const widgetWidthValue = document.createElement('div');
+        widgetWidthValue.className = 'home-customize-width-value';
+        widgetWidthValue.setAttribute('aria-live', 'polite');
+
+        const widgetWidthDetails = document.createElement('div');
+        widgetWidthDetails.className = 'home-customize-width-details';
+
+        let widgetWidthMode = 'manual';
+        let widgetWidth = 300;
+
+        function persistWidgetWidthState() {
+            if (typeof storageSet === 'function') {
+                storageSet(widgetWidthStorageKey, widgetWidth);
+                storageSet(widgetWidthModeStorageKey, widgetWidthMode);
+            } else {
+                try {
+                    localStorage.setItem(widgetWidthStorageKey, String(widgetWidth));
+                    localStorage.setItem(widgetWidthModeStorageKey, widgetWidthMode);
+                } catch (_) {}
+            }
+        }
+
+        function applyWidgetWidthState(nextWidth, nextMode, persist = true) {
+            widgetWidth = Math.min(350, Math.max(250, Number(nextWidth) || 300));
+            widgetWidth = Math.round(widgetWidth / 10) * 10;
+            widgetWidthMode = nextMode === 'auto' ? 'auto' : 'manual';
+            document.body.classList.toggle('mc-home-widget-auto', widgetWidthMode === 'auto');
+            document.body.classList.toggle('mc-home-widget-manual', widgetWidthMode === 'manual');
+            if (widgetWidthMode === 'manual') {
+                document.body.style.setProperty('--mc-home-widget-width', `${widgetWidth}px`);
+            } else {
+                document.body.style.removeProperty('--mc-home-widget-width');
+            }
+            widgetWidthSlider.value = String(widgetWidth);
+            const widthOffset = widgetWidth - 300;
+            widgetWidthValue.textContent = widthOffset === 0
+                ? 'Default'
+                : `${widthOffset > 0 ? '+' : ''}${widthOffset}px`;
+            widgetWidthSlider.disabled = widgetWidthMode === 'auto';
+            decreaseWidthButton.disabled = widgetWidthMode === 'auto' || widgetWidth <= 250;
+            increaseWidthButton.disabled = widgetWidthMode === 'auto' || widgetWidth >= 350;
+            widgetWidthDetails.classList.toggle('expanded', widgetWidthMode === 'manual');
+            manualWidthButton.classList.toggle('active', widgetWidthMode === 'manual');
+            autoWidthButton.classList.toggle('active', widgetWidthMode === 'auto');
+            manualWidthButton.setAttribute('aria-pressed', String(widgetWidthMode === 'manual'));
+            autoWidthButton.setAttribute('aria-pressed', String(widgetWidthMode === 'auto'));
+
+            if (persist) {
+                persistWidgetWidthState();
+            }
+        }
+
+        manualWidthButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            applyWidgetWidthState(widgetWidth, 'manual');
+        });
+        autoWidthButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            applyWidgetWidthState(widgetWidth, 'auto');
+        });
+        widgetWidthSlider.addEventListener('input', (e) => {
+            e.stopPropagation();
+            applyWidgetWidthState(e.target.value, 'manual');
+        });
+        decreaseWidthButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            applyWidgetWidthState(widgetWidth - 10, 'manual');
+        });
+        increaseWidthButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            applyWidgetWidthState(widgetWidth + 10, 'manual');
+        });
+
+        widgetWidthModes.appendChild(manualWidthButton);
+        widgetWidthModes.appendChild(autoWidthButton);
+        widgetWidthDetails.appendChild(widgetWidthModes);
+        widgetWidthSliderRow.appendChild(decreaseWidthButton);
+        widgetWidthSliderRow.appendChild(widgetWidthSlider);
+        widgetWidthSliderRow.appendChild(increaseWidthButton);
+        widgetWidthDetails.appendChild(widgetWidthSliderRow);
+        widgetWidthDetails.appendChild(widgetWidthValue);
+        widgetWidthControl.appendChild(widgetWidthDetails);
+        customizePanel.appendChild(widgetWidthControl);
+
+        let savedWidgetWidth = 300;
+        let savedWidgetWidthMode = 'manual';
+        try {
+            const rawWidgetWidth = localStorage.getItem(widgetWidthStorageKey);
+            const rawWidgetWidthMode = localStorage.getItem(widgetWidthModeStorageKey);
+            if (rawWidgetWidth !== null) savedWidgetWidth = Number(rawWidgetWidth);
+            if (rawWidgetWidthMode === 'auto') savedWidgetWidthMode = 'auto';
+        } catch (_) {}
+        applyWidgetWidthState(savedWidgetWidth, savedWidgetWidthMode, false);
+
+        const widgetAppearanceTitle = document.createElement('div');
+        widgetAppearanceTitle.className = 'home-customize-section-title';
+        widgetAppearanceTitle.textContent = 'Widget Appearance';
+        customizePanel.appendChild(widgetAppearanceTitle);
+
+        const previewHint = document.createElement('div');
+        previewHint.className = 'home-customize-preview-hint';
+        previewHint.textContent = 'Click on an element to hide it';
+        customizePanel.appendChild(previewHint);
+
+        const previewShell = document.createElement('div');
+        previewShell.className = 'home-customize-preview-shell';
+
+        const previewCard = document.createElement('div');
+        previewCard.className = 'home-customize-preview-card';
+
+        const previewGrid = document.createElement('div');
+        previewGrid.className = 'home-customize-preview-grid';
+
+        const previewLabels = document.createElement('div');
+        previewLabels.className = 'home-customize-preview-labels';
+
+        const classLabel = document.createElement('button');
+        classLabel.type = 'button';
+        classLabel.className = 'home-customize-preview-label class';
+        classLabel.textContent = 'Class Name';
+        classLabel.setAttribute('aria-pressed', String(!!displayToggleState.title));
+        classLabel.addEventListener('click', (e) => {
+            e.stopPropagation();
+            applyDisplayToggleState({ title: !displayToggleState.title });
+        });
+
+        const subLabel = document.createElement('button');
+        subLabel.type = 'button';
+        subLabel.className = 'home-customize-preview-label sub';
+        subLabel.textContent = 'Subtext';
+        subLabel.setAttribute('aria-pressed', String(!!displayToggleState.subtitle));
+        subLabel.addEventListener('click', (e) => {
+            e.stopPropagation();
+            applyDisplayToggleState({ subtitle: !displayToggleState.subtitle });
+        });
+
+        const teacherLabel = document.createElement('button');
+        teacherLabel.type = 'button';
+        teacherLabel.className = 'home-customize-preview-label teacher';
+        teacherLabel.textContent = 'Teacher';
+        teacherLabel.setAttribute('aria-pressed', String(!!displayToggleState.teacher));
+        teacherLabel.addEventListener('click', (e) => {
+            e.stopPropagation();
+            applyDisplayToggleState({ teacher: !displayToggleState.teacher });
+        });
+
+        previewLabels.appendChild(classLabel);
+        previewLabels.appendChild(subLabel);
+        previewLabels.appendChild(teacherLabel);
+
+        const previewAvatar = document.createElement('button');
+        previewAvatar.type = 'button';
+        previewAvatar.className = 'home-customize-preview-avatar';
+        previewAvatar.setAttribute('aria-pressed', String(!!displayToggleState.profile));
+        previewAvatar.addEventListener('click', (e) => {
+            e.stopPropagation();
+            applyDisplayToggleState({ profile: !displayToggleState.profile });
+        });
+
+        previewGrid.appendChild(previewLabels);
+        previewGrid.appendChild(previewAvatar);
+        previewCard.appendChild(previewGrid);
+        previewShell.appendChild(previewCard);
+        customizePanel.appendChild(previewShell);
 
         customizeBtn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -282,7 +627,7 @@
                 setCustomizePanelOpen(false);
             }
         });
-        
+
         function updateState(isMiniWidget, persist = true) {
             if (isMiniWidget) {
                 document.body.classList.add('miniwidget');
@@ -312,12 +657,36 @@
             savedState = raw === 'true' || raw === true;
         } catch (_) {}
         updateState(savedState, false);
-        
+
+        let savedTopRowHidden = true;
+        try {
+            const rawTopRowHidden = localStorage.getItem(topRowHiddenStorageKey);
+            if (rawTopRowHidden !== null) {
+                savedTopRowHidden = rawTopRowHidden === 'true';
+            }
+        } catch (_) {}
+        applyTopRowHiddenState(savedTopRowHidden, false);
+
         // Then load from sync storage in background
         if (typeof storageGet === 'function') {
             storageGet('homeMiniWidget', false).then(syncState => {
                 if (syncState !== savedState) {
                     updateState(syncState, false);
+                }
+            });
+
+            storageGet(topRowHiddenStorageKey, true).then(syncState => {
+                if (typeof syncState === 'boolean') {
+                    applyTopRowHiddenState(syncState, false);
+                }
+            });
+
+            Promise.all([
+                storageGet(widgetWidthStorageKey, 300),
+                storageGet(widgetWidthModeStorageKey, 'manual')
+            ]).then(([syncWidth, syncMode]) => {
+                if (syncWidth !== savedWidgetWidth || syncMode !== savedWidgetWidthMode) {
+                    applyWidgetWidthState(syncWidth, syncMode, false);
                 }
             });
 
@@ -361,20 +730,20 @@
         foldersContainer.className = 'home-folders-container';
 
 
-        
+
         // 2. Apps Icon Box (Home)
         const appsBtn = document.createElement('div');
         appsBtn.className = 'home-folder-item active'; // Removed icon-item to allow text
-        
+
         const appsIcon = document.createElement('div');
         appsIcon.className = 'home-folder-icon-div home-icon';
         appsIcon.style.setProperty('--dna-icon-url', `url("${chrome.runtime.getURL('Icons/Home Icon.svg')}")`);
         // Color handled in CSS for light/dark mode support
-        
+
         const appsText = document.createElement('span');
         appsText.className = 'folder-name';
         appsText.textContent = 'Home';
-        
+
         appsBtn.appendChild(appsIcon);
         appsBtn.appendChild(appsText);
         foldersContainer.appendChild(appsBtn);
@@ -398,13 +767,14 @@
         container.appendChild(customizeWrapper);
         indicator.appendChild(container);
         indicator.appendChild(foldersContainer);
-        
+        indicator.appendChild(hiddenClassesContainer);
+
         document.body.appendChild(indicator);
 
         // --- Sub Bar ---
         const subBar = document.createElement('div');
         subBar.className = 'home-sub-bar';
-        
+
         // Rename Button
         const renameBtn = document.createElement('div');
         renameBtn.className = 'sub-bar-btn';
@@ -412,7 +782,7 @@
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
             <span>Rename Folder</span>
         `;
-        
+
         // Icon Button
         const iconBtn = document.createElement('div');
         iconBtn.className = 'sub-bar-btn';
@@ -460,13 +830,13 @@
         deleteBtn.innerHTML = `
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
         `;
-        
+
         let isDeleting = false;
-        
+
         deleteBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             if (!activeFolderId) return;
-            
+
             if (!isDeleting) {
                 // Switch to confirm state
                 isDeleting = true;
@@ -500,7 +870,7 @@
         function showClassroomPicker() {
             subBar.innerHTML = '';
             subBar.style.flexDirection = 'column';
-            
+
             // Return Button
             const returnBtn = document.createElement('div');
             returnBtn.className = 'sub-bar-btn';
@@ -520,37 +890,37 @@
 
             const grid = document.createElement('div');
             grid.className = 'classroom-picker-grid';
-            
+
             // Get all courses from DOM
             const cards = document.querySelectorAll('ol li');
             const courses = [];
             cards.forEach(card => {
                 // Skip hidden classes (they have the OmA97e div)
                 if (card.querySelector('.OmA97e')) return;
-                
+
                 const id = getClassIdFromCard(card);
                 // Use the primary class title only (exclude subtitle like teacher/section text)
                 const name = getPrimaryClassTitleFromCard(card);
-                
+
                 if (id && !courses.find(c => c.id === id)) {
                     courses.push({ id, name });
                 }
             });
 
             const activeFolder = folders.find(f => f.id === activeFolderId);
-            if (!activeFolder) return; 
-            
+            if (!activeFolder) return;
+
             if (!activeFolder.courseIds) activeFolder.courseIds = [];
 
             courses.forEach(course => {
                 const item = document.createElement('div');
                 const isAdded = activeFolder.courseIds.includes(course.id);
                 item.className = `classroom-picker-item ${isAdded ? 'added' : 'not-added'}`;
-                
+
                 item.innerHTML = `
                     <div class="classroom-picker-name">${course.name}</div>
                 `;
-                
+
                 item.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const index = activeFolder.courseIds.indexOf(course.id);
@@ -566,10 +936,10 @@
                     saveFolders();
                     applyClassroomFilter();
                 });
-                
+
                 grid.appendChild(item);
             });
-            
+
             subBar.appendChild(grid);
         }
 
@@ -605,8 +975,8 @@
         try {
             const raw = localStorage.getItem('modernClassroom_folders');
             if (raw) folders = JSON.parse(raw);
-        } catch(e) { 
-            folders = []; 
+        } catch(e) {
+            folders = [];
         }
 
         let activeFolderId = null; // null = Home
@@ -646,7 +1016,7 @@
                 try { localStorage.setItem('modernClassroom_folders', JSON.stringify(folders)); } catch (_) {}
             }
         }
-        
+
         // Load from sync storage in background and update if different
         if (typeof storageGet === 'function') {
             storageGet('modernClassroom_folders', []).then(storedFolders => {
@@ -866,40 +1236,38 @@
         iconBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             if (!activeFolderId) return;
-            
+
             const currentFolder = folders.find(f => f.id === activeFolderId);
             if (!currentFolder) return;
 
             // Temporarily replace sub-bar content with icon picker
             const originalContent = Array.from(subBar.children);
             subBar.innerHTML = '';
-            
+
             const pickerContainer = document.createElement('div');
             pickerContainer.style.display = 'flex';
             pickerContainer.style.flexDirection = 'column';
-            pickerContainer.style.width = '384.36px';
+            pickerContainer.style.width = '100%';
 
             const iconList = document.createElement('div');
             iconList.className = 'icon-picker-scroll';
             iconList.style.overflowY = 'auto';
             iconList.style.maxHeight = '200px';
             iconList.style.padding = '8px';
-            iconList.style.paddingTop = '40px';
             iconList.style.display = 'flex';
             iconList.style.flexDirection = 'column';
             iconList.style.gap = '12px';
 
             availableIcons.forEach(group => {
                 const sectionDiv = document.createElement('div');
-                
+
                 const title = document.createElement('div');
+                title.className = 'home-icon-picker-grid-title';
                 title.textContent = group.title;
                 title.style.fontSize = '11px';
                 title.style.fontWeight = '600';
-                title.style.color = 'rgb(105, 111, 168)';
-                title.style.marginBottom = '6px';
-                title.style.textTransform = 'uppercase';
-                title.style.letterSpacing = '0.5px';
+                title.style.marginBottom = '2px';
+                title.style.letterSpacing = '0px';
                 sectionDiv.appendChild(title);
 
                 const grid = document.createElement('div');
@@ -911,16 +1279,16 @@
                     if (currentFolder.icon === iconName) {
                         iconDiv.classList.add('selected');
                     }
-                    
+
                     const img = document.createElement('img');
                     img.src = chrome.runtime.getURL('Icons/' + iconName);
                     img.className = 'home-icon-img';
-                    
+
                     iconDiv.appendChild(img);
-                    
+
                     iconDiv.addEventListener('click', (ev) => {
                         ev.stopPropagation();
-                        
+
                         // Update UI selection
                         const allIcons = iconList.querySelectorAll('.home-icon-btn');
                         allIcons.forEach(el => el.classList.remove('selected'));
@@ -930,26 +1298,20 @@
                         saveFolders();
                         renderFolders();
                     });
-                    
+
                     grid.appendChild(iconDiv);
                 });
-                
+
                 sectionDiv.appendChild(grid);
                 iconList.appendChild(sectionDiv);
             });
-            
-            pickerContainer.appendChild(iconList);
 
             // Return button for picker
             const closePicker = document.createElement('div');
-            closePicker.className = 'sub-bar-btn';
+            closePicker.className = 'sub-bar-btn icondone';
             closePicker.style.marginBottom = '0';
             closePicker.style.justifyContent = 'left';
-            closePicker.style.width = '80px';
             closePicker.style.boxSizing = 'border-box';
-            closePicker.style.position = 'absolute';
-            closePicker.style.top = '6px';
-            closePicker.style.left = '6px';
             closePicker.innerHTML = `
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                 <span>Done</span>
@@ -959,49 +1321,35 @@
                 restoreSubBar();
             });
 
+            const pickerHeader = document.createElement('div');
+            pickerHeader.className = 'folder-icon-picker-header';
+            pickerHeader.appendChild(closePicker);
+
             // Color Picker Section
             const colorSection = document.createElement('div');
-            colorSection.className = 'home-color-picker-section';
-            
-            const colorTitle = document.createElement('div');
-            colorTitle.textContent = 'Color';
-            colorTitle.style.fontSize = '11px';
-            colorTitle.style.fontWeight = '600';
-            colorTitle.style.color = 'rgb(105, 111, 168)';
-            colorTitle.style.marginBottom = '8px';
-            colorTitle.style.textTransform = 'uppercase';
-            colorSection.appendChild(colorTitle);
+            colorSection.className = 'home-color-picker-section mc-icon-picker-colour-surface';
 
-            // SV Box (Saturation/Value)
-            const svWrapper = document.createElement('div');
-            svWrapper.className = 'home-sv-wrapper';
-            
-            const svCanvas = document.createElement('canvas');
-            svCanvas.className = 'home-sv-canvas';
-            svCanvas.width = 280; // Approximate width
-            svCanvas.height = 120;
-            
-            const svMarker = document.createElement('div');
-            svMarker.className = 'home-sv-marker';
-            
-            svWrapper.appendChild(svCanvas);
-            svWrapper.appendChild(svMarker);
-            colorSection.appendChild(svWrapper);
-
-            // Hue Slider
-            const hueSlider = document.createElement('input');
-            hueSlider.type = 'range';
-            hueSlider.min = '0';
-            hueSlider.max = '360';
-            hueSlider.className = 'home-hue-slider';
-            colorSection.appendChild(hueSlider);
-            
-            // Hex Input
-            const hexInput = document.createElement('input');
-            hexInput.type = 'text';
-            hexInput.className = 'home-hex-input';
-            hexInput.placeholder = '#RRGGBB';
-            colorSection.appendChild(hexInput);
+            const picker = window.MCColourPicker.create({
+                container: colorSection,
+                initialColor: currentFolder.color || '#ffffff',
+                onColorChange: (colour) => {
+                    const hsv = localHexToHsv(colour);
+                    currentH = hsv.h;
+                    currentS = hsv.s;
+                    currentV = hsv.v;
+                    hueSlider.value = currentH;
+                    drawSvBox();
+                    updateMarkerPosition();
+                    updateColorFromHsv();
+                }
+            });
+            const svWrapper = picker.sv;
+            const svCanvas = picker.canvas;
+            const svMarker = picker.marker;
+            const hueSlider = picker.hue;
+            const hexInput = picker.hex;
+            const controlsRow = picker.inputRow;
+            const hexRow = picker.hexRow;
 
             // State
             let currentH = 0;
@@ -1021,10 +1369,10 @@
                 else if (4 <= hh && hh < 5) { r1=x; g1=0; b1=c; }
                 else { r1=c; g1=0; b1=x; }
                 const m = v - c;
-                return { 
-                    r: Math.round((r1+m)*255), 
-                    g: Math.round((g1+m)*255), 
-                    b: Math.round((b1+m)*255) 
+                return {
+                    r: Math.round((r1+m)*255),
+                    g: Math.round((g1+m)*255),
+                    b: Math.round((b1+m)*255)
                 };
             }
 
@@ -1047,7 +1395,7 @@
                     g = parseInt(hex.slice(3, 5), 16);
                     b = parseInt(hex.slice(5, 7), 16);
                 }
-                
+
                 const r1=r/255, g1=g/255, b1=b/255;
                 const max=Math.max(r1,g1,b1), min=Math.min(r1,g1,b1);
                 const d=max-min;
@@ -1069,7 +1417,7 @@
                 currentS = s;
                 currentV = v;
             }
-            
+
             hueSlider.value = currentH;
             hexInput.value = currentFolder.color || '#ffffff';
 
@@ -1078,20 +1426,20 @@
                 const ctx = svCanvas.getContext('2d');
                 const width = svCanvas.width;
                 const height = svCanvas.height;
-                
+
                 ctx.clearRect(0, 0, width, height);
-                
+
                 // Fill with current Hue
                 ctx.fillStyle = `hsl(${currentH}, 100%, 50%)`;
                 ctx.fillRect(0, 0, width, height);
-                
+
                 // White gradient (Left to Right)
                 const whiteGrad = ctx.createLinearGradient(0, 0, width, 0);
                 whiteGrad.addColorStop(0, 'rgba(255,255,255,1)');
                 whiteGrad.addColorStop(1, 'rgba(255,255,255,0)');
                 ctx.fillStyle = whiteGrad;
                 ctx.fillRect(0, 0, width, height);
-                
+
                 // Black gradient (Top to Bottom)
                 const blackGrad = ctx.createLinearGradient(0, 0, 0, height);
                 blackGrad.addColorStop(0, 'rgba(0,0,0,0)');
@@ -1104,7 +1452,7 @@
                 // Ensure we have dimensions
                 const width = svCanvas.offsetWidth || 280;
                 const height = svCanvas.offsetHeight || 120;
-                
+
                 const x = currentS * width;
                 const y = (1 - currentV) * height;
                 svMarker.style.left = `${x}px`;
@@ -1114,16 +1462,16 @@
             function updateColorFromHsv() {
                 const { r, g, b } = localHsvToRgb(currentH, currentS, currentV);
                 const hex = localRgbToHex(r, g, b);
-                
+
                 // Update inputs
                 if (document.activeElement !== hexInput) {
                     hexInput.value = hex;
                 }
-                
+
                 // Update data
                 currentFolder.color = hex;
                 saveFolders();
-                
+
                 // Update DOM directly
                 const activeBtn = subBar.parentElement || dynamicFoldersWrapper.querySelector('.home-folder-item.active');
                 if (activeBtn) {
@@ -1146,21 +1494,21 @@
             });
 
             let isDraggingSv = false;
-            
+
             function handleSvInput(clientX, clientY) {
                 const rect = svCanvas.getBoundingClientRect();
                 if (rect.width === 0 || rect.height === 0) return;
 
                 let x = clientX - rect.left;
                 let y = clientY - rect.top;
-                
+
                 // Clamp
                 x = Math.max(0, Math.min(rect.width, x));
                 y = Math.max(0, Math.min(rect.height, y));
-                
+
                 currentS = x / rect.width;
                 currentV = 1 - (y / rect.height);
-                
+
                 updateMarkerPosition();
                 updateColorFromHsv();
             }
@@ -1169,13 +1517,13 @@
                 isDraggingSv = true;
                 handleSvInput(e.clientX, e.clientY);
             });
-            
+
             window.addEventListener('mousemove', (e) => {
                 if (isDraggingSv) {
                     handleSvInput(e.clientX, e.clientY);
                 }
             });
-            
+
             window.addEventListener('mouseup', () => {
                 isDraggingSv = false;
             });
@@ -1195,8 +1543,10 @@
                 }
             });
 
+            pickerContainer.appendChild(pickerHeader);
             pickerContainer.appendChild(colorSection);
-            
+            pickerContainer.appendChild(iconList);
+
             // Initial Draw
             setTimeout(() => {
                 drawSvBox();
@@ -1204,7 +1554,6 @@
             }, 50);
 
             subBar.appendChild(pickerContainer);
-            subBar.appendChild(closePicker);
 
             function restoreSubBar() {
                 subBar.innerHTML = '';
@@ -1216,23 +1565,23 @@
         renameBtn.addEventListener('click', (e) => {
             e.stopPropagation(); // Prevent folder click
             if (!activeFolderId) return;
-            
+
             const currentFolder = folders.find(f => f.id === activeFolderId);
             if (!currentFolder) return;
 
             // Clear sub-bar to show rename interface
             subBar.innerHTML = '';
-            
+
             const input = document.createElement('input');
             input.type = 'text';
             input.className = 'sub-bar-input';
             input.value = currentFolder.name;
             input.placeholder = "Folder Name";
-            
+
             const saveBtn = document.createElement('div');
             saveBtn.className = 'sub-bar-btn';
             saveBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-            
+
             const cancelBtn = document.createElement('div');
             cancelBtn.className = 'sub-bar-btn';
             cancelBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
@@ -1256,13 +1605,13 @@
                 e.stopPropagation();
                 resetSubBarState();
             });
-            
+
             input.addEventListener('keydown', (e) => {
                 e.stopPropagation();
                 if (e.key === 'Enter') save();
                 if (e.key === 'Escape') resetSubBarState();
             });
-            
+
             input.addEventListener('click', (e) => e.stopPropagation());
 
             subBar.appendChild(input);
@@ -1285,23 +1634,23 @@
 
             folders.forEach((folder, index) => {
                 let fBtn = dynamicFoldersWrapper.querySelector(`[data-folder-id="${folder.id}"]`);
-                
+
                 if (!fBtn) {
                     // Create new button
                     fBtn = document.createElement('div');
                     fBtn.className = 'home-folder-item folder-btn';
                     fBtn.style.position = 'relative';
                     fBtn.dataset.folderId = folder.id;
-                    
+
                     const icon = document.createElement('div');
                     icon.className = 'home-folder-icon-div';
-                    
+
                     const nameSpan = document.createElement('span');
                     nameSpan.className = 'folder-name';
-                    
+
                     fBtn.appendChild(icon);
                     fBtn.appendChild(nameSpan);
-                    
+
                     fBtn.addEventListener('click', () => {
                         setActiveFolder(folder.id);
                     });
@@ -1317,10 +1666,10 @@
                 // Update Content
                 const icon = fBtn.querySelector('.home-folder-icon-div');
                 const nameSpan = fBtn.querySelector('.folder-name');
-                
+
                 const iconName = folder.icon || 'fi-sr-folder.svg';
                 icon.style.setProperty('--dna-icon-url', `url("${chrome.runtime.getURL('Icons/' + iconName)}")`);
-                
+
                 if (folder.color) {
                     icon.style.setProperty('background-color', folder.color, 'important');
                     nameSpan.style.color = folder.color;
@@ -1328,7 +1677,7 @@
                     icon.style.removeProperty('background-color');
                     nameSpan.style.removeProperty('color');
                 }
-                
+
                 nameSpan.textContent = folder.name;
 
                 // Update Active State
@@ -1347,6 +1696,8 @@
         }
 
         function setActiveFolder(id) {
+            deactivateHiddenClasses();
+
             // Reset sub-bar state when switching folders
             if (activeFolderId !== id) {
                 try { resetSubBarState(); } catch (_) {}
@@ -1354,7 +1705,7 @@
 
             activeFolderId = id;
             updateSetHomeButtonState();
-            
+
             // Update UI
             if (id === null) {
                 appsBtn.classList.add('active');
@@ -1365,14 +1716,14 @@
                 appsBtn.classList.remove('active');
                 document.body.classList.add('folder-active');
             }
-            renderFolders(); 
-            
+            renderFolders();
+
             // Trigger Filter
             applyClassroomFilter();
         }
 
         appsBtn.addEventListener('click', () => setActiveFolder(null));
-        
+
         plusBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             if (plusBtn.classList.contains('editing')) return;
@@ -1386,7 +1737,7 @@
             input.className = 'folder-creation-input';
             input.placeholder = "Name";
             input.value = "New Folder";
-            
+
             // Select all text on focus
             setTimeout(() => input.select(), 0);
 
@@ -1433,7 +1784,7 @@
                 if (e.key === 'Enter') save();
                 if (e.key === 'Escape') reset();
             });
-            
+
             input.addEventListener('click', (e) => e.stopPropagation());
 
             plusBtn.appendChild(input);
@@ -1475,8 +1826,8 @@
 
         function applyClassroomFilter() {
             // Find class cards (usually li elements in an ol)
-            const cards = document.querySelectorAll('ol li'); 
-            
+            const cards = document.querySelectorAll('ol li');
+
             // Find active folder
             const activeFolder = folders.find(f => f.id === activeFolderId);
             const allowedCourses = activeFolder ? (activeFolder.courseIds || []) : [];
@@ -1502,7 +1853,7 @@
             sidebarLinks.forEach(link => {
                 const match = link.getAttribute('href').match(/\/c\/([a-zA-Z0-9]+)/);
                 const classId = match ? match[1] : null;
-                
+
                 if (!classId) return;
 
                 if (activeFolderId === null) {
@@ -1603,7 +1954,7 @@
         hookLocationChanges();
         checkUrl();
         applyClassroomFilter();
-        
+
         renderFolders();
         if (defaultFolderId && folders.some(f => f.id === defaultFolderId)) {
             setActiveFolder(defaultFolderId);

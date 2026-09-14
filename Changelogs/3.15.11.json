@@ -1,0 +1,30 @@
+{
+  "id": "3.15.11",
+  "title": "Minor Adjustments",
+  "version": "v3.15.11",
+  "date": "August 19 2026",
+  "sections": [
+    {
+      "title": "Home Widget Width",
+      "content": [
+        { "type": "text", "text": "A new Google classroom update made the home widgets extend to fill the width of the screen" },
+        { "type": "text", "text": "This behaviour is now off by default, where the width can be adjusted in the home layout settings (Accessible through the button on the home page, as shown below)" },
+        { "type": "image", "src": "Changelogs/Images/3.15.11-1.jpeg", "width": "60%", "alt": "Home layout width settings" },
+        { "type": "text", "text": "From here you can also re-enable the automatic resizing system, should you wish to do so." },
+        { "type": "image", "src": "Changelogs/Images/3.15.11-2.jpeg", "width": "60%", "alt": "Home layout width settings" }
+      ]
+    },
+    {
+      "title": "Other Changes",
+      "items": [
+        "- The 'Click the icon to customise' tip on the sidebar now has a dismiss button to prevent it from showing on unedited icons"
+      ]
+    },
+    {
+      "title": "Closing Notes",
+      "items": [
+        "Please report any bugs or request changes through the 'Feedback' button in the settings. Thank you for using Modern Classroom!"
+      ]
+    }
+  ]
+}

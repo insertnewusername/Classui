@@ -6,7 +6,7 @@ function injectGlassFilter() {
     svg.id = 'liquid-glass-svg-filter';
     svg.style.display = 'none';
 
-    // ---- Filter 1: Default – more distortion (scale 300) ----
+    // ---- Filter 1: Default â€“ more distortion (scale 300) ----
     const filter1 = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
     filter1.id = 'glass-distortion';
     filter1.setAttribute('x', '0%');
@@ -152,9 +152,6 @@ function insertCustomSettingsPanel() {
         };
     })();
 
-    // Hide the profile panel
-    profilePanel.style.display = 'none';
-
     // --- Tutorial Panel ---
     const tutorialPanel = document.createElement('div');
     tutorialPanel.className = 'mSaSG pEwOBc Aopndd';
@@ -172,14 +169,14 @@ function insertCustomSettingsPanel() {
     modal.style.padding = "20px";
     modal.style.height = "500px";
     modal.style.paddingBottom = "0px";
-    modal.style.cssText = 'max-width: none; width: 100%; height: 400px; margin: 0; border: none; border-radius: 20px; padding: 0;';
+    modal.style.cssText = 'max-width: none; width: 100%; height: 500px; margin: 0; border: none; border-radius: 20px; padding: 0;';
 
     // Main container
     const container = document.createElement("div");
     container.className = "tutorial-container";
 
-    // Left sidebar with feature list
-    let guidemenu = document.createElement("div");
+    // The selected feature is shown above the navigation rail.
+    const guidemenu = document.createElement("div");
     guidemenu.className = "tutorial-guidemenu";
     guidemenu.style.gap = "4px";
     guidemenu.style.padding = "5px";
@@ -187,10 +184,14 @@ function insertCustomSettingsPanel() {
     const baseUrl = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL)
             ? chrome.runtime.getURL('Tutorial/')
             : 'Tutorial/';
-
     const features = typeof window.getTutorialFeatures === 'function'
         ? window.getTutorialFeatures(baseUrl)
         : [];
+
+    const getThumbnailUrl = (feature) => {
+        const themeFolder = document.body.classList.contains('dark-mode') ? 'Dark Mode' : 'Light Mode';
+        return `${baseUrl}Tutorial Thumbs/${themeFolder}/${feature.thumbnail}`;
+    };
 
     const normalizeImageSize = (value, fallbackUnit = '%') => {
         if (value === undefined || value === null) return '';
@@ -252,44 +253,74 @@ function insertCustomSettingsPanel() {
     features.forEach((feature, index) => {
         const item = document.createElement("div");
         item.className = "tutorial-feature-item";
-        item.style.display = "flex";
-        item.style.flexDirection = "column";
-        item.style.alignItems = "center";
-        item.style.justifyContent = "center";
-        item.style.gap = "6px";
-        item.style.padding = "0px 10px";
-        item.style.height = "35px";
-        item.style.textAlign = "center";
-        item.style.cursor = "pointer";
-        item.style.borderRadius = "15px";
-        item.style.transition = "all 0.2s";
         if (index === 0) item.classList.add("active");
-        
+
+        const image = document.createElement("img");
+        image.className = "tutorial-feature-preview";
+        image.alt = `${feature.title} preview`;
+        image.src = getThumbnailUrl(feature);
+        item.appendChild(image);
+
         const label = document.createElement("span");
+        label.className = "tutorial-feature-label";
         label.textContent = feature.title;
-        label.style.fontSize = "12px";
-        label.style.fontWeight = "500";
-        label.style.wordWrap = "break-word";
-        label.style.lineHeight = "1.2";
-        label.style.textAlign = "center";
         item.appendChild(label);
-        
-        item.addEventListener("click", () => {
-            guidemenu.querySelectorAll(".tutorial-feature-item").forEach(el => el.classList.remove("active"));
-            item.classList.add("active");
-            renderFeatureContent(feature);
-        });
-        
+
+        item.addEventListener("click", () => selectFeature(index));
+
         guidemenu.appendChild(item);
     });
 
+    const rail = document.createElement("div");
+    rail.className = "tutorial-navigation";
+    const previousButton = document.createElement("button");
+    previousButton.type = "button";
+    previousButton.className = "tutorial-navigation-button tutorial-navigation-previous";
+    previousButton.textContent = "â€¹";
+    previousButton.setAttribute("aria-label", "Previous tutorial");
+    const nextButton = document.createElement("button");
+    nextButton.type = "button";
+    nextButton.className = "tutorial-navigation-button tutorial-navigation-next";
+    nextButton.textContent = "â€º";
+    nextButton.setAttribute("aria-label", "Next tutorial");
+    rail.append(previousButton, guidemenu, nextButton);
 
-    // Right panel with content (only one feature at a time)
+    // Content panel (only one feature at a time)
     const rightPanel = document.createElement("div");
     rightPanel.className = "tutorial-content";
+    function selectFeature(index) {
+        if (!features.length) return;
+        const selectedIndex = Math.max(0, Math.min(index, features.length - 1));
+        guidemenu.querySelectorAll(".tutorial-feature-item").forEach((item, itemIndex) => {
+            item.classList.toggle("active", itemIndex === selectedIndex);
+        });
+        currentFeature = selectedIndex;
+        renderFeatureContent(features[selectedIndex]);
+        updateCarousel();
+    }
+    function updateCarousel() {
+        previousButton.disabled = currentFeature === 0;
+        nextButton.disabled = currentFeature === features.length - 1;
+        guidemenu.querySelectorAll(".tutorial-feature-item").forEach((item, index) => {
+            const distance = index - currentFeature;
+            item.style.setProperty("--carousel-distance", distance);
+            item.dataset.carouselDistance = distance;
+            item.classList.toggle("active", distance === 0);
+        });
+    }
+    const themeObserver = new MutationObserver(() => {
+        guidemenu.querySelectorAll(".tutorial-feature-preview").forEach((image, index) => {
+            image.src = getThumbnailUrl(features[index]);
+        });
+    });
+    themeObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    previousButton.addEventListener("click", () => selectFeature(currentFeature - 1));
+    nextButton.addEventListener("click", () => selectFeature(currentFeature + 1));
+    let currentFeature = 0;
     // Render the first feature by default
     if (features.length > 0) {
         renderFeatureContent(features[0]);
+        updateCarousel();
     } else {
         const emptyState = document.createElement('p');
         emptyState.className = 'tutorial-feature-text';
@@ -297,8 +328,8 @@ function insertCustomSettingsPanel() {
         rightPanel.appendChild(emptyState);
     }
 
-    container.appendChild(guidemenu);
     container.appendChild(rightPanel);
+    container.appendChild(rail);
     modal.appendChild(container);
     tutorialContainer.appendChild(modal);
     tutorialPanel.appendChild(tutorialContainer);
@@ -353,6 +384,76 @@ function insertCustomSettingsPanel() {
     const headerActions = document.createElement('div');
     headerActions.className = 'settings-header-actions';
 
+    const exportBtn = document.createElement('button');
+    exportBtn.type = 'button';
+    exportBtn.className = 'settings-data-btn export';
+    exportBtn.textContent = 'Export';
+    exportBtn.title = 'Export customisations';
+
+    const importBtn = document.createElement('button');
+    importBtn.type = 'button';
+    importBtn.className = 'settings-data-btn import';
+    importBtn.textContent = 'Import';
+    importBtn.title = 'Import customisations';
+
+    const importInput = document.createElement('input');
+    importInput.type = 'file';
+    importInput.accept = 'application/json,.json';
+    importInput.hidden = true;
+
+    exportBtn.addEventListener('click', async () => {
+        if (typeof window.buildPortableExportPayload !== 'function') return;
+        try {
+            const payload = await window.buildPortableExportPayload();
+            const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `modern-classroom-customisations-${new Date().toISOString().slice(0, 10)}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+        } catch (_) {
+            alert('Could not export customisations.');
+        }
+    });
+
+    importBtn.addEventListener('click', () => importInput.click());
+    importInput.addEventListener('change', async () => {
+        const file = importInput.files?.[0];
+        importInput.value = '';
+        if (!file || typeof window.applyPortableExportPayload !== 'function') return;
+        try {
+            const payload = JSON.parse(await file.text());
+            if (!await window.applyPortableExportPayload(payload)) throw new Error('Invalid file');
+            location.reload();
+        } catch (_) {
+            alert('This is not a valid Modern Classroom customisations file.');
+        }
+    });
+
+    const versionLabel = document.createElement('span');
+    versionLabel.className = 'settings-version-label';
+    versionLabel.textContent = (() => {
+        const version = chrome?.runtime?.getManifest?.().version || null;
+        return version ? `v${version}` : 'v?';
+    })();
+
+    const changelogBtn = document.createElement('button');
+    changelogBtn.textContent = 'Patch Notes';
+    changelogBtn.className = 'settings-changelog-btn';
+    changelogBtn.style.alignSelf = 'flex-start';
+    changelogBtn.addEventListener('click', () => {
+        if (typeof window.openModernClassroomChangelog === 'function') {
+            window.openModernClassroomChangelog();
+            return;
+        }
+
+        try {
+            const event = new CustomEvent('modernClassroomOpenChangelog');
+            window.dispatchEvent(event);
+        } catch (_) {}
+    });
+
     const feedbackBtn = document.createElement('button');
     feedbackBtn.textContent = 'Feedback';
     feedbackBtn.className = 'feedback-btn';
@@ -366,6 +467,11 @@ function insertCustomSettingsPanel() {
     });
 
     header.appendChild(title);
+    headerActions.appendChild(exportBtn);
+    headerActions.appendChild(importBtn);
+    headerActions.appendChild(importInput);
+    headerActions.appendChild(versionLabel);
+    headerActions.appendChild(changelogBtn);
     headerActions.appendChild(feedbackBtn);
     header.appendChild(headerActions);
     newPanel.appendChild(header);
@@ -459,6 +565,19 @@ function insertCustomSettingsPanel() {
         </div>
     `;
 
+    const toggleGeminiBtn = document.createElement('button');
+    toggleGeminiBtn.className = 'setting-toggle-btn sidebar-pill-toggle-btn';
+    toggleGeminiBtn.id = 'toggle-gemini-btn';
+    toggleGeminiBtn.title = 'Toggle Gemini';
+    toggleGeminiBtn.innerHTML = `
+        <div style="display: flex; flex-direction: row; align-items: center; gap: 12px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true" style="flex-shrink:0;">
+                <path d="M320-280q17 0 28.5-11.5T360-320q0-17-11.5-28.5T320-360q-17 0-28.5 11.5T280-320q0 17 11.5 28.5T320-280Zm0-160q17 0 28.5-11.5T360-480q0-17-11.5-28.5T320-520q-17 0-28.5 11.5T280-480q0 17 11.5 28.5T320-440Zm0-160q17 0 28.5-11.5T360-640q0-17-11.5-28.5T320-680q-17 0-28.5 11.5T280-640q0 17 11.5 28.5T320-600Zm120 320h240v-80H440v80Zm0-160h160v-80H440v80ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h320v80H200v560h560v-320h80v320q0 33-23.5 56.5T760-120H200Zm500-360q0-92-64-156t-156-64q92 0 156-64t64-156q0 92 64 156t156 64q-92 0-156 64t-64 156Zm-220 0Z"></path>
+            </svg>
+            <span style="font-size: 14px; font-weight:500;">Gemini</span>
+        </div>
+    `;
+
         tabPanes.sidebar.appendChild(toggleTodoBtn);
         tabPanes.sidebar.appendChild(toggleCalBtn);
 
@@ -466,8 +585,9 @@ function insertCustomSettingsPanel() {
   profilePanel.insertAdjacentElement('afterend', newPanel);
 
   // Support aria-labels in multiple languages
-  setupToggleButton('#toggle-todo-btn', '[aria-label="To-do"], [aria-label="To do"], [aria-label="Por hacer"], [aria-label="À faire"], [aria-label="Aufgaben"], [aria-label="A fazer"], [aria-label="Da fare"], [aria-label="Te doen"], [aria-label="Задачи"], [aria-label="待做"], [aria-label="待執行"], [aria-label="やることリスト"], [aria-label="할 일"]', 'hideTodo');
-  setupToggleButton('#toggle-calendar-btn', '[aria-label="Calendar"], [aria-label="Calendario"], [aria-label="Calendrier"], [aria-label="Kalender"], [aria-label="Calendário"], [aria-label="Calendario"], [aria-label="Agenda"], [aria-label="Календарь"], [aria-label="日历"], [aria-label="日曆"], [aria-label="カレンダー"], [aria-label="일정"]', 'hideCalendar', 'calendar-hidden');
+    setupToggleButton('#toggle-todo-btn', '[aria-label="To-do"], [aria-label="To do"], [aria-label="Por hacer"], [aria-label="Ã€ faire"], [aria-label="Aufgaben"], [aria-label="A fazer"], [aria-label="Da fare"], [aria-label="Te doen"], [aria-label="Ð—Ð°Ð´Ð°Ñ‡Ð¸"], [aria-label="å¾…åš"], [aria-label="å¾…åŸ·è¡Œ"], [aria-label="ã‚„ã‚‹ã“ã¨ãƒªã‚¹ãƒˆ"], [aria-label="í•  ì¼"], [href*="/todo"], [data-href*="/todo"]', 'hideTodo');
+  setupToggleButton('#toggle-calendar-btn', '[aria-label="Calendar"], [aria-label="Calendario"], [aria-label="Calendrier"], [aria-label="Kalender"], [aria-label="CalendÃ¡rio"], [aria-label="Calendario"], [aria-label="Agenda"], [aria-label="ÐšÐ°Ð»ÐµÐ½Ð´Ð°Ñ€ÑŒ"], [aria-label="æ—¥åŽ†"], [aria-label="æ—¥æ›†"], [aria-label="ã‚«ãƒ¬ãƒ³ãƒ€ãƒ¼"], [aria-label="ì¼ì •"]', 'hideCalendar', 'calendar-hidden');
+  setupToggleButton('#toggle-gemini-btn', '[aria-label="Gemini"], a[href="/u/0/ai"], a[href*="/ai"]', 'hideGemini');
 
   const panelRoot = document.querySelector('#my-extension-settings-panel');
   const tutorialBase = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL)
@@ -486,12 +606,140 @@ function insertCustomSettingsPanel() {
       grid.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;';
       decoRow.appendChild(grid);
 
+      const controlsRow = document.createElement('div');
+      controlsRow.className = 'decoration-controls-row';
+      controlsRow.style.cssText = 'display:flex;align-items:center;gap:10px;flex-wrap:wrap;';
+      const opacityRow = document.createElement('div');
+      opacityRow.className = 'decoration-opacity-row';
+      opacityRow.style.cssText = 'display:flex;align-items:center;gap:10px;flex-wrap:wrap;';
+      const opacityLabel = document.createElement('label');
+      opacityLabel.className = 'decoration-opacity-label';
+      opacityLabel.textContent = 'Visibility';
+      opacityLabel.htmlFor = 'decoration-opacity-input';
+      const opacitySliderContainer = document.createElement('div');
+      opacitySliderContainer.className = 'decoration-opacity-slider-container';
+      const opacityValue = document.createElement('span');
+      opacityValue.style.cssText = 'font-size:13px;color:var(--text-color, #666);min-width:40px;text-align:right;';
+      const opacityInput = document.createElement('input');
+      opacityInput.id = 'decoration-opacity-input';
+      opacityInput.className = 'decoration-opacity-slider';
+      opacityInput.type = 'range';
+      opacityInput.min = '0';
+      opacityInput.max = '1';
+      opacityInput.step = '0.01';
+      opacityInput.value = '0.98';
+      opacityInput.style.cssText = 'width:100%;';
+      opacitySliderContainer.appendChild(opacityInput);
+      opacitySliderContainer.appendChild(opacityValue);
+      const updateOpacityUI = (value) => {
+          const safe = Number.isFinite(Number(value)) ? Math.max(0, Math.min(1, Number(value))) : 0.98;
+          opacityInput.value = String(safe);
+          opacityValue.textContent = `${Math.round(safe * 100)}%`;
+      };
+      (async function loadSavedOpacityForUI() {
+          let opacity = null;
+          try {
+              if (typeof storageGet === 'function') {
+                  const stored = await storageGet('decoration:overlayOpacity');
+                  if (stored !== undefined && stored !== null) opacity = Number(stored);
+              }
+          } catch (_) {}
+          if (opacity === null) {
+              try {
+                  const raw = localStorage.getItem('decoration:overlayOpacity');
+                  if (raw !== null) opacity = JSON.parse(raw);
+              } catch (_) {}
+          }
+          opacity = Number.isFinite(Number(opacity)) ? Math.max(0, Math.min(1, Number(opacity))) : null;
+          if (opacity !== null) {
+              updateOpacityUI(opacity);
+              try { if (typeof setDecorationOverlayOpacity === 'function') setDecorationOverlayOpacity(opacity); } catch(_) {}
+          } else {
+              try {
+                  if (currentDecoration && typeof getDecorationOverlayOpacity === 'function') {
+                      const o = getDecorationOverlayOpacity(currentDecoration);
+                      updateOpacityUI(o);
+                  }
+              } catch(_) {}
+          }
+      })();
+      opacityInput.addEventListener('input', async () => {
+          const value = parseFloat(opacityInput.value);
+          updateOpacityUI(value);
+          try {
+              if (typeof setDecorationOverlayOpacity === 'function') {
+                  await setDecorationOverlayOpacity(value);
+              }
+          } catch (_) {}
+      });
+      opacityValue.textContent = '98%';
+      opacityRow.appendChild(opacityLabel);
+      opacityRow.appendChild(opacitySliderContainer);
+      controlsRow.appendChild(opacityRow);
+
+      const invertControl = document.createElement('label');
+      invertControl.className = 'decoration-invert-control';
+      invertControl.style.cssText = 'display:none;align-items:center;gap:6px;flex-shrink:0;margin-left:auto;';
+      invertControl.setAttribute('aria-label', 'Invert custom decoration');
+      const invertLabel = document.createElement('span');
+      invertLabel.className = 'decoration-invert-label';
+      invertLabel.textContent = 'Invert';
+      const invertToggle = document.createElement('input');
+      invertToggle.id = 'decoration-invert-toggle';
+      invertToggle.className = 'decoration-invert-toggle';
+      invertToggle.type = 'checkbox';
+      const invertSwitch = document.createElement('span');
+      invertSwitch.className = 'decoration-invert-switch';
+      invertControl.appendChild(invertLabel);
+      invertControl.appendChild(invertToggle);
+      invertControl.appendChild(invertSwitch);
+      controlsRow.appendChild(invertControl);
+      decoRow.appendChild(controlsRow);
+
+      const syncDecorationOpacityUI = (filename) => {
+          let opacity = 0.98;
+          if (typeof getDecorationOverlayOpacity === 'function') {
+              opacity = getDecorationOverlayOpacity(filename);
+          }
+          updateOpacityUI(opacity);
+      };
+
       const base = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL)
           ? chrome.runtime.getURL('Decoration/')
           : 'chrome-extension://__MSG_@@extension_id__/Decoration/';
 
+      const syncDecorationInvertUI = (filename) => {
+          const isCustom = filename === '__CUSTOM__';
+          invertControl.style.display = isCustom ? 'inline-flex' : 'none';
+          if (!isCustom) return;
+          if (typeof getDecorationInvertEnabled === 'function') {
+              invertToggle.checked = getDecorationInvertEnabled(filename);
+          }
+      };
+
+      (async function loadSavedInvertState() {
+          try {
+              if (typeof loadSavedDecorationInvertState === 'function') {
+                  await loadSavedDecorationInvertState();
+              }
+          } catch (_) {}
+          if (typeof getDecorationInvertEnabled === 'function') {
+              invertToggle.checked = getDecorationInvertEnabled('__CUSTOM__');
+          }
+      })();
+
+      invertToggle.addEventListener('change', async () => {
+          try {
+              if (typeof setDecorationInvertEnabled === 'function') {
+                  await setDecorationInvertEnabled(invertToggle.checked);
+              }
+          } catch (_) {}
+      });
+
         async function applyDecoration(filename) {
-            try { await applyDecorationFilename(filename, { persist: true }); } catch (_) {}
+            try { await applyDecorationFilename(filename, { persist: true, resetOverlayOpacity: true }); } catch (_) {}
+            syncDecorationOpacityUI(filename);
+            syncDecorationInvertUI(filename);
         }
 
         (async function loadDecorationList() {
@@ -510,6 +758,8 @@ function insertCustomSettingsPanel() {
                     applyDecoration(null);
                     grid.querySelectorAll('.decoration-item').forEach(it => it.classList.remove('selected'));
                     noneBtn.classList.add('selected');
+                    syncDecorationOpacityUI(null);
+                    syncDecorationInvertUI(null);
                 });
                 grid.appendChild(noneBtn);
 
@@ -521,24 +771,22 @@ function insertCustomSettingsPanel() {
                     item.dataset.decorationUrl = `url("${base}${file}")`;
                     item.textContent = file.replace(/[-_]/g,' ').replace(/\.png$/i,'');
                     item.title = file.replace(/[-_]/g,' ').replace(/\.png$/i,'');
-                    
+
                     const loadDecorationImage = () => {
                         if (!item.style.getPropertyValue('--decoration-url')) {
                             item.style.setProperty('--decoration-url', item.dataset.decorationUrl);
                         }
                     };
                     item.addEventListener('mouseenter', loadDecorationImage);
-                    
+
                     item.addEventListener('click', async () => {
-                        try { 
-                            await applyDecoration(file); 
-                            // Force reapply immediately
-                            setTimeout(() => {
-                                applyDecorationFilename(file, { persist: false });
-                            }, 50);
+                        try {
+                            await applyDecoration(file);
                         } catch(_) {}
                         grid.querySelectorAll('.decoration-item').forEach(it => it.classList.remove('selected'));
                         item.classList.add('selected');
+                        syncDecorationOpacityUI(file);
+                        syncDecorationInvertUI(file);
                     });
                     grid.appendChild(item);
                 }
@@ -551,23 +799,23 @@ function insertCustomSettingsPanel() {
                 customBtn.type = 'button';
                 customBtn.textContent = '+';
                 customBtn.title = 'Add custom decoration';
-                
+
                 const hiddenFileInput = document.createElement('input');
                 hiddenFileInput.type = 'file';
                 hiddenFileInput.accept = 'image/jpeg,image/png,image/gif,image/webp,.jpg,.jpeg,.png,.gif,.webp';
                 hiddenFileInput.style.display = 'none';
                 document.body.appendChild(hiddenFileInput);
-                
+
                 hiddenFileInput.addEventListener('change', async (e) => {
                     const file = e.target.files[0];
                     if (!file) return;
-                    
+
                     // Check file size (limit to 5MB)
                     if (file.size > 5 * 1024 * 1024) {
                         alert('File size must be less than 5MB');
                         return;
                     }
-                    
+
                     const reader = new FileReader();
                     reader.onload = async (event) => {
                         const dataUrl = event.target.result;
@@ -580,18 +828,19 @@ function insertCustomSettingsPanel() {
                             await applyDecoration('__CUSTOM__');
                             grid.querySelectorAll('.decoration-item').forEach(it => it.classList.remove('selected'));
                             customBtn.classList.add('selected');
+                            syncDecorationInvertUI('__CUSTOM__');
                         } catch(_) {}
                     };
                     reader.readAsDataURL(file);
-                    
+
                     // Reset input
                     hiddenFileInput.value = '';
                 });
-                
+
                 customBtn.addEventListener('click', () => {
                     hiddenFileInput.click();
                 });
-                
+
                 grid.appendChild(customBtn);
 
                 // Restore previously selected decoration (including custom)
@@ -611,7 +860,7 @@ function insertCustomSettingsPanel() {
 
                     // Clear any previous selection
                     grid.querySelectorAll('.decoration-item').forEach(it => it.classList.remove('selected'));
-                    
+
                     // Apply the saved decoration
                     if (saved === '__CUSTOM__') {
                         // Custom decoration
@@ -620,10 +869,12 @@ function insertCustomSettingsPanel() {
                                 resolve(data['decoration:custom']);
                             });
                         });
-                        
+
                         if (customData) {
                             customBtn.classList.add('selected');
                             await applyDecorationFilename('__CUSTOM__', { persist: false });
+                            syncDecorationOpacityUI('__CUSTOM__');
+                            syncDecorationInvertUI('__CUSTOM__');
                         } else {
                             noneBtn.classList.add('selected');
                         }
@@ -632,7 +883,9 @@ function insertCustomSettingsPanel() {
                         const matches = Array.from(grid.querySelectorAll('.decoration-item')).filter(b => b.dataset && b.dataset.filename === saved);
                         if (matches.length > 0) {
                             matches[0].classList.add('selected');
-                            await applyDecoration(saved);
+                            await applyDecorationFilename(saved, { persist: false, resetOverlayOpacity: false });
+                            syncDecorationOpacityUI(saved);
+                            syncDecorationInvertUI(saved);
                         } else {
                             noneBtn.classList.add('selected');
                         }
@@ -640,6 +893,7 @@ function insertCustomSettingsPanel() {
                         // No saved decoration, use default
                         noneBtn.classList.add('selected');
                     }
+                    syncDecorationInvertUI(saved || null);
                 })();
 
             } catch (e) {
@@ -683,18 +937,20 @@ function insertCustomSettingsPanel() {
 
     const togglesBox = document.createElement('div');
     togglesBox.className = 'toggles-box';
-    togglesBox.style.cssText = 'display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;';
+    togglesBox.style.cssText = 'display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));gap:8px;align-items:stretch;justify-items:stretch;width:100%;';
 
-    const todoBtn = newPanel.querySelector('#toggle-todo-btn');
-    const calBtn = newPanel.querySelector('#toggle-calendar-btn');
+    const todoBtn = toggleTodoBtn;
+    const calBtn = toggleCalBtn;
+    const geminiBtn = toggleGeminiBtn;
     if (todoBtn) togglesBox.appendChild(todoBtn);
     if (calBtn) togglesBox.appendChild(calBtn);
+    if (toggleArchivedBtn) togglesBox.appendChild(toggleArchivedBtn);
+    if (geminiBtn) togglesBox.appendChild(geminiBtn);
 
     const toggleStack = document.createElement('div');
     toggleStack.className = 'sidebar-toggle-group';
-    toggleStack.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:8px;flex:1 1 0px;';
+    toggleStack.style.cssText = 'display:flex;flex-direction:column;align-items:stretch;gap:8px;flex:1 1 0px;width:100%;';
     toggleStack.appendChild(togglesBox);
-    toggleStack.appendChild(toggleArchivedBtn);
 
     const sizeRow = document.createElement('div');
     sizeRow.className = 'sb-size-row';
@@ -706,19 +962,19 @@ function insertCustomSettingsPanel() {
 
     const controlsRow = document.createElement('div');
     controlsRow.className = 'mgc-scale-controls';
-    controlsRow.style.cssText = 'display:flex;gap:12px;align-items:center;justify-content:center;padding:10px 0px;border-radius:18px;border:1px solid rgba(0,0,0,0.06);background:transparent;';
+    controlsRow.style.cssText = 'display:flex;gap:12px;align-items:center;justify-content:center;padding-top:15px;border-radius:18px;border:1px solid rgba(0,0,0,0.06);background:transparent; width:100%;height:100%;';
 
     const minusBtn = document.createElement('button');
     minusBtn.type = 'button';
     minusBtn.className = 'mgc-scale-btn mgc-scale-minus';
-    minusBtn.textContent = '−';
-    minusBtn.style.cssText = 'width:68px;height:40px;border-radius:12px;cursor:pointer;transition:opacity 0.2s ease;line-height:1;font-size:20px;font-weight:700;';
+    minusBtn.textContent = 'âˆ’';
+    minusBtn.style.cssText = 'height:100%;border-radius:12px;cursor:pointer;transition:opacity 0.2s ease;line-height:1;font-size:20px;font-weight:700;flex:1;';
 
     const plusBtn = document.createElement('button');
     plusBtn.type = 'button';
     plusBtn.className = 'mgc-scale-btn mgc-scale-plus';
     plusBtn.textContent = '+';
-    plusBtn.style.cssText = 'width:68px;height:40px;border-radius:12px;cursor:pointer;transition:opacity 0.2s ease;line-height:1;font-size:20px;font-weight:700;';
+    plusBtn.style.cssText = 'height:100%;border-radius:12px;cursor:pointer;transition:opacity 0.2s ease;line-height:1;font-size:20px;font-weight:700;flex:1;';
 
     function applySidebarSize(v) {
         try {
@@ -770,26 +1026,28 @@ function insertCustomSettingsPanel() {
         setSidebarSizeValue(currentSize + 1);
     });
 
+
     controlsRow.appendChild(minusBtn);
     controlsRow.appendChild(plusBtn);
     sizeRow.appendChild(sizeLabel);
-    sizeRow.appendChild(controlsRow);
-
     // Add indicator dots
     const dotsContainer = document.createElement('div');
-    dotsContainer.style.cssText = 'display:flex;gap:6px;justify-content:center;margin-top:8px;';
+    dotsContainer.style.cssText = 'display:flex;gap:6px;justify-content:center;margin-top:8px;align-items:center;';
     for (let i = 0; i < 4; i++) {
       const dot = document.createElement('div');
       dot.className = `size-indicator-dot size-dot-${i + 1}`;
-      dot.style.cssText = 'width:6px;height:6px;border-radius:50%;background-color:currentColor;transition:opacity 0.2s ease;';
+      dot.style.cssText = 'border-radius:50%;background-color:currentColor;transition:opacity 0.2s ease;';
       dotsContainer.appendChild(dot);
     }
     sizeRow.appendChild(dotsContainer);
-    
+    sizeRow.appendChild(controlsRow);
+
+
+
     // Update dots after they're created
     updateScaleButtons(String(initialSize));
     setSidebarSizeValue(initialSize, false);
-    
+
     // Load from sync storage in background
     reconcileSync('sidebarSize', 3, initialSize, (storedSize) => {
         const syncSize = (storedSize !== null) ? parseInt(storedSize, 10) : 3;
@@ -812,7 +1070,7 @@ function insertCustomSettingsPanel() {
         layoutRow.style.cssText = 'display:flex;flex-direction:column;gap:8px;padding:18px;';
 
         const btns = document.createElement('div');
-        btns.style.cssText = 'display:flex;gap:8px;align-items:center;';
+        btns.style.cssText = 'display:flex;gap:8px;align-items:center;flex:1;';
 
         const standardBtn = document.createElement('button');
         standardBtn.type = 'button';
@@ -915,7 +1173,7 @@ function insertCustomSettingsPanel() {
         let stored = readLocalRaw('layoutMode') || 'standard';
         let currentLayoutMode = stored;
         applyLayoutMode(stored, false);
-        
+
         // Then load from sync storage in background
         reconcileSync('layoutMode', 'standard', stored, (syncStored) => {
             currentLayoutMode = syncStored;
@@ -947,14 +1205,14 @@ function insertCustomSettingsPanel() {
                 iconStyleLabel.style.cssText = 'font-size:13px;font-weight:500;';
 
                 const iconStyleBtns = document.createElement('div');
-                iconStyleBtns.style.cssText = 'display:flex;gap:8px;align-items:center;justify-content:flex-start;width:100%;flex-direction:column;';
+                iconStyleBtns.style.cssText = 'display:flex;gap:8px;align-items:center;justify-content:flex-start;width:100%;flex-direction:row;flex:1;';
 
                 const newIconsBtn = document.createElement('button');
                 newIconsBtn.type = 'button';
                 newIconsBtn.className = 'setting-toggle-btn';
                 newIconsBtn.title = 'Use new sidebar icons';
                 newIconsBtn.setAttribute('aria-label', 'Use new sidebar icons');
-                newIconsBtn.style.cssText = 'height:40px;border-radius:12px;padding:15px !important;justify-content:center;width:auto;min-width:0;';
+                newIconsBtn.style.cssText = 'height:40px;border-radius:12px;padding:15px !important;justify-content:center;width:auto;min-width:0;height:100%;';
                 newIconsBtn.innerHTML = `
                     <div style="display:flex;align-items:center;gap:10px;">
                             <img src="${iconBaseUrl}newhome.svg" alt="New Home" style="width:18px;height:18px;">
@@ -968,7 +1226,7 @@ function insertCustomSettingsPanel() {
                 oldIconsBtn.className = 'setting-toggle-btn';
                 oldIconsBtn.title = 'Use old sidebar icons';
                 oldIconsBtn.setAttribute('aria-label', 'Use old sidebar icons');
-                oldIconsBtn.style.cssText = 'height:40px;border-radius:12px;padding:15px !important;justify-content:center;width:auto;min-width:0;';
+                oldIconsBtn.style.cssText = 'height:40px;border-radius:12px;padding:15px !important;justify-content:center;width:auto;min-width:0;height:100%;';
                 oldIconsBtn.innerHTML = `
                     <div style="display:flex;align-items:center;gap:10px;color:currentColor;">
                             <svg data-mgc-static-preview="old-home" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;fill:currentColor;"><path d="M12 3L4 9v12h16V9l-8-6zm6 16h-3v-6H9v6H6v-9l6-4.5 6 4.5v9z"></path></svg>
@@ -1048,9 +1306,9 @@ function insertCustomSettingsPanel() {
                 sliderInput.min = '-168';
                 sliderInput.max = '612';
                 sliderInput.step = '20';
-                
+
                 // Load from localStorage immediately
-                let initialHeight = readLocalNumber('sidebarHeightAdjust', 312);
+                let initialHeight = readLocalNumber('sidebarHeightAdjust', 420);
                 sliderInput.value = initialHeight;
 
                 sliderContainer.appendChild(sliderInput);
@@ -1147,7 +1405,7 @@ function insertCustomSettingsPanel() {
 
                 const endInteraction = () => {
                     sidebarForceVisible = false;
-                    
+
                     // Re-evaluate sidebar visibility based on screen size
                     const currentSidebar = document.querySelector('.STek2d');
                     if (currentSidebar) {
@@ -1158,7 +1416,7 @@ function insertCustomSettingsPanel() {
                             if (sidebarHotspot) sidebarHotspot.classList.remove('sidebar-hide-indicator');
                         }
                     }
-                    
+
                     const enrolledEls = document.querySelectorAll('.STek2d div[role="group"]');
                     enrolledEls.forEach(el => el.style.setProperty('height', 'auto', 'important'));
                 };
@@ -1195,7 +1453,7 @@ function insertCustomSettingsPanel() {
                     applyEnrolledHeightAdjustment(e.target.value, true);
                     endInteraction();
                 });
-                
+
                 sliderInput.addEventListener('mouseup', endInteraction);
                 sliderInput.addEventListener('mouseleave', endInteraction);
                 sliderInput.addEventListener('touchend', endInteraction, { passive: true });
@@ -1207,9 +1465,9 @@ function insertCustomSettingsPanel() {
 
                 applyInitial(initialHeight);
                 setTimeout(() => applyInitial(initialHeight), 220);
-                
+
                 // Load from sync storage in background
-                reconcileSync('sidebarHeightAdjust', 312, initialHeight, (syncHeight) => {
+                reconcileSync('sidebarHeightAdjust', 420, initialHeight, (syncHeight) => {
                     initialHeight = parseInt(syncHeight, 10);
                     if (!Number.isFinite(initialHeight)) return;
                     applyInitial(initialHeight);
@@ -1252,14 +1510,15 @@ function insertCustomSettingsPanel() {
                 // Bind archived toggle and apply saved state when element appears
                 // This handles both settings page and other pages where it may load dynamically
                 // Multilingual selector for archived classes (supports 12+ languages)
-                const archivedClassesSelector = '[aria-label="Archived classes"], [aria-label="Archived Classes"], [aria-label="Clases archivadas"], [aria-label="Classes archivées"], [aria-label="Archivierte Kurse"], [aria-label="Aulas arquivadas"], [aria-label="Classi archiviate"], [aria-label="Gearchiveerde klassen"], [aria-label="Архивные классы"], [aria-label="已归档的课程"], [aria-label="已封存的課程"], [aria-label="アーカイブされたクラス"], [aria-label="보관된 클래스"]';
-                
+                const archivedClassesSelector = '[aria-label="Archived classes"], [aria-label="Archived Classes"], [aria-label="Clases archivadas"], [aria-label="Classes archivÃ©es"], [aria-label="Archivierte Kurse"], [aria-label="Aulas arquivadas"], [aria-label="Classi archiviate"], [aria-label="Gearchiveerde klassen"], [aria-label="ÐÑ€Ñ…Ð¸Ð²Ð½Ñ‹Ðµ ÐºÐ»Ð°ÑÑÑ‹"], [aria-label="å·²å½’æ¡£çš„è¯¾ç¨‹"], [aria-label="å·²å°å­˜çš„èª²ç¨‹"], [aria-label="ã‚¢ãƒ¼ã‚«ã‚¤ãƒ–ã•ã‚ŒãŸã‚¯ãƒ©ã‚¹"], [aria-label="ë³´ê´€ëœ í´ëž˜ìŠ¤"]';
+                const geminiSelector = '[aria-label="Gemini"], a[href="/u/0/ai"], a[href*="/ai"]';
+
                 waitForElement(archivedClassesSelector, () => {
                     const btn = document.querySelector('#toggle-archived-btn');
                     const target = document.querySelector(archivedClassesSelector);
                     if (!target) return;
-                    
-                    // Element exists — apply saved hidden state and set up listener
+
+                    // Element exists â€” apply saved hidden state and set up listener
                     const hidden = readLocalBool('hideArchived', false);
 
                     if (hidden) {
@@ -1278,7 +1537,26 @@ function insertCustomSettingsPanel() {
                     }
                 });
 
-                
+                waitForElement(geminiSelector, () => {
+                    const btn = document.querySelector('#toggle-gemini-btn');
+                    const target = document.querySelector(geminiSelector);
+                    if (!target) return;
+
+                    const hidden = readLocalBool('hideGemini', false);
+                    if (hidden) {
+                        target.style.display = 'none';
+                        if (btn) btn.classList.remove('active');
+                    } else {
+                        target.style.display = '';
+                        if (btn) btn.classList.add('active');
+                    }
+
+                    if (btn) {
+                        setupToggleButton('#toggle-gemini-btn', geminiSelector, 'hideGemini');
+                    }
+                });
+
+
                 function updateSidebarImages() {
                     const isDark = document.body.classList.contains('dark-mode');
                     if (classicImg) {
@@ -1294,7 +1572,7 @@ function insertCustomSettingsPanel() {
                         showAllImg.src = tutorialBase + (isDark ? showAllImg.dataset.darkImg : showAllImg.dataset.lightImg);
                     }
                 }
-                
+
                 updateSidebarImages();
 
                 onBodyClassChange(() => {
@@ -1303,7 +1581,7 @@ function insertCustomSettingsPanel() {
 
                 feedbackBtn.style.marginLeft = '0px';
 
-                                // ---- LIQUID GLASS TOGGLE ----
+                // ---- LIQUID GLASS TOGGLE ----
                 const glassRow = document.createElement('div');
                 glassRow.className = 'layout-row';
                 glassRow.style.cssText = 'display:flex;flex-direction:column;gap:8px;margin-top:12px;';
@@ -1493,8 +1771,6 @@ function insertCustomSettingsPanel() {
         fontObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
         // END FONT PICKER
 
-
-
         function setSidebarMode(mode, persist = true) {
             const isClassic = mode === 'classic';
             try {
@@ -1517,7 +1793,7 @@ function insertCustomSettingsPanel() {
         // Load from localStorage immediately
         let storedClassic = readLocalBool('classicSidebar', false);
         setSidebarMode(storedClassic ? 'classic' : 'floating', false);
-        
+
         // Then load from sync storage in background
         reconcileSync('classicSidebar', false, storedClassic, (syncClassic) => {
             setSidebarMode(syncClassic ? 'classic' : 'floating', false);
