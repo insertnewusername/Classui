@@ -11631,3 +11631,25 @@ body.dark-mode .mc-clock-widget.mc-clock-hero.mc-clock-expanded .mc-clock-settin
 }
 
 body.dark-mode .home-btn {
+/* Liquid-glass homepage spacing. */
+body.cui-glass-enabled .home-buttons-container:not(.expanded) {
+    width: 164px !important;
+    min-height: 48px !important;
+    height: 48px !important;
+    gap: 12px !important;
+    padding: 7px 10px !important;
+}
+
+body.cui-glass-enabled .home-buttons-container:not(.expanded) > .home-btn {
+    flex: 0 0 32px;
+    width: 32px !important;
+    height: 32px !important;
+}
+
+body.cui-glass-enabled .gHz6xd {
+    margin-bottom: 18px !important;
+}
+
+body.cui-glass-enabled .gHz6xd + .gHz6xd {
+    margin-top: 18px !important;
+}
