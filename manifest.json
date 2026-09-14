@@ -3,7 +3,7 @@
       "service_worker": "background.js"
    },
    "content_scripts": [ {
-      "css": [ "styles.css", "dark.css"],
+      "css": [ "styles.css", "dark.css", "features/homepage-redesign.css" ],
       "js": [
          "features/storage-utils.js",
          "features/assignment-stars.js",
@@ -19,10 +19,13 @@
          "features/settings-panel.js",
          "features/sidebar-controls.js",
          "features/sidebar-titles-banners.js",
-         "features/storage-utils.js",
          "features/tutorial-content.js",
          "features/tutorial-modal.js",
-         "features/hide-classroom-tools.js"
+         "features/hide-classroom-tools.js",
+         "features/updates-popup.js",
+         "features/update-checker.js",
+         "features/homepage-redesign.js",
+         "content.js"
       ],
       "matches": [ "*://classroom.google.com/*" ]
    } ],
@@ -34,7 +37,7 @@
    "manifest_version": 3,
    "name": "GC Visuals",
    "permissions": [ "storage" ],
-   "version": "1.0.0",
+   "version": "3.14.2",
    "web_accessible_resources": [ {
       "matches": [ "*://classroom.google.com/*" ],
       "resources": [ "Icons/*", "Tutorial/*", "Decoration/*" ]
