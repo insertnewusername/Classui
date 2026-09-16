@@ -6,7 +6,7 @@ function injectGlassFilter() {
     svg.id = 'liquid-glass-svg-filter';
     svg.style.display = 'none';
 
-    // ---- Filter 1: Default â€“ more distortion (scale 300) ----
+    // ---- Filter 1: Default more distortion (scale 300) ----
     const filter1 = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
     filter1.id = 'glass-distortion';
     filter1.setAttribute('x', '0%');
@@ -1604,7 +1604,7 @@ function insertCustomSettingsPanel() {
                 glassToggle.appendChild(glassThumb);
 
                 const glassLabelText = document.createElement('span');
-                glassLabelText.textContent = 'Enable shimmer & blur';
+                glassLabelText.textContent = 'Enable liquid glass';
                 glassLabelText.style.cssText = 'font-size:14px;font-weight:500;';
 
                 glassToggleContainer.appendChild(glassLabelText);

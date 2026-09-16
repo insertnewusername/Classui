@@ -1,7 +1,7 @@
 # Classui
 
 Class ui is a extension for google classroom. I first forked a chrome extension, named modern classroom, before updating it so that there was liquid glass. Also went to a few open source websites for inspo on liquid glass css codes
-This project was totally legal btw
+This project was totally legal btw (note: there's literally no way I could make this extension myself btw, it was mainly me forking, understanding how the code works, and using free frontend css liquid glass codes I found online for inspo, and putting it in to see if it works.
 
 
 <h2>Tutorial for getting started:<br></h2>
