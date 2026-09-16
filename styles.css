@@ -12812,13 +12812,9 @@ body.listv .sCv5Q.VjRxGc, body.listv .y4ihN.YVvGBb, body.listv .QkOyOd {
     max-width: 100% !important;
 }
 
-/* ===============================================
-   LIQUID GLASS - Unified & Clean
-   =============================================== */
+/* LIQUID GLASS code*/
 
-   /* ==========================================================================
-   TOÃ¢â‚¬â€˜DO ASSIGNMENTS Ã¢â‚¬â€œ Liquid Glass (matching stream posts)
-   ========================================================================== */
+/* to do assignments*/
 body.cui-glass-enabled [data-role="task-row"] {
     position: relative !important;
     overflow: hidden !important;
@@ -12919,9 +12915,7 @@ body.dark-mode.cui-glass-enabled .MHxtic.JUr7jb.gmNu1d.CNpREd::after {
 }
 
 
-/* ==========================================================================
-   YOUR WORK PANEL Ã¢â‚¬â€œ Liquid Glass (exact match to stream posts)
-   ========================================================================== */
+/* your work panel*/
 body.cui-glass-enabled .K2hR3c.BiaLW .AJFihd.T25sKc.jlxRme {
     position: relative !important;
     overflow: hidden !important;
@@ -13022,9 +13016,7 @@ body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .AJFihd.T25sKc.jlxRme::after {
 }
 
 
-/* ==========================================================================
-   PRIVATE COMMENTS SECTION Ã¢â‚¬â€œ Liquid Glass
-   ========================================================================== */
+/* priv comments */
 body.cui-glass-enabled .K2hR3c.BiaLW .PeGHgb.jbH5ac {
     position: relative !important;
     overflow: hidden !important;
@@ -13217,9 +13209,7 @@ body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .upBbve .UywwFc-vQzf8d {
 }
 
 
-/* ==========================================================================
-   ADD OR CREATE (+) BUTTON Ã¢â‚¬â€œ Liquid Glass pill
-   ========================================================================== */
+/* Add or create pill */
 body.cui-glass-enabled .K2hR3c.BiaLW .eVOdue {
     position: relative !important;
     border-radius: 40px !important;
@@ -13311,9 +13301,7 @@ body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .eVOdue i {
     color: #ffffff !important;
 }
 
-   /* ==========================================================================
-   DUE SOON / TO-DO PANELS Ã¢â‚¬â€œ Liquid Glass
-   ========================================================================== */
+/* Due soon and to do */
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme {
     position: relative !important;
     border-radius: 16px !important;
@@ -13376,9 +13364,7 @@ body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme::after {
     ) !important;
 }
 
-/* ==========================================================================
-   DUE SOON ASSIGNMENT CARDS Ã¢â‚¬â€œ Frosted Glass (like sidebar icons)
-   ========================================================================== */
+/* Due soon assign cards*/
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EO16hc,
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .x4lrdf {
     position: relative !important;
@@ -13469,9 +13455,7 @@ body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .x4lrdf::after {
 }
 
 
-/* ==========================================================================
-   QUICK LINKS & UPCOMING SIDEBAR Ã¢â‚¬â€œ Liquid Glass (exact match to stream posts)
-   ========================================================================== */
+/* Qck link sidebar*/
 body.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc {
     position: relative !important;
     overflow: hidden !important;
@@ -13493,7 +13477,7 @@ body.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc {
     border: none !important;
     transition: transform 0.2s ease, box-shadow 0.2s ease !important;
 }
-/* Hover glow Ã¢â‚¬â€œ exact same as stream posts */
+/* Hover glow exact same as stream posts */
 body.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc::after {
     content: '' !important;
     position: absolute !important;
@@ -13517,7 +13501,7 @@ body.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc > * {
     position: relative !important;
     z-index: 3 !important;
 }
-/* Hover lift Ã¢â‚¬â€œ exact same as stream posts */
+/* Hover lift exact same as stream posts */
 body.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc:hover {
     transform: scale(1.015) !important;
     box-shadow:
@@ -13571,9 +13555,7 @@ body.dark-mode.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc::after {
 }
 
 
-/* ==========================================================================
-   STREAMSIDE TOGGLE BUTTON Ã¢â‚¬â€œ Liquid Glass (exact match to stream posts)
-   ========================================================================== */
+/* Streamside toggle*/
 body.cui-glass-enabled .streamside-toggle-arrow-btn {
     position: relative !important;
     border-radius: 40px !important;
@@ -13659,9 +13641,7 @@ body.dark-mode.cui-glass-enabled .streamside-toggle-arrow-btn::after {
 
 
 
-/* ==========================================================================
-   HOMEPAGE CLASS CARD ACTION BAR Ã¢â‚¬â€œ Frosted Liquid Glass
-   ========================================================================== */
+/* Homepage class card*/
 /* --- The whole action bar container --- */
 body.cui-glass-enabled .SZ0kZe {
     position: relative !important;
@@ -13782,9 +13762,7 @@ body.dark-mode.cui-glass-enabled .SZ0kZe .my-extension-image:hover {
                 inset 1px 1px 0 rgba(255, 255, 255, 0.08) !important;
 }
 
-/* ==========================================================================
-   SIDEBAR CONTAINER ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ Glass (distortion on ::before, content stays crisp)
-   ========================================================================== */
+/*Sidebar container*/
 
 body.cui-glass-enabled .rknsod {
     position: relative !important;
@@ -13928,9 +13906,7 @@ body.dark-mode.cui-glass-enabled {
     --glass-dark-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
     --glass-dark-shadow-hover: 0 14px 40px rgba(0, 0, 0, 0.52);
 }
-/* ==========================================================================
-   CLASSROOM TABS ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ Outer glass pill + inner glass tabs (demo style)
-   ========================================================================== */
+/* Classroom tabs*/
 body.cui-glass-enabled .xHPsid {
     position: relative !important;
     display: flex !important;
@@ -14075,9 +14051,7 @@ body.dark-mode.cui-glass-enabled .hN1OOc[aria-current="page"] {
         inset -1px -1px 0 -1px rgba(255, 255, 255, 0.08),
         0px 2px 8px 0px rgba(0, 0, 0, 0.24) !important;
 }
-/* ==========================================================================
-   SIDEBAR CLASS CARDS ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ Advanced Glass
-   ========================================================================== */
+/* Sidebar class*/
 body.cui-glass-enabled .uTwgne,
 body.cui-glass-enabled .rknsod .uTwgne {
     position: relative !important;
@@ -14137,9 +14111,7 @@ body.cui-glass-enabled .rknsod .uTwgne:hover {
         inset 2px 2px 1px 0 rgba(255, 255, 255, 0.5),
         inset -1px -1px 1px 1px rgba(255, 255, 255, 0.5) !important;
 }
-/* ==========================================================================
-   HOMEPAGE CLASS CARDS ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ Liquid Glass (DEMO EXACT)
-   ========================================================================== */
+/* Homepage class card*/
 body.cui-glass-enabled .gHz6xd {
     position: relative !important;
     overflow: hidden !important;
@@ -14213,9 +14185,7 @@ body.dark-mode.cui-glass-enabled .gHz6xd::after {
         transparent 60%
     ) !important;
 }
-/* ==========================================================================
-   MAIN STREAM CARDS ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ OUTER GLASS PILL STYLE
-   ========================================================================== */
+/* Main stream card*/
 body.cui-glass-enabled [role="main"] .wBE4bf.TIunU {
     position: relative !important;
     overflow: hidden !important;
@@ -14321,9 +14291,7 @@ body.dark-mode.cui-glass-enabled [role="main"] .wBE4bf.TIunU::after {
         transparent 60%
     ) !important;
 }
-/* ==========================================================================
-   TEACHER & STUDENT ATTACHMENTS (fully rounded)
-   ========================================================================== */
+/* Teach and my attachments*/
 body.cui-glass-enabled .riU7le.FHXi2c,
 body.cui-glass-enabled .t2wIBc .riU7le.FHXi2c {
     position: relative !important;
@@ -14414,9 +14382,7 @@ body.dark-mode.cui-glass-enabled .t2wIBc .riU7le.FHXi2c::after {
         transparent 60%
     ) !important;
 }
-/* ==========================================================================
-   NEW ANNOUNCEMENT BUTTON ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ Liquid Glass Pill
-   ========================================================================== */
+/* Make an announcement button*/
 body.cui-glass-enabled .Utoz9b {
     position: relative !important;
     display: inline-flex !important;
@@ -14523,9 +14489,7 @@ body.dark-mode.cui-glass-enabled .Utoz9b::after {
         transparent 60%
     ) !important;
 }
-/* ==========================================================================
-   CLASSWORK TOPIC BOXES ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ Liquid Glass
-   ========================================================================== */
+/* Topic boxes */
 body.cui-glass-enabled .jHgkif.KSMuDe.u0dx8e {
     position: relative !important;
     border-radius: 16px !important;
@@ -14594,9 +14558,7 @@ body.dark-mode.cui-glass-enabled .jHgkif.KSMuDe.u0dx8e::after {
         transparent 60%
     ) !important;
 }
-/* ==========================================================================
-   ASSIGNMENT & MATERIAL POSITIONING (Stars, 3-dot)
-   ========================================================================== */
+/* Assign and material */
 body.cui-glass-enabled [role="main"] .wBE4bf.TIunU:has([aria-label*="Assignment"]) .kpDQ8,
 body.cui-glass-enabled [role="main"] .wBE4bf.TIunU:has([aria-label*="Material"]) .kpDQ8 {
     position: absolute !important;
@@ -14627,16 +14589,12 @@ body.cui-glass-enabled [role="main"] .wBE4bf.TIunU:has([aria-label*="Material"])
     margin: 0 0 2px 0 !important;
     line-height: normal !important;
 }
-/* ==========================================================================
-   ANNOUNCEMENTS ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ no extra padding overrides
-   ========================================================================== */
+/* Accouncement*/
 body.cui-glass-enabled [role="main"] .wBE4bf.TIunU:not(:has([aria-label*="Assignment"])) .pco8Kc,
 body.cui-glass-enabled [role="main"] .wBE4bf.TIunU:not(:has([aria-label*="Assignment"])) .GQW44b {
     padding-right: 0 !important;
 }
-/* ==========================================================================
-   COMMENTS ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ remove glass from comment sections inside stream cards
-   ========================================================================== */
+/* Comment*/
 body.cui-glass-enabled [role="main"] .wBE4bf.TIunU .s2g3Xd,
 body.cui-glass-enabled [role="main"] .wBE4bf.TIunU .PeGHgb,
 body.cui-glass-enabled [role="main"] .wBE4bf.TIunU .Q8U8uc,
@@ -14663,9 +14621,7 @@ body.cui-glass-enabled [role="main"] .wBE4bf.TIunU [role="region"] * {
     border: none !important;
 }
 
-/* ==========================================================================
-   DARK MODE ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ Top navigation bar
-   ========================================================================== */
+/* Dark mode toggle button*/
 body.dark-mode.cui-glass-enabled .joJglb,
 body.dark-mode.cui-glass-enabled header[role="banner"] {
     background: rgba(18, 20, 26, 0.72) !important;
@@ -14822,9 +14778,6 @@ body.dark-mode.cui-glass-enabled header[role="banner"] {
         inset 1px 1px 0 rgba(255, 255, 255, 0.06),
         inset -1px -1px 0 rgba(255, 255, 255, 0.04) !important;
 }
-/* ==========================================================================
-   FIX: Keep glass on sidebar items in "Expand Class" mode
-   ========================================================================== */
 body:not(.sidebar-expand-all-hover) .rknsod {
     max-height: none !important;
     overflow-y: visible !important;
@@ -14843,9 +14796,7 @@ body:not(.sidebar-expand-all-hover) .rknsod {
 body:not(.sidebar-expand-all-hover) .rknsod .uTwgne::after {
     pointer-events: none;
 }
-/* ==========================================================================
-   RE-APPLY LIQUID GLASS TO CLASS COMMENTS INSIDE ASSIGNMENT VIEW
-   ========================================================================== */
+
 /* Target class comments (.PeGHgb) that are NOT private (.jbH5ac)
    inside the assignment view wrapper (.eqqrO) */
 body.cui-glass-enabled .eqqrO .PeGHgb:not(.jbH5ac) {
