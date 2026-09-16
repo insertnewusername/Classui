@@ -14920,3 +14920,12 @@ body.cui-glass-enabled .gHz6xd {
 body.cui-glass-enabled .gHz6xd + .gHz6xd {
     margin-top: 18px !important;
 }
+
+/* Keep the glass homepage content clear of the expanded sidebar/taskbar. */
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme {
+    margin-left: 16px !important;
+}
+
+body.cui-glass-enabled .gHz6xd {
+    margin-left: 24px !important;
+}
