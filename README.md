@@ -11,7 +11,14 @@ Go to chrome://extensions<br>
 Press load unpacked<br>
 Select the folder that you have downloaded<br>
 Now go to google classroom! <br>
-IMPORTANT! GO TO GOOGLE CLASSROOM SETTINGS, BACKGROUND, AND ENABLE LIQUID GLASS
+IMPORTANT! GO TO GOOGLE CLASSROOM SETTINGS, BACKGROUND, AND ENABLE LIQUID GLASS\
+
+
+<h2>Acknowledgements</h2>
+
+Liquid glass css code: https://freefrontend.com/css-liquid-glass/
+THe thng i pirated of chrome web store: https://chromewebstore.google.com/detail/modern-classroom/bbeejocagpeechkgliijfedcbeggncne
+
 
 <h2>Screenshots:</h2>
 
