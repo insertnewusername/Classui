@@ -14051,65 +14051,145 @@ body.dark-mode.cui-glass-enabled .hN1OOc[aria-current="page"] {
         inset -1px -1px 0 -1px rgba(255, 255, 255, 0.08),
         0px 2px 8px 0px rgba(0, 0, 0, 0.24) !important;
 }
-/* Sidebar class*/
+/* ===== SIDEBAR ITEMS ===== */
+
 body.cui-glass-enabled .uTwgne,
 body.cui-glass-enabled .rknsod .uTwgne {
     position: relative !important;
-    border-radius: 16px !important;
-    margin: 4px 8px !important;
-    overflow: hidden !important;
-    background: rgba(255, 255, 255, 0.35) !important;
-    box-shadow:
-        0 4px 15px rgba(0, 0, 0, 0.06),
-        inset 2px 2px 1px 0 rgba(255, 255, 255, 0.5),
-        inset -1px -1px 1px 1px rgba(255, 255, 255, 0.5) !important;
-    border: 1px solid rgba(255, 255, 255, 0.3) !important;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease !important;
+
+    margin: 0 !important;
+    padding: 15 !important;
+
+    border-radius: 18px !important;
+
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+
+    overflow: visible !important;
+
+    transition:
+        transform 0.25s ease,
+        background 0.25s ease,
+        box-shadow 0.25s ease !important;
 }
+
+/* Remove individual class glass */
 body.cui-glass-enabled .uTwgne::before,
-body.cui-glass-enabled .rknsod .uTwgne::before {
-    content: '' !important;
-    position: absolute !important;
-    inset: 0 !important;
-    border-radius: inherit !important;
-    z-index: 0 !important;
-    pointer-events: none !important;
-    backdrop-filter: blur(8px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(8px) saturate(180%) !important;
-    filter: url(#glass-distortion) !important;
-}
+body.cui-glass-enabled .rknsod .uTwgne::before,
 body.cui-glass-enabled .uTwgne::after,
 body.cui-glass-enabled .rknsod .uTwgne::after {
-    content: '' !important;
-    position: absolute !important;
-    inset: 0 !important;
-    border-radius: inherit !important;
-    pointer-events: none !important;
-    z-index: 2 !important;
-    background: radial-gradient(
-        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-        rgba(255, 255, 255, 0.4) 0%,
-        transparent 60%
-    ) !important;
-    opacity: 0 !important;
-    transition: opacity 0.3s ease !important;
+    display: none !important;
 }
-body.cui-glass-enabled .uTwgne:hover::after,
-body.cui-glass-enabled .rknsod .uTwgne:hover::after {
-    opacity: 1 !important;
-}
+
 body.cui-glass-enabled .uTwgne > *,
 body.cui-glass-enabled .rknsod .uTwgne > * {
     position: relative !important;
     z-index: 3 !important;
 }
+
+/* Hover highlight only */
 body.cui-glass-enabled .uTwgne:hover,
 body.cui-glass-enabled .rknsod .uTwgne:hover {
+
+    background: rgba(255,255,255,.08) !important;
+
+    backdrop-filter: blur(8px) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
+
+    border-radius: 999px !important;
+
     transform: scale(1.015) !important;
+}
+
+/* ===== MAIN SIDEBAR LIQUID GLASS ===== */
+
+body.cui-glass-enabled .rknsod {
+    position: relative !important;
+
+    overflow: hidden !important;
+    overflow-y: auto !important;
+
+    max-height: calc(100vh - 120px) !important;
+
+    border-radius: 20px !important;
+    margin: 18px !important;
+
+    background: rgba(255,255,255,.25) !important;
+
+    backdrop-filter: blur(8px) url(#glass-distortion) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
+
+    border: none !important;
+
+    min-width: 40px !important;
+
     box-shadow:
-        0 8px 30px rgba(0, 0, 0, 0.12),
-        inset 2px 2px 1px 0 rgba(255, 255, 255, 0.5),
-        inset -1px -1px 1px 1px rgba(255, 255, 255, 0.5) !important;
+        inset 0 0 0 1px rgba(255,255,255,.6),
+        inset 2px 3px 0 -2px rgba(255,255,255,.9),
+        inset -2px -2px 0 -2px rgba(255,255,255,.8),
+        inset -3px -8px 1px -6px rgba(255,255,255,.6),
+        inset -0.3px -1px 4px 0 rgba(0,0,0,.12),
+        inset -1.5px 2.5px 0 -2px rgba(0,0,0,.2),
+        inset 0 3px 4px -2px rgba(0,0,0,.2),
+        inset 2px -6.5px 1px -4px rgba(0,0,0,.1),
+        0 1px 5px 0 rgba(0,0,0,.1),
+        0 6px 16px 0 rgba(0,0,0,.08) !important;
+}
+
+/* Distortion layer */
+body.cui-glass-enabled .rknsod::before {
+    content: '' !important;
+    position: absolute !important;
+
+    inset: 0 !important;
+
+    border-radius: inherit !important;
+
+    z-index: 0 !important;
+
+    pointer-events: none !important;
+
+    filter: url(#glass-distortion) !important;
+}
+
+/* Liquid highlight */
+body.cui-glass-enabled .rknsod::after {
+    content: '' !important;
+
+    position: absolute !important;
+    inset: 0 !important;
+
+    border-radius: inherit !important;
+
+    pointer-events: none !important;
+    z-index: 2 !important;
+
+    background:
+        radial-gradient(
+            circle at var(--mouse-x,50%) var(--mouse-y,50%),
+            rgba(255,255,255,.35) 0%,
+            transparent 60%
+        ),
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,.25) 0%,
+            rgba(255,255,255,.08) 25%,
+            transparent 50%
+        ) !important;
+
+    opacity: .75 !important;
+
+    transition: opacity .3s ease !important;
+}
+
+body.cui-glass-enabled .rknsod:hover::after {
+    opacity: 1 !important;
+}
+
+body.cui-glass-enabled .rknsod > * {
+    position: relative !important;
+    z-index: 3 !important;
 }
 /* Homepage class card*/
 body.cui-glass-enabled .gHz6xd {
