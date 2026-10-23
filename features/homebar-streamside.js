@@ -84,7 +84,7 @@
             targetElement.parentElement.insertBefore(flexContainer, targetElement);
             flexContainer.appendChild(buttonWrapper);
             flexContainer.appendChild(targetElement);
-
+            
             // Mark element so we don't add button twice
             targetElement.setAttribute('data-streamside-button-added', 'true');
             return true;
@@ -100,7 +100,7 @@
         // Aggressive observer that watches for new target elements
         const observer = new MutationObserver((mutations) => {
             let shouldCheck = false;
-
+            
             for (let mutation of mutations) {
                 if (mutation.type === 'childList') {
                     for (let node of mutation.addedNodes) {
@@ -153,14 +153,14 @@
 
         const indicator = document.createElement('div');
         indicator.className = 'home-indicator';
-
+        
         const container = document.createElement('div');
         container.className = 'home-buttons-container';
-
+        
         const btn1 = document.createElement('button');
         btn1.className = 'home-btn';
         btn1.innerHTML = '<div class="home-icon-stack"><div class="home-rect"></div></div>';
-
+        
         const btn2 = document.createElement('button');
         btn2.className = 'home-btn';
         btn2.innerHTML = '<div class="home-icon-single"><div class="home-rect-full"></div></div>';
@@ -627,7 +627,7 @@
                 setCustomizePanelOpen(false);
             }
         });
-
+        
         function updateState(isMiniWidget, persist = true) {
             if (isMiniWidget) {
                 document.body.classList.add('miniwidget');
@@ -666,7 +666,7 @@
             }
         } catch (_) {}
         applyTopRowHiddenState(savedTopRowHidden, false);
-
+        
         // Then load from sync storage in background
         if (typeof storageGet === 'function') {
             storageGet('homeMiniWidget', false).then(syncState => {
@@ -730,20 +730,20 @@
         foldersContainer.className = 'home-folders-container';
 
 
-
+        
         // 2. Apps Icon Box (Home)
         const appsBtn = document.createElement('div');
         appsBtn.className = 'home-folder-item active'; // Removed icon-item to allow text
-
+        
         const appsIcon = document.createElement('div');
         appsIcon.className = 'home-folder-icon-div home-icon';
         appsIcon.style.setProperty('--dna-icon-url', `url("${chrome.runtime.getURL('Icons/Home Icon.svg')}")`);
         // Color handled in CSS for light/dark mode support
-
+        
         const appsText = document.createElement('span');
         appsText.className = 'folder-name';
         appsText.textContent = 'Home';
-
+        
         appsBtn.appendChild(appsIcon);
         appsBtn.appendChild(appsText);
         foldersContainer.appendChild(appsBtn);
@@ -768,13 +768,13 @@
         indicator.appendChild(container);
         indicator.appendChild(foldersContainer);
         indicator.appendChild(hiddenClassesContainer);
-
+        
         document.body.appendChild(indicator);
 
         // --- Sub Bar ---
         const subBar = document.createElement('div');
         subBar.className = 'home-sub-bar';
-
+        
         // Rename Button
         const renameBtn = document.createElement('div');
         renameBtn.className = 'sub-bar-btn';
@@ -782,7 +782,7 @@
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
             <span>Rename Folder</span>
         `;
-
+        
         // Icon Button
         const iconBtn = document.createElement('div');
         iconBtn.className = 'sub-bar-btn';
@@ -830,13 +830,13 @@
         deleteBtn.innerHTML = `
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
         `;
-
+        
         let isDeleting = false;
-
+        
         deleteBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             if (!activeFolderId) return;
-
+            
             if (!isDeleting) {
                 // Switch to confirm state
                 isDeleting = true;
@@ -870,7 +870,7 @@
         function showClassroomPicker() {
             subBar.innerHTML = '';
             subBar.style.flexDirection = 'column';
-
+            
             // Return Button
             const returnBtn = document.createElement('div');
             returnBtn.className = 'sub-bar-btn';
@@ -890,37 +890,37 @@
 
             const grid = document.createElement('div');
             grid.className = 'classroom-picker-grid';
-
+            
             // Get all courses from DOM
             const cards = document.querySelectorAll('ol li');
             const courses = [];
             cards.forEach(card => {
                 // Skip hidden classes (they have the OmA97e div)
                 if (card.querySelector('.OmA97e')) return;
-
+                
                 const id = getClassIdFromCard(card);
                 // Use the primary class title only (exclude subtitle like teacher/section text)
                 const name = getPrimaryClassTitleFromCard(card);
-
+                
                 if (id && !courses.find(c => c.id === id)) {
                     courses.push({ id, name });
                 }
             });
 
             const activeFolder = folders.find(f => f.id === activeFolderId);
-            if (!activeFolder) return;
-
+            if (!activeFolder) return; 
+            
             if (!activeFolder.courseIds) activeFolder.courseIds = [];
 
             courses.forEach(course => {
                 const item = document.createElement('div');
                 const isAdded = activeFolder.courseIds.includes(course.id);
                 item.className = `classroom-picker-item ${isAdded ? 'added' : 'not-added'}`;
-
+                
                 item.innerHTML = `
                     <div class="classroom-picker-name">${course.name}</div>
                 `;
-
+                
                 item.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const index = activeFolder.courseIds.indexOf(course.id);
@@ -936,10 +936,10 @@
                     saveFolders();
                     applyClassroomFilter();
                 });
-
+                
                 grid.appendChild(item);
             });
-
+            
             subBar.appendChild(grid);
         }
 
@@ -975,8 +975,8 @@
         try {
             const raw = localStorage.getItem('modernClassroom_folders');
             if (raw) folders = JSON.parse(raw);
-        } catch(e) {
-            folders = [];
+        } catch(e) { 
+            folders = []; 
         }
 
         let activeFolderId = null; // null = Home
@@ -1016,7 +1016,7 @@
                 try { localStorage.setItem('modernClassroom_folders', JSON.stringify(folders)); } catch (_) {}
             }
         }
-
+        
         // Load from sync storage in background and update if different
         if (typeof storageGet === 'function') {
             storageGet('modernClassroom_folders', []).then(storedFolders => {
@@ -1236,14 +1236,14 @@
         iconBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             if (!activeFolderId) return;
-
+            
             const currentFolder = folders.find(f => f.id === activeFolderId);
             if (!currentFolder) return;
 
             // Temporarily replace sub-bar content with icon picker
             const originalContent = Array.from(subBar.children);
             subBar.innerHTML = '';
-
+            
             const pickerContainer = document.createElement('div');
             pickerContainer.style.display = 'flex';
             pickerContainer.style.flexDirection = 'column';
@@ -1260,7 +1260,7 @@
 
             availableIcons.forEach(group => {
                 const sectionDiv = document.createElement('div');
-
+                
                 const title = document.createElement('div');
                 title.className = 'home-icon-picker-grid-title';
                 title.textContent = group.title;
@@ -1279,16 +1279,16 @@
                     if (currentFolder.icon === iconName) {
                         iconDiv.classList.add('selected');
                     }
-
+                    
                     const img = document.createElement('img');
                     img.src = chrome.runtime.getURL('Icons/' + iconName);
                     img.className = 'home-icon-img';
-
+                    
                     iconDiv.appendChild(img);
-
+                    
                     iconDiv.addEventListener('click', (ev) => {
                         ev.stopPropagation();
-
+                        
                         // Update UI selection
                         const allIcons = iconList.querySelectorAll('.home-icon-btn');
                         allIcons.forEach(el => el.classList.remove('selected'));
@@ -1298,14 +1298,14 @@
                         saveFolders();
                         renderFolders();
                     });
-
+                    
                     grid.appendChild(iconDiv);
                 });
-
+                
                 sectionDiv.appendChild(grid);
                 iconList.appendChild(sectionDiv);
             });
-
+            
             // Return button for picker
             const closePicker = document.createElement('div');
             closePicker.className = 'sub-bar-btn icondone';
@@ -1328,7 +1328,7 @@
             // Color Picker Section
             const colorSection = document.createElement('div');
             colorSection.className = 'home-color-picker-section mc-icon-picker-colour-surface';
-
+            
             const picker = window.MCColourPicker.create({
                 container: colorSection,
                 initialColor: currentFolder.color || '#ffffff',
@@ -1369,10 +1369,10 @@
                 else if (4 <= hh && hh < 5) { r1=x; g1=0; b1=c; }
                 else { r1=c; g1=0; b1=x; }
                 const m = v - c;
-                return {
-                    r: Math.round((r1+m)*255),
-                    g: Math.round((g1+m)*255),
-                    b: Math.round((b1+m)*255)
+                return { 
+                    r: Math.round((r1+m)*255), 
+                    g: Math.round((g1+m)*255), 
+                    b: Math.round((b1+m)*255) 
                 };
             }
 
@@ -1395,7 +1395,7 @@
                     g = parseInt(hex.slice(3, 5), 16);
                     b = parseInt(hex.slice(5, 7), 16);
                 }
-
+                
                 const r1=r/255, g1=g/255, b1=b/255;
                 const max=Math.max(r1,g1,b1), min=Math.min(r1,g1,b1);
                 const d=max-min;
@@ -1417,7 +1417,7 @@
                 currentS = s;
                 currentV = v;
             }
-
+            
             hueSlider.value = currentH;
             hexInput.value = currentFolder.color || '#ffffff';
 
@@ -1426,20 +1426,20 @@
                 const ctx = svCanvas.getContext('2d');
                 const width = svCanvas.width;
                 const height = svCanvas.height;
-
+                
                 ctx.clearRect(0, 0, width, height);
-
+                
                 // Fill with current Hue
                 ctx.fillStyle = `hsl(${currentH}, 100%, 50%)`;
                 ctx.fillRect(0, 0, width, height);
-
+                
                 // White gradient (Left to Right)
                 const whiteGrad = ctx.createLinearGradient(0, 0, width, 0);
                 whiteGrad.addColorStop(0, 'rgba(255,255,255,1)');
                 whiteGrad.addColorStop(1, 'rgba(255,255,255,0)');
                 ctx.fillStyle = whiteGrad;
                 ctx.fillRect(0, 0, width, height);
-
+                
                 // Black gradient (Top to Bottom)
                 const blackGrad = ctx.createLinearGradient(0, 0, 0, height);
                 blackGrad.addColorStop(0, 'rgba(0,0,0,0)');
@@ -1452,7 +1452,7 @@
                 // Ensure we have dimensions
                 const width = svCanvas.offsetWidth || 280;
                 const height = svCanvas.offsetHeight || 120;
-
+                
                 const x = currentS * width;
                 const y = (1 - currentV) * height;
                 svMarker.style.left = `${x}px`;
@@ -1462,16 +1462,16 @@
             function updateColorFromHsv() {
                 const { r, g, b } = localHsvToRgb(currentH, currentS, currentV);
                 const hex = localRgbToHex(r, g, b);
-
+                
                 // Update inputs
                 if (document.activeElement !== hexInput) {
                     hexInput.value = hex;
                 }
-
+                
                 // Update data
                 currentFolder.color = hex;
                 saveFolders();
-
+                
                 // Update DOM directly
                 const activeBtn = subBar.parentElement || dynamicFoldersWrapper.querySelector('.home-folder-item.active');
                 if (activeBtn) {
@@ -1494,21 +1494,21 @@
             });
 
             let isDraggingSv = false;
-
+            
             function handleSvInput(clientX, clientY) {
                 const rect = svCanvas.getBoundingClientRect();
                 if (rect.width === 0 || rect.height === 0) return;
 
                 let x = clientX - rect.left;
                 let y = clientY - rect.top;
-
+                
                 // Clamp
                 x = Math.max(0, Math.min(rect.width, x));
                 y = Math.max(0, Math.min(rect.height, y));
-
+                
                 currentS = x / rect.width;
                 currentV = 1 - (y / rect.height);
-
+                
                 updateMarkerPosition();
                 updateColorFromHsv();
             }
@@ -1517,13 +1517,13 @@
                 isDraggingSv = true;
                 handleSvInput(e.clientX, e.clientY);
             });
-
+            
             window.addEventListener('mousemove', (e) => {
                 if (isDraggingSv) {
                     handleSvInput(e.clientX, e.clientY);
                 }
             });
-
+            
             window.addEventListener('mouseup', () => {
                 isDraggingSv = false;
             });
@@ -1546,7 +1546,7 @@
             pickerContainer.appendChild(pickerHeader);
             pickerContainer.appendChild(colorSection);
             pickerContainer.appendChild(iconList);
-
+            
             // Initial Draw
             setTimeout(() => {
                 drawSvBox();
@@ -1565,23 +1565,23 @@
         renameBtn.addEventListener('click', (e) => {
             e.stopPropagation(); // Prevent folder click
             if (!activeFolderId) return;
-
+            
             const currentFolder = folders.find(f => f.id === activeFolderId);
             if (!currentFolder) return;
 
             // Clear sub-bar to show rename interface
             subBar.innerHTML = '';
-
+            
             const input = document.createElement('input');
             input.type = 'text';
             input.className = 'sub-bar-input';
             input.value = currentFolder.name;
             input.placeholder = "Folder Name";
-
+            
             const saveBtn = document.createElement('div');
             saveBtn.className = 'sub-bar-btn';
             saveBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-
+            
             const cancelBtn = document.createElement('div');
             cancelBtn.className = 'sub-bar-btn';
             cancelBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
@@ -1605,13 +1605,13 @@
                 e.stopPropagation();
                 resetSubBarState();
             });
-
+            
             input.addEventListener('keydown', (e) => {
                 e.stopPropagation();
                 if (e.key === 'Enter') save();
                 if (e.key === 'Escape') resetSubBarState();
             });
-
+            
             input.addEventListener('click', (e) => e.stopPropagation());
 
             subBar.appendChild(input);
@@ -1634,23 +1634,23 @@
 
             folders.forEach((folder, index) => {
                 let fBtn = dynamicFoldersWrapper.querySelector(`[data-folder-id="${folder.id}"]`);
-
+                
                 if (!fBtn) {
                     // Create new button
                     fBtn = document.createElement('div');
                     fBtn.className = 'home-folder-item folder-btn';
                     fBtn.style.position = 'relative';
                     fBtn.dataset.folderId = folder.id;
-
+                    
                     const icon = document.createElement('div');
                     icon.className = 'home-folder-icon-div';
-
+                    
                     const nameSpan = document.createElement('span');
                     nameSpan.className = 'folder-name';
-
+                    
                     fBtn.appendChild(icon);
                     fBtn.appendChild(nameSpan);
-
+                    
                     fBtn.addEventListener('click', () => {
                         setActiveFolder(folder.id);
                     });
@@ -1666,10 +1666,10 @@
                 // Update Content
                 const icon = fBtn.querySelector('.home-folder-icon-div');
                 const nameSpan = fBtn.querySelector('.folder-name');
-
+                
                 const iconName = folder.icon || 'fi-sr-folder.svg';
                 icon.style.setProperty('--dna-icon-url', `url("${chrome.runtime.getURL('Icons/' + iconName)}")`);
-
+                
                 if (folder.color) {
                     icon.style.setProperty('background-color', folder.color, 'important');
                     nameSpan.style.color = folder.color;
@@ -1677,7 +1677,7 @@
                     icon.style.removeProperty('background-color');
                     nameSpan.style.removeProperty('color');
                 }
-
+                
                 nameSpan.textContent = folder.name;
 
                 // Update Active State
@@ -1705,7 +1705,7 @@
 
             activeFolderId = id;
             updateSetHomeButtonState();
-
+            
             // Update UI
             if (id === null) {
                 appsBtn.classList.add('active');
@@ -1716,14 +1716,14 @@
                 appsBtn.classList.remove('active');
                 document.body.classList.add('folder-active');
             }
-            renderFolders();
-
+            renderFolders(); 
+            
             // Trigger Filter
             applyClassroomFilter();
         }
 
         appsBtn.addEventListener('click', () => setActiveFolder(null));
-
+        
         plusBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             if (plusBtn.classList.contains('editing')) return;
@@ -1737,7 +1737,7 @@
             input.className = 'folder-creation-input';
             input.placeholder = "Name";
             input.value = "New Folder";
-
+            
             // Select all text on focus
             setTimeout(() => input.select(), 0);
 
@@ -1784,7 +1784,7 @@
                 if (e.key === 'Enter') save();
                 if (e.key === 'Escape') reset();
             });
-
+            
             input.addEventListener('click', (e) => e.stopPropagation());
 
             plusBtn.appendChild(input);
@@ -1826,8 +1826,8 @@
 
         function applyClassroomFilter() {
             // Find class cards (usually li elements in an ol)
-            const cards = document.querySelectorAll('ol li');
-
+            const cards = document.querySelectorAll('ol li'); 
+            
             // Find active folder
             const activeFolder = folders.find(f => f.id === activeFolderId);
             const allowedCourses = activeFolder ? (activeFolder.courseIds || []) : [];
@@ -1853,7 +1853,7 @@
             sidebarLinks.forEach(link => {
                 const match = link.getAttribute('href').match(/\/c\/([a-zA-Z0-9]+)/);
                 const classId = match ? match[1] : null;
-
+                
                 if (!classId) return;
 
                 if (activeFolderId === null) {
@@ -1954,7 +1954,7 @@
         hookLocationChanges();
         checkUrl();
         applyClassroomFilter();
-
+        
         renderFolders();
         if (defaultFolderId && folders.some(f => f.id === defaultFolderId)) {
             setActiveFolder(defaultFolderId);
@@ -1973,3 +1973,5 @@
         initHomeBar();
     }
 })();
+
+

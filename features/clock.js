@@ -382,16 +382,16 @@ function loadClockLayout() {
                 const format = btn.dataset.format;
                 use24HourFormat = format === '24h';
                 saveTimeFormat();
-
+                
                 // Update button states
                 formatBtns.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-
+                
                 // Update time display
                 updateClock(widget);
             });
         });
-
+        
         // Set initial button state
         const activeBtn = widget.querySelector(use24HourFormat ? '.mc-clock-format-24h' : '.mc-clock-format-12h');
         if (activeBtn) {
@@ -408,16 +408,16 @@ function loadClockLayout() {
                 const unit = btn.dataset.unit;
                 useFahrenheit = unit === 'f';
                 saveTempUnit();
-
+                
                 // Update button states
                 tempBtns.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-
+                
                 // Update weather display
                 updateWeather(widget);
             });
         });
-
+        
         // Set initial button state
         const activeBtn = widget.querySelector(useFahrenheit ? '.mc-clock-temp-f' : '.mc-clock-temp-c');
         if (activeBtn) {
@@ -469,16 +469,29 @@ function loadClockLayout() {
                     applyClockLayout(widget);
                     colourTrigger.querySelector('.mc-clock-colour-swatch').style.backgroundColor = colour;
                 },
-                onDefault: () => {
-                    heroClockColour = null;
-                    saveHeroClockAppearance();
-                    applyClockLayout(widget);
-                    restoringDefault = true;
-                    picker.setColor(defaultColour, 'default');
-                    restoringDefault = false;
-                    colourTrigger.querySelector('.mc-clock-colour-swatch').style.backgroundColor = '';
-                }
+                onDefault: restoreDefaultColour
             });
+
+            function restoreDefaultColour() {
+                heroClockColour = null;
+                saveHeroClockAppearance();
+                applyClockLayout(widget);
+                restoringDefault = true;
+                picker.setColor(defaultColour, 'default');
+                restoringDefault = false;
+                colourTrigger.querySelector('.mc-clock-colour-swatch').style.backgroundColor = '';
+            }
+
+            const resetButton = document.createElement('button');
+            resetButton.type = 'button';
+            resetButton.className = 'mc-picker-default mc-clock-colour-reset';
+            resetButton.textContent = 'Revert to default';
+            resetButton.setAttribute('aria-label', 'Revert clock colour to default');
+            resetButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                restoreDefaultColour();
+            });
+            colourPickerEl.appendChild(resetButton);
 
             colourTrigger.querySelector('.mc-clock-colour-swatch').style.backgroundColor = heroClockColour || '';
             colourTrigger.addEventListener('click', (e) => {
@@ -486,6 +499,16 @@ function loadClockLayout() {
                 const isHidden = colourPickerEl.hidden;
                 colourPickerEl.hidden = !isHidden;
                 colourTrigger.setAttribute('aria-expanded', String(isHidden));
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!(e.target instanceof Node)
+                    || colourPickerEl.contains(e.target)
+                    || colourTrigger.contains(e.target)) {
+                    return;
+                }
+                colourPickerEl.hidden = true;
+                colourTrigger.setAttribute('aria-expanded', 'false');
             });
         }
 

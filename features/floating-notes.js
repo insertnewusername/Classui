@@ -1,4 +1,18 @@
 (function() {
+    const FEATURE_KEY = 'modernClassroom_featureNotes';
+    const FEATURE_DEFAULT = true;
+
+    function isFeatureEnabled() {
+        try {
+            const raw = localStorage.getItem(FEATURE_KEY);
+            return raw === null ? FEATURE_DEFAULT : raw !== 'false';
+        } catch (_) {
+            return FEATURE_DEFAULT;
+        }
+    }
+
+    if (!isFeatureEnabled()) return;
+
     function initFloatingNotesWidget() {
         if (document.querySelector('.mc-notes-widget')) return;
 
@@ -8,6 +22,7 @@
         const PANEL_SIZE_KEY = 'modernClassroom_floatingNotesPanelSize';
         const PANEL_MODE_KEY = 'modernClassroom_floatingNotesPanelMode';
         const PANEL_FIXED_WIDTH_KEY = 'modernClassroom_floatingNotesFixedWidth';
+        const PANEL_LOCK_KEY = 'modernClassroom_floatingNotesPanelLocked';
         const defaultState = { todos: [], text: '', starredAssignments: [] };
         const defaultPanelSize = { width: 380, height: 420 };
         const defaultFixedPanelWidth = 420;
@@ -320,7 +335,7 @@
                     const itemId = String(item.itemId || '').trim() || streamItemId;
                     const courseWorkId = String(item.courseWorkId || '').trim();
                     const rawTitle = String(item.rawTitle || item.title || '').trim().slice(0, 240);
-                    const title = getDisplayTitle(item.title || rawTitle).slice(0, 220);
+                    const title = String(item.title || '').trim().slice(0, 220) || getDisplayTitle(rawTitle).slice(0, 220);
                     const inferredItemType = /^m:/i.test(itemId)
                         ? 'material'
                         : /^a:/i.test(itemId)
@@ -404,6 +419,12 @@
             try {
                 localStorage.setItem(PANEL_SIZE_KEY, JSON.stringify(size));
             } catch (_) {}
+
+            try {
+                if (typeof storageSet === 'function') {
+                    storageSet(PANEL_SIZE_KEY, size);
+                }
+            } catch (_) {}
         }
 
         function loadPanelSize() {
@@ -419,6 +440,12 @@
         function saveFixedPanelWidth(width) {
             try {
                 localStorage.setItem(PANEL_FIXED_WIDTH_KEY, String(width));
+            } catch (_) {}
+
+            try {
+                if (typeof storageSet === 'function') {
+                    storageSet(PANEL_FIXED_WIDTH_KEY, Number(width));
+                }
             } catch (_) {}
         }
 
@@ -437,11 +464,37 @@
             try {
                 localStorage.setItem(PANEL_MODE_KEY, fixedMode ? 'fixed' : 'float');
             } catch (_) {}
+
+            try {
+                if (typeof storageSet === 'function') {
+                    storageSet(PANEL_MODE_KEY, fixedMode ? 'fixed' : 'float');
+                }
+            } catch (_) {}
         }
 
         function loadPanelMode() {
             try {
                 return localStorage.getItem(PANEL_MODE_KEY) === 'fixed';
+            } catch (_) {
+                return false;
+            }
+        }
+
+        function savePanelLockState(locked) {
+            try {
+                localStorage.setItem(PANEL_LOCK_KEY, locked ? '1' : '0');
+            } catch (_) {}
+
+            try {
+                if (typeof storageSet === 'function') {
+                    storageSet(PANEL_LOCK_KEY, locked ? '1' : '0');
+                }
+            } catch (_) {}
+        }
+
+        function loadPanelLockState() {
+            try {
+                return localStorage.getItem(PANEL_LOCK_KEY) === '1';
             } catch (_) {
                 return false;
             }
@@ -458,6 +511,7 @@
             }
             if (isFixedMode && isPanelLocked) {
                 applyPanelLockState(false);
+                savePanelLockState(false);
             }
 
             if (modeToggleIcon) {
@@ -567,6 +621,10 @@
         const initialPanelSize = loadPanelSize();
         setPanelSize(initialPanelSize, { fixedMode: false });
         applyPanelMode(loadPanelMode());
+        const initialPanelLocked = loadPanelLockState();
+        if (!isFixedMode) {
+            applyPanelLockState(initialPanelLocked);
+        }
         initializePanelResizing();
 
         function normalizeState(raw) {
@@ -628,6 +686,12 @@
             try {
                 localStorage.setItem(STARRED_ASSIGNMENTS_KEY, JSON.stringify(items));
             } catch (_) {}
+
+            try {
+                if (typeof storageSet === 'function') {
+                    storageSet(STARRED_ASSIGNMENTS_KEY, items);
+                }
+            } catch (_) {}
         }
 
         function broadcastStarredAssignments() {
@@ -671,6 +735,7 @@
             try {
                 if (typeof storageSet === 'function') {
                     storageSet(STORAGE_KEY, persistableState);
+                    storageSet(LEGACY_STORAGE_KEY, persistableState);
                 }
             } catch (_) {}
 
@@ -1143,86 +1208,187 @@
                 const row = document.createElement('li');
                 row.className = 'mc-notes-starred-item';
 
-                const openBtn = document.createElement('button');
-                openBtn.type = 'button';
-                openBtn.className = 'mc-notes-starred-open';
-                openBtn.title = item.title;
-                openBtn.textContent = item.title;
-                openBtn.addEventListener('click', () => {
-                    const streamItemId = String(item.streamItemId || '').trim();
-                    const courseWorkId = String(item.courseWorkId || '').trim();
-                    const classPath = String(item.classPath || '').trim()
-                        || getClassPathFromUrl(item.url || '')
-                        || getClassroomClassPath();
+const openBtn = document.createElement('button');
+openBtn.type = 'button';
+openBtn.className = 'mc-notes-starred-open';
+openBtn.title = item.title;
+openBtn.textContent = item.title;
 
-                    const itemId = String(item.itemId || '').trim();
-                    const canonicalFromSavedUrl = getCanonicalKeyFromUrl(item.url || '');
-                    let targetUrl = '';
+const openSavedItem = () => {
+    const streamItemId = String(item.streamItemId || '').trim();
+    const courseWorkId = String(item.courseWorkId || '').trim();
+    const classPath = String(item.classPath || '').trim()
+        || getClassPathFromUrl(item.url || '')
+        || getClassroomClassPath();
 
-                    try {
-                        const parsedSavedUrl = new URL(String(item.url || ''), window.location.origin);
-                        targetUrl = parsedSavedUrl.toString();
-                    } catch (_) {
-                        targetUrl = '';
-                    }
+    const itemId = String(item.itemId || '').trim();
+    let targetUrl = '';
 
-                    if (!targetUrl && /^a:/i.test(itemId)) {
-                        targetUrl = buildAssignmentDetailsUrl(itemId.split(':')[1] || '', classPath);
-                    } else if (!targetUrl && courseWorkId) {
-                        targetUrl = buildAssignmentDetailsUrl(courseWorkId, classPath);
-                    } else if (!targetUrl && /^a:/i.test(canonicalFromSavedUrl)) {
-                        targetUrl = buildAssignmentDetailsUrl(canonicalFromSavedUrl.split(':')[1] || '', classPath);
-                    } else if (!targetUrl && /^m:/i.test(itemId)) {
-                        targetUrl = buildMaterialDetailsUrl(itemId.split(':')[1] || '', classPath);
-                    } else if (!targetUrl && /^m:/i.test(canonicalFromSavedUrl)) {
-                        targetUrl = buildMaterialDetailsUrl(canonicalFromSavedUrl.split(':')[1] || '', classPath);
-                    } else if (!targetUrl && streamItemId) {
-                        // Stream-origin entries without coursework ids are more reliable via intent URL.
-                        targetUrl = getStreamOpenIntentUrl(streamItemId, classPath);
-                    }
+    try {
+        targetUrl = new URL(
+            String(item.url || ''),
+            window.location.origin
+        ).toString();
+    } catch (_) {}
 
-                    if (!targetUrl) {
-                        targetUrl = getStreamOpenIntentUrl(streamItemId, classPath);
-                    }
+    if (!targetUrl && /^a:/i.test(itemId)) {
+        targetUrl = buildAssignmentDetailsUrl(
+            itemId.split(':')[1] || '',
+            classPath
+        );
+    } else if (!targetUrl && courseWorkId) {
+        targetUrl = buildAssignmentDetailsUrl(
+            courseWorkId,
+            classPath
+        );
+    } else if (!targetUrl && /^m:/i.test(itemId)) {
+        targetUrl = buildMaterialDetailsUrl(
+            itemId.split(':')[1] || '',
+            classPath
+        );
+    } else if (!targetUrl && streamItemId) {
+        targetUrl = getStreamOpenIntentUrl(
+            streamItemId,
+            classPath
+        );
+    }
 
-                    window.location.assign(targetUrl);
-                });
+    if (!targetUrl) {
+        targetUrl = getStreamOpenIntentUrl(
+            streamItemId,
+            classPath
+        );
+    }
 
-                const removeBtn = document.createElement('button');
-                removeBtn.type = 'button';
-                removeBtn.className = 'mc-notes-starred-remove';
-                removeBtn.setAttribute('aria-label', `Remove saved assignment ${item.title}`);
-                removeBtn.textContent = '×';
-                removeBtn.addEventListener('click', () => {
-                    const itemKey = getStarItemKey(item);
-                    const nextItems = state.starredAssignments.filter((entry) => getStarItemKey(entry) !== itemKey);
-                    setStarredAssignments(nextItems);
-                });
+    window.location.assign(targetUrl);
+};
 
-                const noteInput = document.createElement('input');
-                noteInput.type = 'text';
-                noteInput.className = 'mc-notes-starred-note';
-                noteInput.placeholder = 'Note...';
-                noteInput.maxLength = 160;
-                noteInput.value = String(item.note || '');
+openBtn.addEventListener('click', openSavedItem);
 
-                const persistNote = () => {
-                    item.note = String(noteInput.value || '').slice(0, 160);
-                    saveStarredAssignmentsToStorage(state.starredAssignments);
-                };
 
-                noteInput.addEventListener('input', persistNote);
-                noteInput.addEventListener('blur', persistNote);
+// Edit button
+const editBtn = document.createElement('button');
+editBtn.type = 'button';
+editBtn.className = 'mc-notes-starred-edit';
+editBtn.setAttribute('aria-label', `Edit saved assignment ${item.title}`);
+editBtn.setAttribute('title', 'Edit title');
 
-                const content = document.createElement('div');
-                content.className = 'mc-notes-starred-content';
-                content.appendChild(openBtn);
-                content.appendChild(noteInput);
+editBtn.innerHTML = `
+    <svg width="15" height="15" viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true">
+        <path d="m13,20c0,.553-.448,1-1,1h-7c-2.757,0-5-2.243-5-5v-8C0,5.243,2.243,3,5,3h7c.552,0,1,.447,1,1s-.448,1-1,1h-7c-1.654,0-3,1.346-3,3v8c0,1.654,1.346,3,3,3h7c.552,0,1,.447,1,1Zm-5-3c.552,0,1-.447,1-1v-7h2c.552,0,1-.447,1-1s-.448-1-1-1h-6c-.552,0-1,.447-1,1s.448,1,1,1h2v7c0,.553.448,1,1,1Zm10,5c-.551,0-1-.448-1-1V3c0-.552.449-1,1-1s1-.447,1-1-.448-1-1-1c-.768,0-1.469.29-2,.766-.531-.476-1.232-.766-2-.766-.552,0-1,.447-1,1s.448,1,1,1,1,.448,1,1v18c0,.552-.449,1-1,1s-1-.447-1-1,.448-1,1-1c.768,0,1.469.29,2,.766.531-.476,1.232-.766,2-.766.552,0,1,.447,1,1s-.448,1-1,1-1-.448-1-1Zm2.25-18.843c-.538-.137-1.08.185-1.218.72-.138.534.184,1.08.719,1.218,1.325.341,2.25,1.535,2.25,2.905v8c0,1.37-.925,2.564-2.25,2.905-.535.138-.856.684-.719,1.218.116.451.522.751.968.751.083,0,.167-.01.25-.031,2.208-.569,3.75-2.561,3.75-4.843v-8c0-2.282-1.542-4.273-3.75-4.843Z"/>
+    </svg>
+`;
 
-                row.appendChild(content);
-                row.appendChild(removeBtn);
-                starredList.appendChild(row);
-            });
+
+editBtn.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const titleInput = document.createElement('input');
+    titleInput.type = 'text';
+    titleInput.className = 'mc-notes-starred-title-input';
+    titleInput.value = item.title;
+    titleInput.maxLength = 220;
+
+    let saved = false;
+
+    const saveTitle = () => {
+        if (saved) return;
+        saved = true;
+
+        const value = String(titleInput.value || '').trim();
+
+        if (value) {
+            item.title = value.slice(0, 220);
+            saveStarredAssignmentsToStorage(state.starredAssignments);
+            broadcastStarredAssignments();
+        }
+
+        renderStarredAssignments();
+    };
+
+    titleInput.addEventListener('blur', saveTitle);
+
+    titleInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            titleInput.blur();
+        }
+
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            saved = true;
+            renderStarredAssignments();
+        }
+    });
+
+    openBtn.replaceWith(titleInput);
+
+    requestAnimationFrame(() => {
+        titleInput.focus();
+        titleInput.select();
+    });
+});
+
+
+// Star button
+const starBtn = document.createElement('button');
+starBtn.type = 'button';
+starBtn.className = 'mc-notes-starred-star';
+starBtn.setAttribute(
+    'aria-label',
+    `Remove ${item.title} from Saved`
+);
+starBtn.setAttribute('title', 'Remove from Saved');
+
+starBtn.innerHTML = '<span aria-hidden="true">★</span>';
+
+starBtn.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const itemKey = getStarItemKey(item);
+
+    const nextItems = state.starredAssignments.filter(
+        (entry) => getStarItemKey(entry) !== itemKey
+    );
+
+    setStarredAssignments(nextItems);
+});
+
+
+// Right-side actions
+const actions = document.createElement('div');
+actions.className = 'mc-notes-starred-actions';
+
+actions.appendChild(editBtn);
+actions.appendChild(starBtn);
+
+
+// Card content
+const content = document.createElement('div');
+content.className = 'mc-notes-starred-content';
+
+content.appendChild(openBtn);
+
+
+// Clicking anywhere on the card opens the assignment
+row.addEventListener('click', (event) => {
+    if (
+        event.target.closest('.mc-notes-starred-actions') ||
+        event.target.closest('.mc-notes-starred-title-input')
+    ) {
+        return;
+    }
+
+    openSavedItem();
+});
+
+row.appendChild(content);
+row.appendChild(actions);
+starredList.appendChild(row);            });
         }
 
         function renderActiveTabContent() {
@@ -1352,6 +1518,7 @@
             lockToggleBtn.addEventListener('click', () => {
                 if (isFixedMode) return;
                 applyPanelLockState(!isPanelLocked);
+                savePanelLockState(isPanelLocked);
             });
         }
 
@@ -1423,6 +1590,61 @@
             const nextItems = Array.isArray(event?.detail?.items) ? event.detail.items : [];
             setStarredAssignments(nextItems, { persist: true, broadcast: false });
         });
+
+        // After SPA navigation, poll localStorage for the pending auto-star
+        // to avoid races where the page hasn't saved the starred item yet.
+        function pollForStarredOnNavigation() {
+            const pendingRaw = sessionStorage.getItem('modernClassroom_pendingAutoStar');
+            const pendingAlias = (function() {
+                try {
+                    const parsed = JSON.parse(pendingRaw || '{}');
+                    return String(parsed?.itemId || '').trim();
+                } catch (_) { return String(pendingRaw || '').trim(); }
+            })();
+
+            const maxAttempts = 12;
+            const intervalMs = 250;
+            let attempts = 0;
+            const previousCount = Array.isArray(state.starredAssignments) ? state.starredAssignments.length : 0;
+
+            const timer = setInterval(() => {
+                attempts += 1;
+                try {
+                    const items = loadStarredAssignmentsFromStorage();
+                    setStarredAssignments(items, { persist: true, broadcast: false });
+
+                    if (items.length > previousCount) {
+                        clearInterval(timer);
+                        return;
+                    }
+
+                    if (pendingAlias) {
+                        const found = items.some((it) => {
+                            try {
+                                if (String(it.itemId || '').trim() === pendingAlias) return true;
+                                if (String(it.streamItemId || '').trim() === pendingAlias) return true;
+                                if (String(it.courseWorkId || '').trim() && pendingAlias === `a:${String(it.courseWorkId || '').trim()}`) return true;
+                                const canon = getCanonicalKeyFromUrl(it.url || '');
+                                if (canon && canon === pendingAlias) return true;
+                            } catch (_) {}
+                            return false;
+                        });
+
+                        if (found) {
+                            clearInterval(timer);
+                            return;
+                        }
+                    }
+                } catch (_) {}
+
+                if (attempts >= maxAttempts) {
+                    clearInterval(timer);
+                }
+            }, intervalMs);
+        }
+
+        window.addEventListener('locationchange', pollForStarredOnNavigation);
+        window.addEventListener('popstate', pollForStarredOnNavigation);
 
         const streamItemFromUrl = new URL(window.location.href).searchParams.get('mcStreamItem');
         if (streamItemFromUrl) {

@@ -170,7 +170,10 @@ function requestRuntimeUpdateCheck() {
 
       if (maybePromise && typeof maybePromise.then === 'function') {
         maybePromise
-          .then((status) => resolve({ status, details: null }))
+          .then((result) => resolve({
+            status: typeof result === 'string' ? result : result?.status,
+            details: typeof result === 'object' ? result : null
+          }))
           .catch((error) => resolve({
             status: 'error',
             error: error?.message || 'Unknown update error'
@@ -189,7 +192,11 @@ async function runImmediateUpdateCheck() {
   const result = await requestRuntimeUpdateCheck();
 
   if (result.status === 'update_available') {
-    return { success: true, status: 'update_available' };
+    return {
+      success: true,
+      status: 'update_available',
+      version: result.details?.version || null
+    };
   }
 
   if (result.status === 'no_update') {
@@ -207,21 +214,28 @@ async function runImmediateUpdateCheck() {
   };
 }
 
-async function notifyTabsAboutUpdate() {
-  const currentVersion = chrome.runtime?.getManifest?.().version || null;
+async function notifyTabsAboutUpdate(version = null) {
+  const pendingVersion = version || null;
 
   await Promise.all([
     setInStorage(UPDATE_AVAILABLE_KEY, true),
-    setInStorage(UPDATE_PENDING_VERSION_KEY, currentVersion)
+    setInStorage(UPDATE_PENDING_VERSION_KEY, pendingVersion)
   ]);
 
   chrome.tabs.query({}, (tabs) => {
     tabs.forEach((tab) => {
-      chrome.tabs.sendMessage(tab.id, { action: 'updateAvailable', version: currentVersion }).catch(() => {
+      chrome.tabs.sendMessage(tab.id, { action: 'updateAvailable', version: pendingVersion }).catch(() => {
         // Tab might not be accessible, that's okay
       });
     });
   });
+}
+
+async function clearUpdateNotificationState() {
+  await Promise.all([
+    setInStorage(UPDATE_AVAILABLE_KEY, false),
+    setInStorage(UPDATE_PENDING_VERSION_KEY, null)
+  ]);
 }
 
 if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onInstalled) {
@@ -262,7 +276,9 @@ function checkForUpdates() {
       if (result.status === 'update_available') {
         console.log('Modern Classroom update available');
         // Notify tabs so content scripts can prompt the user to apply the update
-        try { notifyTabsAboutUpdate().catch(() => {}); } catch (_) {}
+        try { notifyTabsAboutUpdate(result.version).catch(() => {}); } catch (_) {}
+      } else if (result.status === 'no_update') {
+        clearUpdateNotificationState().catch(() => {});
       }
     })
     .catch(() => {
@@ -274,7 +290,9 @@ function checkForUpdates() {
 if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onUpdateAvailable) {
   chrome.runtime.onUpdateAvailable.addListener(() => {
     console.log('Modern Classroom update is ready to install');
-    notifyTabsAboutUpdate().catch(() => {});
+    getFromStorage(UPDATE_PENDING_VERSION_KEY, null)
+      .then((version) => notifyTabsAboutUpdate(version))
+      .catch(() => {});
   });
 }
 

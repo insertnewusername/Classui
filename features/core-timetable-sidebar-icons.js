@@ -1,6 +1,18 @@
 (function() {
     'use strict';
 
+    const FEATURE_KEY = 'modernClassroom_featureTimetable';
+    const FEATURE_DEFAULT = true;
+
+    function isFeatureEnabled() {
+        try {
+            const raw = localStorage.getItem(FEATURE_KEY);
+            return raw === null ? FEATURE_DEFAULT : raw !== 'false';
+        } catch (_) {
+            return FEATURE_DEFAULT;
+        }
+    }
+
     // ==========================================
     // TIMETABLE BUTTON
     // ==========================================
@@ -44,12 +56,48 @@
         `;
         host.addEventListener('click', (e) => {
             e.stopPropagation();
+            const target = e.target;
+            if (!(target instanceof Element)) return;
+            const card = target.closest('.mc-live-card');
+            if (card && card.dataset.classroom) navigateToClassroom(card.dataset.classroom);
+        });
+        host.addEventListener('keydown', (event) => {
+            const target = event.target;
+            if (!(target instanceof Element)) return;
+            const card = target.closest('.mc-live-card');
+            if (!card) return;
+
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                event.stopPropagation();
+                if (card.dataset.classroom) navigateToClassroom(card.dataset.classroom);
+            } else if (event.key === 'Escape') {
+                hideTimetableMenu();
+            }
+        });
+        host.addEventListener('pointerover', (event) => {
+            const target = event.target;
+            if (!(target instanceof Element)) return;
+            const card = target.closest('.mc-live-card');
+            if (!card || (event.relatedTarget instanceof Node && card.contains(event.relatedTarget))) return;
+
+            const tooltip = card.querySelector('.mc-card-tooltip');
+            if (!tooltip) return;
+
+            const now = new Date();
+            const currentMin = now.getHours() * 60 + now.getMinutes();
+            const eventMin = Number(card.dataset.role === 'upcoming' ? card.dataset.startMin : card.dataset.endMin);
+            const minutes = Math.max(0, eventMin - currentMin);
+            tooltip.textContent = card.dataset.role === 'upcoming'
+                ? `Starts in ${formatDurationCompact(minutes)}`
+                : `${formatDurationCompact(minutes)} left`;
         });
         document.body.appendChild(host);
         return host;
     }
 
     function insertTimetableButton() {
+        if (!isFeatureEnabled()) return;
         // Choose a visible target instance (there can be duplicates in the DOM; pick the visible one)
         const all = Array.from(document.querySelectorAll(timetableButtonConfig.targetSelector));
         function isVisible(el) { try { return !!(el && (el.offsetWidth || el.offsetHeight || el.getClientRects().length)); } catch(_) { return false; } }
@@ -88,7 +136,7 @@
             }
         }
 
-        // No existing button found — create and insert one into the action container (or fallback into target)
+        // No existing button found - create and insert one into the action container (or fallback into target)
         const btn = createTimetableButton();
         if (actionContainer) {
             actionContainer.insertBefore(btn, actionContainer.firstElementChild);
@@ -123,7 +171,101 @@
     // Live widget update logic
     // -----------------------------
     let __mc_live_hide_timer = null;
-    let __mc_live_last_shown = 0;
+    let __mc_live_position_frame = 0;
+
+    function updateLiveCardProgress(widget, now = new Date()) {
+        const currentMin = now.getHours() * 60 + now.getMinutes();
+
+        widget.querySelectorAll('.mc-live-card-active').forEach(card => {
+            const startMin = Number(card.dataset.startMin);
+            const endMin = Number(card.dataset.endMin);
+            if (!Number.isFinite(startMin) || !Number.isFinite(endMin) || startMin >= endMin) return;
+
+            const duration = endMin - startMin;
+            const elapsed = Math.max(0, Math.min(currentMin - startMin, duration));
+            const swatch = card.querySelector('.mc-card-swatch-active');
+            if (swatch) swatch.style.setProperty('--swatch-progress', `${(elapsed / duration) * 100}%`);
+        });
+
+        widget.querySelectorAll('.mc-live-card-upcoming').forEach(card => {
+            const startMin = Number(card.dataset.startMin);
+            if (!Number.isFinite(startMin)) return;
+
+            const progress = Math.max(0, Math.min(100, 100 - ((startMin - currentMin) / 15) * 100));
+            const swatch = card.querySelector('.mc-card-swatch-upcoming');
+            if (swatch) swatch.style.setProperty('--swatch-opacity', (0.2 + (progress / 100) * 0.8).toFixed(3));
+        });
+    }
+
+    function createLiveCard(item, role) {
+        const { c: cls, p: period } = item;
+        const classTitle = cls.title || '';
+        const room = period.room || cls.room;
+        const card = document.createElement('div');
+
+        card.className = `mc-live-card ${role === 'upcoming' ? 'mc-live-card-upcoming' : 'mc-live-card-active'}`;
+        card.dataset.role = role;
+        card.dataset.startMin = item.startMin || 0;
+        card.dataset.endMin = item.endMin || 0;
+        if (cls.classroom && String(cls.classroom).trim()) card.dataset.classroom = cls.classroom;
+        card.setAttribute('role', 'button');
+        card.tabIndex = 0;
+
+        const color = escapeHtml(cls.colour || '#9aa0a6');
+
+        if (role === 'upcoming') {
+            const title = `${escapeHtml(classTitle)}${room ? ` • ${escapeHtml(room)}` : ''}`;
+            card.innerHTML = `
+                <div class="mc-card-swatch mc-card-swatch-upcoming" data-colour="${color}" style="--swatch-color: ${color}; background: transparent;"></div>
+                <div class="mc-card-mini-content">
+                    <div class="mc-card-mini-title">${title}</div>
+                    <div class="mc-card-mini-period">Starts at ${escapeHtml(formatTimeToAmPm(period.start))}</div>
+                </div>
+                <div class="mc-card-tooltip">Starts in --</div>
+            `;
+            card.setAttribute('aria-label', `${classTitle || 'Class'} starts at ${formatTimeToAmPm(period.start)}`);
+        } else {
+            const metaParts = [cls.teacher, room].filter(Boolean).map(escapeHtml);
+            card.innerHTML = `
+                <div class="mc-card-swatch mc-card-swatch-active" data-colour="${color}" style="--swatch-color: ${color}; background: transparent;"></div>
+                <div class="mc-card-mini-content">
+                    <div class="mc-card-mini-title">${escapeHtml(classTitle)}</div>
+                    ${metaParts.length ? `<div class="mc-card-mini-meta">${metaParts.join(' • ')}</div>` : ''}
+                    <div class="mc-card-mini-period">${escapeHtml(formatTimeToAmPm(period.start))} - ${escapeHtml(formatTimeToAmPm(period.end))}</div>
+                </div>
+                <div class="mc-card-tooltip">-- left</div>
+            `;
+            card.setAttribute('aria-label', `${classTitle || 'Class'} active until ${formatTimeToAmPm(period.end)}`);
+        }
+
+        return card;
+    }
+
+    function positionLiveWidget() {
+        const widget = document.querySelector('.mc-live-widget');
+        if (!widget || widget.style.display === 'none') return;
+
+        const button = document.querySelector('.mc-left-action-btn');
+        const widgetRect = widget.getBoundingClientRect();
+        let left = 8;
+        if (button) {
+            const buttonRect = button.getBoundingClientRect();
+            left = buttonRect.left - widgetRect.width - 8;
+            if (left < 8) left = buttonRect.right + 8;
+        }
+
+        const nextLeft = `${Math.round(left)}px`;
+        if (widget.style.left !== nextLeft) widget.style.left = nextLeft;
+        if (widget.style.top !== '0px') widget.style.top = '0px';
+    }
+
+    function scheduleLiveWidgetPosition() {
+        if (__mc_live_position_frame) return;
+        __mc_live_position_frame = requestAnimationFrame(() => {
+            __mc_live_position_frame = 0;
+            positionLiveWidget();
+        });
+    }
 
     function updateLiveWidget() {
         try {
@@ -149,30 +291,36 @@
             }
 
             const classes = getStoredClasses() || [];
-            const today = (new Date()).getDay();
-            const nowMin = (() => { const d = new Date(); return d.getHours()*60 + d.getMinutes(); })();
+            try { renderTodayPanel(classes); } catch (_) {}
+            const now = new Date();
+            const today = now.getDay();
+            const nowMin = now.getHours() * 60 + now.getMinutes();
+            const activePeriods = [];
+            const upcomingPeriods = [];
+            let nextStartMin = Infinity;
 
-            const periods = [];
-            classes.forEach(c => (c.periods || []).forEach(p => { if (p && Number(p.day) === today && p.start && p.end) periods.push({ c, p }); }));
-            console.debug('updateLiveWidget periods:', periods.length);
+            classes.forEach(cls => {
+                (cls.periods || []).forEach(period => {
+                    if (!period || Number(period.day) !== today || !period.start || !period.end) return;
 
-            if (!periods.length) {
-                // Debounce hide to avoid flicker when DOM/loads are changing
-                if (__mc_live_hide_timer) clearTimeout(__mc_live_hide_timer);
-                __mc_live_hide_timer = setTimeout(() => {
-                    widget.style.display = 'none';
-                }, 600);
-                return;
-            }
-
-            // compute start/end minutes for each
-            periods.forEach(x => { x.startMin = parseTimeToMinutes(x.p.start); x.endMin = parseTimeToMinutes(x.p.end); });
-            periods.sort((a,b) => a.startMin - b.startMin);
-
-            const activePeriods = periods.filter(x => x.startMin <= nowMin && nowMin < x.endMin);
-            const upcomingCandidates = periods.filter(x => x.startMin > nowMin);
-            const nextStartMin = upcomingCandidates.length ? upcomingCandidates[0].startMin : null;
-            const upcomingPeriods = nextStartMin !== null ? upcomingCandidates.filter(x => x.startMin === nextStartMin) : [];
+                    const item = {
+                        c: cls,
+                        p: period,
+                        startMin: parseTimeToMinutes(period.start),
+                        endMin: parseTimeToMinutes(period.end)
+                    };
+                    if (item.startMin <= nowMin && nowMin < item.endMin) {
+                        activePeriods.push(item);
+                    } else if (item.startMin > nowMin) {
+                        if (item.startMin < nextStartMin) {
+                            nextStartMin = item.startMin;
+                            upcomingPeriods.length = 0;
+                        }
+                        if (item.startMin === nextStartMin) upcomingPeriods.push(item);
+                    }
+                });
+            });
+            activePeriods.sort((a, b) => a.startMin - b.startMin);
 
             if (!activePeriods.length && !upcomingPeriods.length) {
                 if (__mc_live_hide_timer) clearTimeout(__mc_live_hide_timer);
@@ -187,72 +335,6 @@
             widget.style.alignItems = 'stretch';
             widget.style.gap = '8px';
 
-            function attachCardInteractions(card, cls) {
-                if (!card) return;
-                const handler = (ev) => {
-                    ev.stopPropagation();
-                    if (cls && cls.classroom && String(cls.classroom).trim()) {
-                        const handled = navigateToClassroom(cls.classroom);
-                        if (handled) return;
-                    }
-                };
-                card.addEventListener('click', handler);
-                card.addEventListener('keydown', (ev) => {
-                    if (ev.key === 'Enter' || ev.key === ' ') {
-                        ev.preventDefault();
-                        handler(ev);
-                    }
-                    if (ev.key === 'Escape') {
-                        hideTimetableMenu();
-                    }
-                });
-            }
-
-            function createLiveCard(item, role) {
-                const card = document.createElement('div');
-                const cls = item.c;
-                const period = item.p;
-                const classTitle = cls.title || '';
-                card.className = `mc-live-card ${role === 'upcoming' ? 'mc-live-card-upcoming' : 'mc-live-card-active'}`;
-                card.dataset.role = role;
-                card.dataset.startMin = item.startMin || 0;
-                card.dataset.endMin = item.endMin || 0;
-                card.setAttribute('role', 'button');
-                card.tabIndex = 0;
-
-                if (role === 'upcoming') {
-                    const titleWithRoom = `${escapeHtml(classTitle)}${cls.room ? ' • ' + escapeHtml(cls.room) : ''}`;
-                    const colorStyle = escapeHtml(cls.colour || '#9aa0a6');
-                    card.innerHTML = `
-                        <div class="mc-card-swatch mc-card-swatch-upcoming" data-colour="${colorStyle}" style="--swatch-color: ${colorStyle};"></div>
-                        <div class="mc-card-mini-content">
-                            <div class="mc-card-mini-title">${titleWithRoom}</div>
-                            <div class="mc-card-mini-period">Starts at ${escapeHtml(formatTimeToAmPm(period.start))}</div>
-                        </div>
-                        <div class="mc-card-tooltip">Starts in --</div>
-                    `;
-                    card.setAttribute('aria-label', `${classTitle || 'Class'} starts at ${formatTimeToAmPm(period.start)}`);
-                } else {
-                    const metaParts = [];
-                    if (cls.teacher) metaParts.push(escapeHtml(cls.teacher));
-                    if (cls.room) metaParts.push(escapeHtml(cls.room));
-                    const colorStyle = escapeHtml(cls.colour || '#9aa0a6');
-                    card.innerHTML = `
-                        <div class="mc-card-swatch mc-card-swatch-active" data-colour="${colorStyle}" style="--swatch-color: ${colorStyle};"></div>
-                        <div class="mc-card-mini-content">
-                            <div class="mc-card-mini-title">${escapeHtml(classTitle)}</div>
-                            ${metaParts.length ? `<div class="mc-card-mini-meta">${metaParts.join(' • ')}</div>` : ''}
-                            <div class="mc-card-mini-period">${escapeHtml(formatTimeToAmPm(period.start))} — ${escapeHtml(formatTimeToAmPm(period.end))}</div>
-                        </div>
-                        <div class="mc-card-tooltip">-- left</div>
-                    `;
-                    card.setAttribute('aria-label', `${classTitle || 'Class'} active until ${formatTimeToAmPm(period.end)}`);
-                }
-
-                attachCardInteractions(card, cls);
-                return card;
-            }
-
             activeGroup.innerHTML = '';
             upcomingGroup.innerHTML = '';
 
@@ -260,18 +342,6 @@
                 activePeriods.forEach(item => {
                     const card = createLiveCard(item, 'active');
                     activeGroup.appendChild(card);
-                    
-                    // Add hover listener for tooltip
-                    card.addEventListener('mouseenter', () => {
-                        const now = new Date();
-                        const currentMin = now.getHours() * 60 + now.getMinutes();
-                        const endMin = Number(card.dataset.endMin);
-                        const minutesLeft = Math.max(0, endMin - currentMin);
-                        const tooltip = card.querySelector('.mc-card-tooltip');
-                        if (tooltip) {
-                            tooltip.textContent = `${formatDurationCompact(minutesLeft)} left`;
-                        }
-                    });
                 });
             }
 
@@ -279,56 +349,10 @@
                 upcomingPeriods.forEach(item => {
                     const card = createLiveCard(item, 'upcoming');
                     upcomingGroup.appendChild(card);
-                    
-                    // Add hover listener for tooltip
-                    card.addEventListener('mouseenter', () => {
-                        const now = new Date();
-                        const currentMin = now.getHours() * 60 + now.getMinutes();
-                        const startMin = Number(card.dataset.startMin);
-                        const minutesUntil = Math.max(0, startMin - currentMin);
-                        const tooltip = card.querySelector('.mc-card-tooltip');
-                        if (tooltip) {
-                            tooltip.textContent = `Starts in ${formatDurationCompact(minutesUntil)}`;
-                        }
-                    });
                 });
             }
 
-            function updateLiveCardProgress() {
-                const now = new Date();
-                const currentMin = now.getHours() * 60 + now.getMinutes();
-                
-                // Update active cards
-                const activeCards = activeGroup.querySelectorAll('.mc-live-card-active');
-                activeCards.forEach(card => {
-                    const startMin = Number(card.dataset.startMin);
-                    const endMin = Number(card.dataset.endMin);
-                    if (!Number.isFinite(startMin) || !Number.isFinite(endMin) || startMin >= endMin) return;
-                    const duration = endMin - startMin;
-                    const elapsed = Math.max(0, Math.min(currentMin - startMin, duration));
-                    const progressPct = (elapsed / duration) * 100;
-                    const swatch = card.querySelector('.mc-card-swatch-active');
-                    if (swatch) {
-                        swatch.style.setProperty('--swatch-progress', progressPct + '%');
-                    }
-                });
-                
-                // Update upcoming cards
-                const upcomingCards = upcomingGroup.querySelectorAll('.mc-live-card-upcoming');
-                upcomingCards.forEach(card => {
-                    const startMin = Number(card.dataset.startMin);
-                    if (!Number.isFinite(startMin)) return;
-                    const timeUntilStart = startMin - currentMin;
-                    const countdownWindow = 15;
-                    const countdownProgress = Math.max(0, Math.min(100, 100 - (timeUntilStart / countdownWindow) * 100));
-                    const swatch = card.querySelector('.mc-card-swatch-upcoming');
-                    if (swatch) {
-                        swatch.style.setProperty('--swatch-progress', countdownProgress + '%');
-                    }
-                });
-            }
-
-            updateLiveCardProgress();
+            updateLiveCardProgress(widget);
 
             const hasActiveCards = activeGroup.childElementCount > 0;
             const hasUpcomingCards = upcomingGroup.childElementCount > 0;
@@ -339,84 +363,14 @@
             upcomingGroup.setAttribute('aria-hidden', hasUpcomingCards ? 'false' : 'true');
             upcomingGroup.classList.toggle('mc-live-group-alone', hasUpcomingCards && !hasActiveCards);
 
-            const positionWidget = () => {
-                const btn = document.querySelector('.mc-left-action-btn');
-                const wRect = widget.getBoundingClientRect();
-                if (btn) {
-                    const r = btn.getBoundingClientRect();
-                    let left = r.left - wRect.width - 8;
-                    if (left < 8) left = r.right + 8;
-                    let top = r.top + (r.height - wRect.height) / 2;
-                    if (top < 8) top = 8;
-                    if (top + wRect.height > window.innerHeight - 8) top = window.innerHeight - wRect.height - 8;
-                    widget.style.left = `${Math.round(left)}px`;
-                    widget.style.top = '0px';
-                } else {
-                    widget.style.left = '8px';
-                    widget.style.top = '0px';
-                }
-            };
+            scheduleLiveWidgetPosition();
 
-            positionWidget();
-            requestAnimationFrame(positionWidget);
-
-            __mc_live_last_shown = Date.now();
         } catch (e) { console.debug('updateLiveWidget error', e); }
     }
 
     // periodic refresh and storage events
     try { updateLiveWidget(); } catch(_) {}
     setInterval(updateLiveWidget, 30 * 1000);
-    
-    // Update progress bar smoothly every second
-    function updateAllLiveCardProgress() {
-        try {
-            const widget = document.querySelector('.mc-live-widget');
-            if (!widget) return;
-            const now = new Date();
-            const currentMin = now.getHours() * 60 + now.getMinutes();
-            
-            // Update active cards
-            const activeGroup = widget.querySelector('.mc-live-group-active');
-            if (activeGroup) {
-                const activeCards = activeGroup.querySelectorAll('.mc-live-card-active');
-                activeCards.forEach(card => {
-                    const startMin = Number(card.dataset.startMin);
-                    const endMin = Number(card.dataset.endMin);
-                    if (!Number.isFinite(startMin) || !Number.isFinite(endMin) || startMin >= endMin) return;
-                    const duration = endMin - startMin;
-                    const elapsed = Math.max(0, Math.min(currentMin - startMin, duration));
-                    const progressPct = (elapsed / duration) * 100;
-                    const swatch = card.querySelector('.mc-card-swatch-active');
-                    if (swatch) {
-                        swatch.style.setProperty('--swatch-progress', progressPct + '%');
-                    }
-                });
-            }
-            
-            // Update upcoming cards
-            const upcomingGroup = widget.querySelector('.mc-live-group-upcoming');
-            if (upcomingGroup) {
-                const upcomingCards = upcomingGroup.querySelectorAll('.mc-live-card-upcoming');
-                upcomingCards.forEach(card => {
-                    const startMin = Number(card.dataset.startMin);
-                    if (!Number.isFinite(startMin)) return;
-                    const timeUntilStart = startMin - currentMin;
-                    // Show countdown in the last 15 minutes before start
-                    const countdownWindow = 15;
-                    const countdownProgress = Math.max(0, Math.min(100, 100 - (timeUntilStart / countdownWindow) * 100));
-                    const swatch = card.querySelector('.mc-card-swatch-upcoming');
-                    if (swatch) {
-                        swatch.style.setProperty('--swatch-progress', countdownProgress + '%');
-                    }
-                });
-            }
-        } catch (e) {
-            console.debug('updateAllLiveCardProgress error:', e);
-        }
-    }
-    
-    setInterval(updateAllLiveCardProgress, 1000);
     
     window.addEventListener('storage', (e) => { 
         // Listen for any of the timetable storage keys or the current index
@@ -428,9 +382,9 @@
             updateLiveWidget();
         }
     });
-    // Also reposition/update on resize/scroll so floating widget tracks the button
-    window.addEventListener('resize', () => { try { updateLiveWidget(); } catch(_) {} });
-    window.addEventListener('scroll', () => { try { updateLiveWidget(); } catch(_) {} });
+    // Reposition without rebuilding cards or rereading timetable storage.
+    window.addEventListener('resize', scheduleLiveWidgetPosition, { passive: true });
+    window.addEventListener('scroll', scheduleLiveWidgetPosition, { passive: true, capture: true });
 
     function navigateToClassroom(targetUrl) {
         if (!targetUrl) return false;
@@ -553,9 +507,9 @@
             const rectStr = `${Math.round(r.left)}|${Math.round(r.top)}|${Math.round(r.width)}|${Math.round(r.height)}`;
             if (rectStr !== __mc_btn_last_rect) {
                 __mc_btn_last_rect = rectStr;
-                try { updateLiveWidget(); } catch (_) {}
+                scheduleLiveWidgetPosition();
             }
-        }, 150);
+        }, 500);
     }
     function stopButtonPositionWatcher() {
         if (__mc_btn_check_interval) { clearInterval(__mc_btn_check_interval); __mc_btn_check_interval = null; __mc_btn_last_rect = ''; }
@@ -568,87 +522,48 @@
     // TIMETABLE: small popup showing Sun-Sat and live time indicator
     const mcTimetable = {
         container: null,
+        todayPanel: null,
+        todayHideTimer: null,
         intervalId: null,
         currentTimetableIndex: 0  // Track which timetable is active (0, 1, or 2)
     };
 
-    // Migrate old timetable data to new structure
-    function migrateOldTimetableData() {
+    // Migrate old timetable data to new structure using localStorage only.
+    async function migrateOldTimetableData() {
+        try {
+            if (window.__modernClassroomInitialCloudHydration) {
+                await window.__modernClassroomInitialCloudHydration;
+            }
+        } catch (_) {}
+
         try {
             const oldKey = 'mcTimetableClasses';
             const newClassesKey = 'mcTimetableClassesShared';
             const newPeriodsKey = 'mcTimetableClasses_0';
-            
-            // Check if old key exists in localStorage
+
             const oldData = localStorage.getItem(oldKey);
             const newClassesData = localStorage.getItem(newClassesKey);
-            
+
             if (oldData && !newClassesData) {
                 try {
                     const oldClasses = JSON.parse(oldData);
-                    
-                    // Separate classes from periods
+                    if (!Array.isArray(oldClasses)) return;
                     const classesList = oldClasses.map(c => {
                         const { periods, ...classData } = c;
                         return classData;
                     });
-                    
-                    // Build periods map
                     const periodsMap = {};
                     oldClasses.forEach(c => {
                         if (c.id && c.periods) {
                             periodsMap[c.id] = c.periods;
                         }
                     });
-                    
-                    // Save separated data
                     localStorage.setItem(newClassesKey, JSON.stringify(classesList));
                     localStorage.setItem(newPeriodsKey, JSON.stringify(periodsMap));
-                    console.log('Successfully migrated timetable data to new structure (classes + periods)');
+                    console.log('Successfully migrated timetable data to new local structure (classes + periods)');
                 } catch (e) {
                     console.warn('Failed to parse and migrate old data:', e);
                 }
-            }
-            
-            // Also check chrome.storage and migrate if needed
-            if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.sync) {
-                chrome.storage.sync.get([oldKey, newClassesKey], function(data) {
-                    if (chrome.runtime?.lastError) return;
-                    
-                    const oldChromeData = data[oldKey];
-                    const newChromeclassesData = data[newClassesKey];
-                    
-                    if (oldChromeData && !newChromeclassesData) {
-                        try {
-                            const oldClasses = Array.isArray(oldChromeData) ? oldChromeData : [];
-                            
-                            const classesList = oldClasses.map(c => {
-                                const { periods, ...classData } = c;
-                                return classData;
-                            });
-                            
-                            const periodsMap = {};
-                            oldClasses.forEach(c => {
-                                if (c.id && c.periods) {
-                                    periodsMap[c.id] = c.periods;
-                                }
-                            });
-                            
-                            chrome.storage.sync.set({ 
-                                [newClassesKey]: classesList,
-                                [newPeriodsKey]: periodsMap
-                            }, function() {
-                                if (chrome.runtime?.lastError) {
-                                    console.warn('Chrome.storage migration failed:', chrome.runtime.lastError);
-                                } else {
-                                    console.log('Successfully migrated timetable data to chrome.storage (classes + periods)');
-                                }
-                            });
-                        } catch (e) {
-                            console.warn('Failed to migrate chrome data:', e);
-                        }
-                    }
-                });
             }
         } catch (e) {
             console.warn('Timetable migration error:', e);
@@ -656,7 +571,7 @@
     }
 
     // Run migration on startup
-    migrateOldTimetableData();
+    migrateOldTimetableData().catch(() => {});
 
     // Save/load current timetable index
     function saveTimetableIndex() {
@@ -674,22 +589,6 @@
             const idx = localStorage.getItem('mcTimetableCurrentIndex');
             if (idx !== null) mcTimetable.currentTimetableIndex = parseInt(idx);
         } catch (e) {}
-        
-        // Then check chrome.storage.sync and update localStorage if different
-        try {
-            if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.sync) {
-                chrome.storage.sync.get(['mcTimetableCurrentIndex'], (result) => {
-                    if (chrome.runtime.lastError) return;
-                    if (result.mcTimetableCurrentIndex !== undefined) {
-                        const syncIdx = parseInt(result.mcTimetableCurrentIndex);
-                        if (!isNaN(syncIdx)) {
-                            mcTimetable.currentTimetableIndex = syncIdx;
-                            localStorage.setItem('mcTimetableCurrentIndex', syncIdx);
-                        }
-                    }
-                });
-            }
-        } catch (e) {}
     }
 
     // Load on startup
@@ -704,7 +603,7 @@
         container.setAttribute('aria-label', 'Timetable');
         container.tabIndex = -1;
 
-        // Header with timetable cycle arrows and edit button
+        // Header with timetable picker and edit button
         const header = document.createElement('div');
         header.className = 'mc-timetable-header';
 
@@ -718,11 +617,15 @@
             return ((Math.trunc(num) % count) + count) % count;
         }
 
-        function applyTimetableIndex(index, labelEl) {
+        function applyTimetableIndex(index) {
             const nextIndex = normalizeTimetableIndex(index);
             mcTimetable.currentTimetableIndex = nextIndex;
-            if (labelEl) {
-                labelEl.textContent = timetableNames[nextIndex] || `Timetable ${nextIndex + 1}`;
+            if (options) {
+                options.querySelectorAll('.mc-timetable-option').forEach((option) => {
+                    const isSelected = Number(option.dataset.index) === nextIndex;
+                    option.classList.toggle('active', isSelected);
+                    option.setAttribute('aria-pressed', String(isSelected));
+                });
             }
             saveTimetableIndex();
             try { updateLiveWidget(); } catch (_) {}
@@ -730,50 +633,44 @@
             try { renderPeriodsOnTimetable(); } catch (_) {}
         }
 
-        // Create a container for title + arrows
         const titleContainer = document.createElement('div');
         titleContainer.className = 'mc-timetable-title-container';
-        
-        const title = document.createElement('label');
-        title.className = 'mc-timetable-title';
-        title.textContent = 'Timetable';
-        title.style.marginRight = '8px';
 
-        const switcher = document.createElement('div');
-        switcher.className = 'mc-timetable-switcher';
+        const options = document.createElement('div');
+        options.className = 'mc-timetable-options mc-timetable-number-row';
+        options.setAttribute('role', 'group');
+        options.setAttribute('aria-label', 'Choose timetable');
+        options.setAttribute('aria-live', 'polite');
 
-        const prevBtn = document.createElement('button');
-        prevBtn.className = 'mc-timetable-nav-btn mc-timetable-nav-prev';
-        prevBtn.type = 'button';
-        prevBtn.setAttribute('aria-label', 'Previous timetable');
-        prevBtn.title = 'Previous timetable';
-        prevBtn.textContent = '◀';
+        timetableNames.forEach((name, index) => {
+            const option = document.createElement('button');
+            option.className = 'mc-timetable-option';
+            option.type = 'button';
+            option.dataset.index = String(index);
+            const isSelected = index === normalizeTimetableIndex(mcTimetable.currentTimetableIndex);
+            option.classList.toggle('active', isSelected);
+            option.setAttribute('aria-pressed', String(isSelected));
+            option.setAttribute('aria-label', name);
+            option.title = name;
 
-        const currentLabel = document.createElement('span');
-        currentLabel.className = 'mc-timetable-current-label';
-        currentLabel.setAttribute('aria-live', 'polite');
-        currentLabel.textContent = timetableNames[normalizeTimetableIndex(mcTimetable.currentTimetableIndex)] || 'Timetable 1';
+            const number = document.createElement('span');
+            number.className = 'mc-timetable-option-number';
+            number.textContent = String(index + 1);
 
-        const nextBtn = document.createElement('button');
-        nextBtn.className = 'mc-timetable-nav-btn mc-timetable-nav-next';
-        nextBtn.type = 'button';
-        nextBtn.setAttribute('aria-label', 'Next timetable');
-        nextBtn.title = 'Next timetable';
-        nextBtn.textContent = '▶';
+            const label = document.createElement('span');
+            label.className = 'mc-timetable-option-name';
+            label.textContent = 'Timetable';
 
-        prevBtn.addEventListener('click', () => {
-            applyTimetableIndex(mcTimetable.currentTimetableIndex - 1, currentLabel);
+            option.append(label, number);
+            option.addEventListener('click', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                applyTimetableIndex(index);
+            });
+            options.appendChild(option);
         });
-        nextBtn.addEventListener('click', () => {
-            applyTimetableIndex(mcTimetable.currentTimetableIndex + 1, currentLabel);
-        });
 
-        switcher.appendChild(prevBtn);
-        switcher.appendChild(currentLabel);
-        switcher.appendChild(nextBtn);
-        
-        titleContainer.appendChild(title);
-        titleContainer.appendChild(switcher);
+        titleContainer.appendChild(options);
         header.appendChild(titleContainer);
 
         const editBtn = document.createElement('button');
@@ -818,6 +715,23 @@
         });
 
         container.appendChild(daysGrid);
+
+        const todayPanel = document.createElement('section');
+        todayPanel.className = 'mc-today-panel';
+        todayPanel.setAttribute('aria-labelledby', 'mc-today-panel-title');
+
+        const todayTitle = document.createElement('div');
+        todayTitle.className = 'mc-today-panel-title';
+        todayTitle.id = 'mc-today-panel-title';
+        todayTitle.textContent = 'Today';
+
+        const todayRow = document.createElement('div');
+        todayRow.className = 'mc-today-row';
+        todayRow.setAttribute('role', 'list');
+
+        todayPanel.appendChild(todayTitle);
+        todayPanel.appendChild(todayRow);
+        mcTimetable.todayPanel = todayPanel;
 
         // Background indicator element (semi-transparent, spans all days)
         const indicatorBg = document.createElement('div');
@@ -918,47 +832,9 @@
             } catch (e) { return []; }
         }
 
-        // Async: Load from chrome.storage.sync and sync to localStorage if needed
+        // Local-only sync stub retained for compatibility with the rest of the module.
         function syncClassesFromChrome() {
-            if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.sync) return;
-            chrome.storage.sync.get([STORAGE_CLASSES_KEY, STORAGE_KEY, BLOCKS_SHARED_KEY, ...BLOCKS_LEGACY_KEYS], (data) => {
-                if (chrome.runtime?.lastError) return;
-                
-                // Sync shared classes
-                const chromeClasses = data[STORAGE_CLASSES_KEY];
-                if (chromeClasses && Array.isArray(chromeClasses)) {
-                    try { localStorage.setItem(STORAGE_CLASSES_KEY, JSON.stringify(chromeClasses)); } catch (e) {}
-                    if (JSON.stringify(classes) !== JSON.stringify(chromeClasses)) {
-                        classes = chromeClasses;
-                        selectedId = classes.length ? classes[0].id : null;
-                        try { renderSidebarList(); } catch (e) {}
-                    }
-                }
-                
-                // Sync periods for this timetable
-                const chromePeriods = data[STORAGE_KEY];
-                if (chromePeriods && typeof chromePeriods === 'object') {
-                    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(chromePeriods)); } catch (e) {}
-                    classPeriods = chromePeriods;
-                }
-
-                const chromeSharedBlocks = data[BLOCKS_SHARED_KEY];
-                const chromeLegacyBlocks = BLOCKS_LEGACY_KEYS.map((key) => data[key]);
-                const chromeBlocks = Array.isArray(chromeSharedBlocks) && chromeSharedBlocks.length
-                    ? chromeSharedBlocks
-                    : mergeBlockArrays(...chromeLegacyBlocks);
-                if (Array.isArray(chromeBlocks) && chromeBlocks.length) {
-                    try { localStorage.setItem(BLOCKS_SHARED_KEY, JSON.stringify(chromeBlocks)); } catch (e) {}
-                    blocks = chromeBlocks;
-                    renderSidebarList();
-                    if (!Array.isArray(chromeSharedBlocks) || !chromeSharedBlocks.length) {
-                        try {
-                            if (typeof storageSet === 'function') storageSet(BLOCKS_SHARED_KEY, chromeBlocks);
-                            else localStorage.setItem(BLOCKS_SHARED_KEY, JSON.stringify(chromeBlocks));
-                        } catch (_) {}
-                    }
-                }
-            });
+            return;
         }
 
         function saveClasses(classes) {
@@ -986,6 +862,7 @@
 
         function saveBlocks(nextBlocks) {
             blocks = Array.isArray(nextBlocks) ? nextBlocks : [];
+            try { console.log('mc:saveBlocks', blocks.length, blocks.map(b=>b.id)); } catch (_) {}
             try {
                 if (typeof storageSet === 'function') {
                     storageSet(BLOCKS_SHARED_KEY, blocks);
@@ -1020,11 +897,8 @@
         let sidebarMode = 'classes';
         let draggedBlockId = null;
 
-        // Sync from chrome.storage.sync on startup
+        // Local-only startup check: the edit menu works with locally loaded data only.
         syncClassesFromChrome();
-
-        // Don't sync from chrome while editing - it can overwrite local changes
-        // The edit menu works with locally loaded data only
 
         const overlay = document.createElement('div');
         overlay.className = 'mc-timetable-edit-overlay';
@@ -1038,34 +912,169 @@
 
         const leftHeader = document.createElement('div');
         leftHeader.className = 'mc-edit-list-header';
-        leftHeader.innerHTML = '<div class="mc-edit-list-title">Classes</div>';
+        
+        const listTabs = document.createElement('div');
+        listTabs.className = 'mc-schedule-tabs mc-list-tabs';
+        listTabs.setAttribute('role', 'tablist');
+        
+        const classesTab = document.createElement('button');
+        classesTab.type = 'button';
+        classesTab.className = 'mc-schedule-tab mc-schedule-tab-active';
+        classesTab.setAttribute('data-tab', 'classes');
+        classesTab.setAttribute('role', 'tab');
+        classesTab.setAttribute('aria-selected', 'true');
+        classesTab.textContent = 'Classes';
+        
+        const blocksTab = document.createElement('button');
+        blocksTab.type = 'button';
+        blocksTab.className = 'mc-schedule-tab';
+        blocksTab.setAttribute('data-tab', 'blocks');
+        blocksTab.setAttribute('role', 'tab');
+        blocksTab.setAttribute('aria-selected', 'false');
+        blocksTab.textContent = 'Blocks';
+        
+        listTabs.appendChild(classesTab);
+        listTabs.appendChild(blocksTab);
+        leftHeader.appendChild(listTabs);
 
-        const addWrap = document.createElement('div');
-        addWrap.className = 'mc-add-class-wrap';
-        const addBtn = document.createElement('button');
-        addBtn.className = 'mc-add-class-btn';
-        addBtn.type = 'button';
-        addBtn.textContent = '+';
-        addBtn.title = 'Add new class';
-
-        addWrap.appendChild(addBtn);
-        leftHeader.appendChild(addWrap);
         left.appendChild(leftHeader);
 
         const list = document.createElement('div');
         list.className = 'mc-class-list';
+
+        const addEntry = document.createElement('div');
+        addEntry.className = 'mc-class-item-row mc-class-add-entry';
+
+        const addItem = document.createElement('div');
+        addItem.className = 'mc-class-item';
+        addItem.dataset.id = 'mc-add-class-row';
+
+        const addContent = document.createElement('div');
+        addContent.className = 'mc-class-item-content';
+
+        const addDot = document.createElement('span');
+        addDot.className = 'mc-class-dot';
+        addDot.style.background = '#9aa0a6';
+
+        const addInput = document.createElement('input');
+        addInput.type = 'text';
+        addInput.className = 'mc-class-add-input';
+        addInput.placeholder = 'New Class';
+        addInput.setAttribute('aria-label', 'New Class');
+
+        const updateAddInputPlaceholder = () => {
+            const placeholder = sidebarMode === 'blocks' ? 'New Block' : 'New Class';
+            const ariaLabel = sidebarMode === 'blocks' ? 'New block name' : 'New Class';
+            addInput.placeholder = placeholder;
+            addInput.setAttribute('aria-label', ariaLabel);
+        };
+        updateAddInputPlaceholder();
+
+        addContent.appendChild(addDot);
+        addContent.appendChild(addInput);
+        addItem.appendChild(addContent);
+
+        const addConfirmBtn = document.createElement('button');
+        addConfirmBtn.type = 'button';
+        addConfirmBtn.className = 'mc-add-row-btn';
+        addConfirmBtn.textContent = '+';
+        addConfirmBtn.title = 'Create class';
+        addConfirmBtn.setAttribute('aria-label', 'Create class');
+
+        addEntry.appendChild(addItem);
+        addEntry.appendChild(addConfirmBtn);
+
+        function createClassFromInput() {
+            const title = String(addInput.value || '').trim();
+            if (!title) {
+                addInput.focus();
+                return;
+            }
+            if (sidebarMode === 'blocks') {
+                const newBlock = {
+                    id: 'b_' + Math.random().toString(36).slice(2, 8),
+                    name: title,
+                    items: []
+                };
+                openBlockEditor(newBlock);
+                addInput.value = '';
+                addConfirmBtn.classList.remove('visible');
+                return;
+            }
+            const newClass = {
+                id: generateId(),
+                title,
+                teacher: '',
+                room: '',
+                classroom: '',
+                classroomName: '',
+                colour: '#9aa0a6',
+                periods: []
+            };
+            classes.unshift(newClass);
+            saveClasses(classes);
+            selectedId = newClass.id;
+            addInput.value = '';
+            addConfirmBtn.classList.remove('visible');
+            renderSidebarList();
+            renderEditFormFor(newClass);
+            setTimeout(() => {
+                const titleInput = form.querySelector('.mc-input-title');
+                if (titleInput) titleInput.focus();
+            }, 0);
+        }
+
+        addConfirmBtn.addEventListener('click', createClassFromInput);
+        addInput.addEventListener('input', () => {
+            const hasText = String(addInput.value || '').trim().length > 0;
+            addConfirmBtn.classList.toggle('visible', hasText);
+        });
+
+        addInput.addEventListener('keydown', (ev) => {
+            if (ev.key === 'Enter') {
+                ev.preventDefault();
+                if (String(addInput.value || '').trim().length > 0) {
+                    createClassFromInput();
+                }
+            }
+        });
+
+        list.appendChild(addEntry);
         left.appendChild(list);
 
-        const leftFooter = document.createElement('div');
-        leftFooter.className = 'mc-edit-list-footer';
-        const sidebarModeBtn = document.createElement('button');
-        sidebarModeBtn.type = 'button';
-        sidebarModeBtn.className = 'mc-sidebar-mode-btn';
-        sidebarModeBtn.textContent = 'Blocks';
-        leftFooter.appendChild(sidebarModeBtn);
-        left.appendChild(leftFooter);
+        // Tab switching logic
+        function updateTabState() {
+            const isBlocksMode = sidebarMode === 'blocks';
+            classesTab.classList.toggle('mc-schedule-tab-active', !isBlocksMode);
+            classesTab.setAttribute('aria-selected', !isBlocksMode ? 'true' : 'false');
+            blocksTab.classList.toggle('mc-schedule-tab-active', isBlocksMode);
+            blocksTab.setAttribute('aria-selected', isBlocksMode ? 'true' : 'false');
+            
+            // Update placeholder text based on mode
+            updateAddInputPlaceholder();
+        }
+        
+        classesTab.addEventListener('click', () => {
+            if (sidebarMode !== 'classes') {
+                sidebarMode = 'classes';
+                resetClearTimetableButton();
+                renderSidebarList();
+                updateTabState();
+            }
+        });
+        
+        blocksTab.addEventListener('click', () => {
+            if (sidebarMode !== 'blocks') {
+                sidebarMode = 'blocks';
+                resetClearTimetableButton();
+                renderSidebarList();
+                updateTabState();
+            }
+        });
+        
+        // Initialize tab state
+        updateTabState();
 
-        // Right: edit form
         const right = document.createElement('div');
         right.className = 'mc-edit-form';
 
@@ -1077,7 +1086,7 @@
         detailsCard.className = 'mc-class-details-card';
 
         const scheduleCard = document.createElement('div');
-        scheduleCard.className = 'mc-schedule-editor-card';
+        scheduleCard.className = 'mc-schedule-editor-card mc-field-row mc-field-schedule';
 
         // Top row: Colour + Title
         const topRow = document.createElement('div');
@@ -1085,8 +1094,8 @@
         topRow.innerHTML = `
             <div class="mc-top-inputs">
                 <div class="mc-colour-control">
-                    <button type="button" class="mc-input-colour-trigger" aria-label="Choose class colour" aria-expanded="false" title="Choose class colour">
-                        <span class="mc-input-colour-swatch" aria-hidden="true"></span>
+                    <button type="button" class="mc-input-colour-trigger mc-picker-trigger" aria-label="Choose class colour" aria-expanded="false" title="Choose class colour">
+                        <span class="mc-input-colour-swatch mc-picker-trigger-swatch" aria-hidden="true"></span>
                     </button>
                     <input name="colour" type="text" class="mc-input-colour mc-input-hidden" aria-hidden="true" tabindex="-1">
                     <div class="mc-inline-colour-picker" hidden>
@@ -1094,14 +1103,16 @@
                             <div class="mc-inline-colour-picker-title">Class colour</div>
                             <button type="button" class="mc-inline-colour-picker-close" aria-label="Close colour picker">&times;</button>
                         </div>
-                        <div class="mc-inline-colour-picker-sv-wrap">
-                            <canvas class="mc-inline-colour-picker-sv" width="260" height="130" aria-hidden="true"></canvas>
-                            <div class="mc-inline-colour-picker-marker" aria-hidden="true"></div>
+                        <div class="mc-colour-picker-hex-row mc-picker-hex-row">
+                            <input type="text" class="mc-inline-colour-picker-hex mc-picker-hex mc-unified-hex-input" placeholder="#9aa0a6" aria-label="Hex colour">
                         </div>
-                        <input type="range" min="0" max="360" value="0" class="mc-inline-colour-picker-hue" aria-label="Hue">
+                        <div class="mc-inline-colour-picker-sv-wrap mc-picker-sv">
+                            <canvas class="mc-inline-colour-picker-sv mc-picker-sv-canvas" width="260" height="130" aria-hidden="true"></canvas>
+                            <div class="mc-inline-colour-picker-marker mc-picker-marker" aria-hidden="true"></div>
+                        </div>
+                        <input type="range" min="0" max="360" value="0" class="mc-inline-colour-picker-hue mc-picker-hue" aria-label="Hue">
                         <div class="mc-inline-colour-picker-footer">
-                            <div class="mc-inline-colour-picker-preview" aria-hidden="true"></div>
-                            <input type="text" class="mc-inline-colour-picker-hex" placeholder="#9aa0a6" aria-label="Hex colour">
+                            <div class="mc-inline-colour-picker-preview mc-picker-preview" aria-hidden="true"></div>
                         </div>
                     </div>
                 </div>
@@ -1282,43 +1293,73 @@
             }
         }
 
-        const periodsRow = document.createElement('div');
-        periodsRow.className = 'mc-field-row mc-field-schedule';
+        const periodsRow = scheduleCard;
         periodsRow.innerHTML = `
-            <div class="mc-schedule-card">
-                <div class="mc-schedule-header">
-                    <div class="mc-schedule-title">Timetable</div>
-                    <div class="mc-schedule-hint">Drag a class from the left - Click or drag a period to edit</div>
+                <div class="mc-schedule-tabs" role="tablist">
+                    <button type="button" class="mc-schedule-tab mc-schedule-tab-active" data-tab="timetable" role="tab" aria-selected="true">Timetable</button>
+                    <button type="button" class="mc-schedule-tab" data-tab="periods" role="tab" aria-selected="false">Periods</button>
+                    <button type="button" class="mc-schedule-tab" data-tab="import" role="tab" aria-selected="false">Import</button>
                 </div>
-                <div class="mc-schedule-board">
-                    <div class="mc-schedule-time-axis" aria-hidden="true"></div>
-                    <div class="mc-schedule-days" aria-label="Weekly schedule"></div>
+                <div class="mc-schedule-tab-content">
+                    <div class="mc-schedule-panel mc-schedule-panel-timetable" data-panel="timetable">
+                        <div class="mc-schedule-board">
+                            <div class="mc-schedule-time-axis" aria-hidden="true"></div>
+                            <div class="mc-schedule-days" aria-label="Weekly schedule"></div>
+                        </div>
+                        <div class="mc-schedule-clear-wrap">
+                            <button type="button" class="mc-schedule-clear-btn" aria-label="Clear timetable">Clear Timetable</button>
+                        </div>
+                        <div class="mc-schedule-tune" hidden>
+                            <div class="mc-schedule-tune-row mc-schedule-tune-times">
+                                <label>Start <input type="time" class="mc-tune-start"></label>
+                                <label>End <input type="time" class="mc-tune-end"></label>
+                            </div>
+                            <div class="mc-schedule-tune-row mc-schedule-tune-details">
+                                <input type="text" class="mc-tune-room" placeholder="Alternate Room" aria-label="Alternate Room">
+                            </div>
+                            <div class="mc-schedule-tune-actions">
+                                <button type="button" class="mc-tune-delete">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mc-schedule-panel mc-schedule-panel-periods" data-panel="periods" hidden>
+                        <div class="mc-periods-list" aria-live="polite"></div>
+                    </div>
+                    <div class="mc-schedule-panel mc-schedule-panel-import" data-panel="import" hidden>
+                        <div class="mc-import-panel" role="dialog" aria-label="Import periods">
+                            <div class="mc-import-header">
+                                <span class="mc-import-header-text">Import from</span>
+                                <select id="mc-import-source" class="mc-import-source" aria-label="Import from timetable"></select>
+                            </div>
+                            <div class="mc-import-row mc-import-days-row">
+                                <div class="mc-import-days-head">
+                                    <div class="mc-import-days-head-actions">
+                                        <button type="button" class="mc-import-all">All</button>
+                                        <button type="button" class="mc-import-none">None</button>
+                                    </div>
+                                </div>
+                                <div class="mc-import-days-controls">
+                                    <div class="mc-import-days-grid">
+                                        <button type="button" class="mc-import-day" data-day="0">Sun</button>
+                                        <button type="button" class="mc-import-day" data-day="1">Mon</button>
+                                        <button type="button" class="mc-import-day" data-day="2">Tue</button>
+                                        <button type="button" class="mc-import-day" data-day="3">Wed</button>
+                                        <button type="button" class="mc-import-day" data-day="4">Thu</button>
+                                        <button type="button" class="mc-import-day" data-day="5">Fri</button>
+                                        <button type="button" class="mc-import-day" data-day="6">Sat</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mc-import-disclaimer">This will overwrite any existing periods on selected days</div>
+                            <div class="mc-import-footer">
+                                <button type="button" class="mc-import-cancel">Cancel</button>
+                                <button type="button" class="mc-import-confirm">Import</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="mc-periods-panel" hidden>
-                <div class="mc-periods-panel-header">
-                    <div class="mc-periods-panel-title">Periods</div>
-                </div>
-                <div class="mc-periods-list" aria-live="polite"></div>
-            </div>
-            <div class="mc-schedule-clear-wrap">
-                <button type="button" class="mc-schedule-view-toggle-btn" aria-label="Show periods view">Show Periods</button>
-                <button type="button" class="mc-schedule-import-btn" aria-label="Import periods">Import</button>
-                <button type="button" class="mc-schedule-clear-btn" aria-label="Clear timetable">Clear Timetable</button>
-            </div>
-            <div class="mc-schedule-tune" hidden>
-                <div class="mc-schedule-tune-row mc-schedule-tune-times">
-                    <label>Start <input type="time" class="mc-tune-start"></label>
-                    <label>End <input type="time" class="mc-tune-end"></label>
-                </div>
-                <div class="mc-schedule-tune-actions">
-                    <button type="button" class="mc-tune-delete">Delete</button>
-                </div>
-            </div>
         `;
-        scheduleCard.appendChild(periodsRow);
 
-        // Footer (close button only — delete is inline on the selected list item)
         const closeBtn = document.createElement('button');
         closeBtn.type = 'button';
         closeBtn.className = 'mc-close-edit-btn';
@@ -1332,41 +1373,6 @@
         panel.appendChild(right);
         panel.appendChild(closeBtn);
 
-        const importOverlay = document.createElement('div');
-        importOverlay.className = 'mc-import-overlay';
-        importOverlay.innerHTML = `
-            <div class="mc-import-panel" role="dialog" aria-label="Import periods">
-                <div class="mc-import-header">
-                    <span class="mc-import-header-text">Import from</span>
-                    <select id="mc-import-source" class="mc-import-source" aria-label="Import from timetable"></select>
-                </div>
-                <div class="mc-import-row mc-import-days-row">
-                    <div class="mc-import-days-head">
-                        <div class="mc-import-days-head-actions">
-                            <button type="button" class="mc-import-all">All</button>
-                            <button type="button" class="mc-import-none">None</button>
-                        </div>
-                    </div>
-                    <div class="mc-import-days-controls">
-                        <div class="mc-import-days-grid">
-                            <button type="button" class="mc-import-day" data-day="0">Sun</button>
-                            <button type="button" class="mc-import-day" data-day="1">Mon</button>
-                            <button type="button" class="mc-import-day" data-day="2">Tue</button>
-                            <button type="button" class="mc-import-day" data-day="3">Wed</button>
-                            <button type="button" class="mc-import-day" data-day="4">Thu</button>
-                            <button type="button" class="mc-import-day" data-day="5">Fri</button>
-                            <button type="button" class="mc-import-day" data-day="6">Sat</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="mc-import-disclaimer">This will overwrite any existing periods on selected days</div>
-                <div class="mc-import-footer">
-                    <button type="button" class="mc-import-cancel">Cancel</button>
-                    <button type="button" class="mc-import-confirm">Import</button>
-                </div>
-            </div>
-        `;
-        panel.appendChild(importOverlay);
 
         const blockEditorOverlay = document.createElement('div');
         blockEditorOverlay.className = 'mc-block-editor-overlay';
@@ -1403,12 +1409,12 @@
         overlay.appendChild(panel);
         document.body.appendChild(overlay);
 
-        const importSourceSelect = importOverlay.querySelector('.mc-import-source');
-        const importAllBtn = importOverlay.querySelector('.mc-import-all');
-        const importNoneBtn = importOverlay.querySelector('.mc-import-none');
-        const importDayButtons = Array.from(importOverlay.querySelectorAll('.mc-import-day'));
-        const importCancelBtn = importOverlay.querySelector('.mc-import-cancel');
-        const importConfirmBtn = importOverlay.querySelector('.mc-import-confirm');
+        const importSourceSelect = periodsRow.querySelector('.mc-import-source');
+        const importAllBtn = periodsRow.querySelector('.mc-import-all');
+        const importNoneBtn = periodsRow.querySelector('.mc-import-none');
+        const importDayButtons = Array.from(periodsRow.querySelectorAll('.mc-import-day'));
+        const importCancelBtn = periodsRow.querySelector('.mc-import-cancel');
+        const importConfirmBtn = periodsRow.querySelector('.mc-import-confirm');
         const blockNameInput = blockEditorOverlay.querySelector('.mc-block-name-input');
         const blockEditorCancelBtn = blockEditorOverlay.querySelector('.mc-block-editor-cancel');
         const blockEditorSaveBtn = blockEditorOverlay.querySelector('.mc-block-editor-save');
@@ -1437,25 +1443,39 @@
         const colourTriggerEl = form.querySelector('.mc-input-colour-trigger');
         const colourSwatchEl = form.querySelector('.mc-input-colour-swatch');
         const inlineColourPickerEl = form.querySelector('.mc-inline-colour-picker');
-        const inlineColourCanvasEl = form.querySelector('.mc-inline-colour-picker-sv');
-        const inlineColourMarkerEl = form.querySelector('.mc-inline-colour-picker-marker');
-        const inlineColourHueEl = form.querySelector('.mc-inline-colour-picker-hue');
-        const inlineColourHexEl = form.querySelector('.mc-inline-colour-picker-hex');
-        const inlineColourPreviewEl = form.querySelector('.mc-inline-colour-picker-preview');
-        const inlineColourCloseEl = form.querySelector('.mc-inline-colour-picker-close');
+        inlineColourPickerEl.innerHTML = '';
+        const inlineColourPicker = window.MCColourPicker.create({
+            container: inlineColourPickerEl,
+            initialColor: '#9aa0a6',
+            title: 'Class colour',
+            onClose: hideInlineColourPicker,
+            onColorChange: (colour) => {
+                syncColourTrigger(colour);
+                commitColourToSelectedClass(colour);
+            }
+        });
+        const inlineColourCanvasEl = inlineColourPicker.canvas;
+        const inlineColourMarkerEl = inlineColourPicker.marker;
+        const inlineColourHueEl = inlineColourPicker.hue;
+        const inlineColourHexEl = inlineColourPicker.hex;
+        const inlineColourPreviewEl = inlineColourPicker.preview;
+        const inlineColourCloseEl = inlineColourPicker.root.querySelector('.mc-picker-close');
         let selectedImportDays = new Set([0, 1, 2, 3, 4, 5, 6]);
-        const scheduleCardEl = periodsRow.querySelector('.mc-schedule-card');
-        const periodsPanelEl = periodsRow.querySelector('.mc-periods-panel');
+        const scheduleCardEl = scheduleCard;
+        const timetablePanelEl = periodsRow.querySelector('.mc-schedule-panel-timetable');
+        const periodsPanelEl = periodsRow.querySelector('.mc-schedule-panel-periods');
+        const importPanelWrapper = periodsRow.querySelector('.mc-schedule-panel-import');
         const periodsListEl = periodsRow.querySelector('.mc-periods-list');
         const scheduleBoardEl = periodsRow.querySelector('.mc-schedule-board');
         const scheduleAxisEl = periodsRow.querySelector('.mc-schedule-time-axis');
         const scheduleDaysEl = periodsRow.querySelector('.mc-schedule-days');
         const scheduleClearBtn = periodsRow.querySelector('.mc-schedule-clear-btn');
-        const scheduleViewToggleBtn = periodsRow.querySelector('.mc-schedule-view-toggle-btn');
+        const scheduleViewTabs = scheduleCardEl.querySelectorAll('.mc-schedule-tab');
         const scheduleImportBtn = periodsRow.querySelector('.mc-schedule-import-btn');
         const scheduleTuneEl = periodsRow.querySelector('.mc-schedule-tune');
         const tuneStartEl = periodsRow.querySelector('.mc-tune-start');
         const tuneEndEl = periodsRow.querySelector('.mc-tune-end');
+        const tuneRoomEl = periodsRow.querySelector('.mc-tune-room');
         const tuneDeleteEl = periodsRow.querySelector('.mc-tune-delete');
         const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
         let draggedClassId = null;
@@ -1467,10 +1487,13 @@
         let scheduleViewMode = 'timetable';
         let clearTimetableArmed = false;
         let clearTimetableTimer = null;
+        let scheduleBoardResizeObserver = null;
+        let periodsLaneResizeObserver = null;
         let blockEditorState = null;
         let blockEditorDraggedClassId = null;
         let blockEditorDragState = null;
         let blockEditorResizeState = null;
+        let blockEditorResizeObserver = null;
         let focusedBlockEditorItem = null;
         let activeBlockEditorItem = null;
         let activeInlinePeriodEditor = null;
@@ -1498,17 +1521,79 @@
             root.className = `mc-schedule-axis-control ${sideClass}`;
             root.setAttribute('role', 'group');
             root.setAttribute('aria-label', ariaLabel);
+
+            // Card-style control: label, display, edit button and hidden edit area
+            const labelText = ariaLabel && /start/i.test(ariaLabel) ? 'Start' : 'End';
+            const isStart = /start/i.test(sideClass || '');
+            // For both Start and End: label, display, edit area, and Edit button below
             root.innerHTML = `
-                <div class="mc-schedule-time-group">
-                    <input type="text" class="mc-schedule-time-part mc-schedule-time-hour" inputmode="numeric" maxlength="2" autocomplete="off" spellcheck="false" aria-label="${ariaLabel} hour" value="${parts.hour}">
-                    <span class="mc-schedule-time-separator" aria-hidden="true">:</span>
-                    <input type="text" class="mc-schedule-time-part mc-schedule-time-minute" inputmode="numeric" maxlength="2" autocomplete="off" spellcheck="false" aria-label="${ariaLabel} minute" value="${parts.minute}">
-                    <button type="button" class="mc-schedule-time-part mc-schedule-time-meridiem" aria-label="${ariaLabel} am or pm" aria-pressed="${parts.meridiem === 'pm' ? 'true' : 'false'}">${parts.meridiem}</button>
+                <div class="mc-axis-card mc-axis-card-inline">
+                    <div class="mc-schedule-axis-control-label">${labelText}</div>
+                    <div class="mc-schedule-axis-control-display">${formatTimeToAmPm(timeString)}</div>
+                    <div class="mc-axis-edit-area">
+                        <div class="mc-schedule-time-group">
+                            <input type="text" class="mc-schedule-time-part mc-schedule-time-hour" inputmode="numeric" maxlength="2" autocomplete="off" spellcheck="false" aria-label="${ariaLabel} hour" value="${parts.hour}">
+                            <span class="mc-schedule-time-separator" aria-hidden="true">:</span>
+                            <input type="text" class="mc-schedule-time-part mc-schedule-time-minute" inputmode="numeric" maxlength="2" autocomplete="off" spellcheck="false" aria-label="${ariaLabel} minute" value="${parts.minute}">
+                            <button type="button" class="mc-schedule-time-part mc-schedule-time-meridiem" aria-label="${ariaLabel} am or pm" aria-pressed="${parts.meridiem === 'pm' ? 'true' : 'false'}">${parts.meridiem}</button>
+                        </div>
+                    </div>
+                    <button type="button" class="mc-axis-edit-btn" aria-label="Edit ${labelText}">Edit</button>
                 </div>
             `;
+
             const hourInput = root.querySelector('.mc-schedule-time-hour');
             const minuteInput = root.querySelector('.mc-schedule-time-minute');
             const meridiemInput = root.querySelector('.mc-schedule-time-meridiem');
+            const displayEl = root.querySelector('.mc-schedule-axis-control-display');
+            const editArea = root.querySelector('.mc-axis-edit-area');
+            const editBtn = root.querySelector('.mc-axis-edit-btn');
+
+            const controlObj = { root, hourInput, minuteInput, meridiemInput };
+            const updateDisplay = () => {
+                try {
+                    const v = getTimeControlValue(controlObj) || timeString || '';
+                    displayEl.textContent = formatTimeToAmPm(v);
+                } catch (e) {}
+            };
+
+            if (hourInput) hourInput.addEventListener('input', updateDisplay);
+            if (minuteInput) minuteInput.addEventListener('input', updateDisplay);
+            if (meridiemInput) meridiemInput.addEventListener('click', () => {
+                const cur = (meridiemInput.dataset?.value || meridiemInput.textContent || '').trim().toLowerCase();
+                const next = cur && cur.startsWith('p') ? 'am' : 'pm';
+                meridiemInput.textContent = next;
+                meridiemInput.dataset.value = next;
+                meridiemInput.setAttribute('aria-pressed', next === 'pm' ? 'true' : 'false');
+                updateDisplay();
+            });
+            // Delegate edit button clicks (handles buttons above/below without moving nodes)
+            root.addEventListener('click', (ev) => {
+                const btn = ev.target.closest('.mc-axis-edit-btn');
+                if (!btn) return;
+                ev.preventDefault(); ev.stopPropagation();
+                const isEditing = btn.dataset.editing === '1';
+                const editAreaEl = root.querySelector('.mc-axis-edit-area');
+                const labelEl = root.querySelector('.mc-schedule-axis-control-label');
+                if (!editAreaEl) return;
+                if (!isEditing) {
+                    btn.dataset.editing = '1';
+                    btn.textContent = 'Done';
+                    if (labelEl) labelEl.style.display = 'none';
+                    if (displayEl) displayEl.style.display = 'none';
+                    editAreaEl.classList.add('mc-axis-edit-open');
+                    setTimeControlValue(controlObj, getTimeControlValue(controlObj) || timeString);
+                    try { const h = root.querySelector('.mc-schedule-time-hour'); if (h) { h.focus(); if (typeof h.select === 'function') h.select(); } } catch (_) {}
+                } else {
+                    btn.dataset.editing = '0';
+                    btn.textContent = 'Edit';
+                    editAreaEl.classList.remove('mc-axis-edit-open');
+                    if (labelEl) labelEl.style.display = '';
+                    if (displayEl) displayEl.style.display = '';
+                    try { commitViewRangeFromControls(viewStartInput, viewEndInput); } catch (e) {}
+                    updateDisplay();
+                }
+            });
             return {
                 root,
                 hourInput,
@@ -1784,6 +1869,7 @@
         function openInlineColourPicker() {
             if (!inlineColourPickerEl) return;
             const hex = colourInputEl && colourInputEl.value ? colourInputEl.value : '#9aa0a6';
+            inlineColourPicker.setColor(hex, 'open');
             const hsv = hexToHsv(hex);
             inlineColourState = { h: hsv.h, s: hsv.s, v: hsv.v };
             if (inlineColourHueEl) inlineColourHueEl.value = String(Math.round(inlineColourState.h));
@@ -1887,26 +1973,37 @@
         }
 
         function setScheduleViewMode(mode) {
-            scheduleViewMode = mode === 'periods' ? 'periods' : 'timetable';
-            const inPeriodsView = scheduleViewMode === 'periods';
-            if (scheduleCardEl) scheduleCardEl.hidden = inPeriodsView;
-            if (periodsPanelEl) periodsPanelEl.hidden = !inPeriodsView;
+            const validModes = ['timetable', 'periods', 'import'];
+            scheduleViewMode = validModes.includes(mode) ? mode : 'timetable';
+            const isTimetable = scheduleViewMode === 'timetable';
+            const isPeriods = scheduleViewMode === 'periods';
+            const isImport = scheduleViewMode === 'import';
+
+            if (scheduleCardEl) scheduleCardEl.hidden = false;
+            if (timetablePanelEl) timetablePanelEl.hidden = !isTimetable;
+            if (periodsPanelEl) periodsPanelEl.hidden = !isPeriods;
+            if (importPanelWrapper) importPanelWrapper.hidden = !isImport;
             if (periodsRow) {
-                periodsRow.classList.toggle('mc-periods-view', inPeriodsView);
-                periodsRow.classList.toggle('mc-timetable-view', !inPeriodsView);
+                periodsRow.classList.toggle('mc-periods-view', isPeriods);
+                periodsRow.classList.toggle('mc-timetable-view', isTimetable);
+                periodsRow.classList.toggle('mc-import-view', isImport);
             }
-            if (scheduleViewToggleBtn) {
-                scheduleViewToggleBtn.textContent = inPeriodsView ? 'Show Timetable' : 'Show Periods';
-                scheduleViewToggleBtn.setAttribute('aria-label', inPeriodsView ? 'Show timetable view' : 'Show periods view');
-            }
+            scheduleViewTabs.forEach((tab) => {
+                const tabMode = tab.dataset.tab;
+                const selected = tabMode === scheduleViewMode;
+                tab.classList.toggle('mc-schedule-tab-active', selected);
+                tab.setAttribute('aria-selected', selected ? 'true' : 'false');
+            });
             hideTunePanel();
-            if (!inPeriodsView) {
-                if (scheduleCardEl) scheduleCardEl.hidden = false;
-                if (periodsPanelEl) periodsPanelEl.hidden = true;
+            if (isTimetable) {
                 window.requestAnimationFrame(() => {
                     if (scheduleViewMode !== 'timetable') return;
                     renderPeriodsList(classById(selectedId));
                 });
+            } else if (isPeriods) {
+                renderAllPeriodsView();
+            } else if (isImport) {
+                ensureImportSourceOptions();
             }
         }
 
@@ -1926,6 +2023,7 @@
                         day: Number(period.day) || 0,
                         start: period.start || '00:00',
                         end: period.end || '00:00',
+                        room: String(period.room || ''),
                         startMin,
                         endMin
                     });
@@ -1952,13 +2050,59 @@
             }
             savePeriods(classPeriods);
             renderPeriodsList(classById(selectedId));
+            if (scheduleViewMode === 'periods') renderAllPeriodsView();
             renderSidebarList();
             try { renderPeriodsOnTimetable(); } catch (_) {}
             try { updateTimetableIndicator(); } catch (_) {}
             try { updateLiveWidget(); } catch (_) {}
         }
 
-        function updatePeriodTimesInTimetable(classId, periodId, start, end) {
+        function addPeriodToDay(classId, day) {
+            const targetClass = classById(classId);
+            if (!targetClass) return;
+
+            const existing = collectAllPeriodsForCurrentTimetable()
+                .filter((entry) => entry.day === Number(day));
+            const range = getViewRange();
+            const duration = 60;
+            let startMin = range.startMin;
+            let foundSlot = false;
+
+            for (; startMin + duration <= range.endMin; startMin += 5) {
+                const overlaps = existing.some((entry) => startMin < entry.endMin && startMin + duration > entry.startMin);
+                if (!overlaps) {
+                    foundSlot = true;
+                    break;
+                }
+            }
+
+            if (!foundSlot) {
+                startMin = Math.max(range.startMin, ...existing.map((entry) => entry.endMin));
+                startMin = Math.min(startMin, 23 * 60);
+            }
+            const endMin = Math.min(startMin + duration, (23 * 60) + 59);
+            if (endMin <= startMin) return;
+
+            const next = normalizePeriods(classPeriods[targetClass.id] || []);
+            next.push({
+                id: randomPeriodId(),
+                day: Number(day) || 0,
+                start: minutesToTimeString(startMin),
+                end: minutesToTimeString(endMin),
+                label: '',
+                room: ''
+            });
+            classPeriods[targetClass.id] = next;
+            targetClass.periods = next;
+            savePeriods(classPeriods);
+            renderSidebarList();
+            renderPeriodsList(classById(selectedId));
+            if (scheduleViewMode === 'periods') renderAllPeriodsView();
+            try { updateTimetableIndicator(); } catch (_) {}
+            try { updateLiveWidget(); } catch (_) {}
+        }
+
+        function updatePeriodTimesInTimetable(classId, periodId, start, end, room) {
             const targetClass = classById(classId);
             if (!targetClass) return;
             if (!start || !end) return;
@@ -1968,30 +2112,59 @@
             const idx = next.findIndex((p) => p.id === periodId);
             if (idx === -1) return;
 
-            next[idx] = Object.assign({}, next[idx], { start, end });
+            next[idx] = Object.assign({}, next[idx], { start, end, room: String(room || '').trim() });
             classPeriods[targetClass.id] = next;
             targetClass.periods = next;
 
             savePeriods(classPeriods);
             renderPeriodsList(classById(selectedId));
+            if (scheduleViewMode === 'periods') renderAllPeriodsView();
             renderSidebarList();
             try { renderPeriodsOnTimetable(); } catch (_) {}
             try { updateTimetableIndicator(); } catch (_) {}
             try { updateLiveWidget(); } catch (_) {}
         }
 
+        function updatePeriodScrollbar(grid) {
+            const scrollbar = grid && grid.nextElementSibling;
+            const thumb = scrollbar && scrollbar.firstElementChild;
+            if (!grid || !scrollbar || !thumb) return;
+            const trackWidth = scrollbar.clientWidth;
+            const maxScroll = Math.max(0, grid.scrollWidth - grid.clientWidth);
+            const hasOverflow = maxScroll > 1;
+            const thumbWidth = maxScroll > 0
+                ? Math.max(Math.min(24, trackWidth), trackWidth * grid.clientWidth / grid.scrollWidth)
+                : trackWidth;
+            const thumbTravel = Math.max(0, trackWidth - thumbWidth);
+            const thumbOffset = maxScroll > 0 ? grid.scrollLeft / maxScroll * thumbTravel : 0;
+            scrollbar.classList.toggle('is-overflowing', hasOverflow);
+            thumb.style.width = `${thumbWidth}px`;
+            thumb.style.transform = `translateX(${thumbOffset}px)`;
+            scrollbar.setAttribute('aria-valuemax', String(Math.round(maxScroll)));
+            scrollbar.setAttribute('aria-valuenow', String(Math.round(grid.scrollLeft)));
+            scrollbar.setAttribute('aria-disabled', String(maxScroll <= 0));
+        }
+
+        function disconnectPeriodsLaneResizeObserver() {
+            if (!periodsLaneResizeObserver) return;
+            periodsLaneResizeObserver.disconnect();
+            periodsLaneResizeObserver = null;
+        }
+
         function renderAllPeriodsView() {
             if (!periodsListEl) return;
             detachActiveInlinePeriodEditorListeners();
+            disconnectPeriodsLaneResizeObserver();
+            periodsLaneResizeObserver = typeof ResizeObserver !== 'undefined'
+                ? new ResizeObserver((observedEntries) => {
+                    observedEntries.forEach((observedEntry) => {
+                        updatePeriodScrollbar(observedEntry.target);
+                    });
+                })
+                : null;
             periodsListEl.innerHTML = '';
             const entries = collectAllPeriodsForCurrentTimetable();
-            if (!entries.length) {
-                const empty = document.createElement('div');
-                empty.className = 'mc-periods-empty';
-                empty.textContent = 'No periods yet in this timetable.';
-                periodsListEl.appendChild(empty);
-                return;
-            }
+            const periodDayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
             const groupedByDay = new Map();
             entries.forEach((entry) => {
@@ -2000,19 +2173,108 @@
                 groupedByDay.get(day).push(entry);
             });
 
-            Array.from(groupedByDay.keys()).sort((a, b) => a - b).forEach((day) => {
+            periodDayNames.forEach((dayName, day) => {
                 const section = document.createElement('section');
                 section.className = 'mc-periods-day-section';
+                section.dataset.day = String(day);
 
                 const header = document.createElement('div');
                 header.className = 'mc-periods-day-header';
-                header.textContent = dayNames[day] || 'Sun';
+                header.textContent = dayName;
                 section.appendChild(header);
+
+                const lane = document.createElement('div');
+                lane.className = 'mc-periods-day-lane';
 
                 const grid = document.createElement('div');
                 grid.className = 'mc-periods-day-grid';
+                grid.id = `mc-periods-day-grid-${day}`;
+                grid.addEventListener('dragover', (ev) => {
+                    if (!draggedClassId) return;
+                    ev.preventDefault();
+                    if (ev.dataTransfer) ev.dataTransfer.dropEffect = 'copy';
+                    section.classList.add('mc-periods-day-drop-target');
+                });
+                grid.addEventListener('dragleave', (ev) => {
+                    if (ev.relatedTarget && grid.contains(ev.relatedTarget)) return;
+                    section.classList.remove('mc-periods-day-drop-target');
+                });
+                grid.addEventListener('drop', (ev) => {
+                    if (!draggedClassId) return;
+                    ev.preventDefault();
+                    section.classList.remove('mc-periods-day-drop-target');
+                    addPeriodToDay(draggedClassId, day);
+                });
 
-                groupedByDay.get(day).forEach((entry) => {
+                const scrollbar = document.createElement('div');
+                scrollbar.className = 'mc-periods-scrollbar-track';
+                scrollbar.setAttribute('role', 'scrollbar');
+                scrollbar.setAttribute('aria-label', `${dayName} periods scroll position`);
+                scrollbar.setAttribute('aria-orientation', 'horizontal');
+                scrollbar.setAttribute('aria-controls', grid.id);
+                scrollbar.setAttribute('aria-valuemin', '0');
+                scrollbar.setAttribute('aria-valuemax', '0');
+                scrollbar.setAttribute('aria-valuenow', '0');
+                scrollbar.tabIndex = 0;
+
+                const scrollbarThumb = document.createElement('div');
+                scrollbarThumb.className = 'mc-periods-scrollbar-thumb';
+                scrollbarThumb.setAttribute('aria-hidden', 'true');
+                scrollbar.appendChild(scrollbarThumb);
+
+                let thumbDragStart = null;
+                scrollbar.addEventListener('keydown', (ev) => {
+                    const maxScroll = Math.max(0, grid.scrollWidth - grid.clientWidth);
+                    const page = Math.max(32, grid.clientWidth * 0.8);
+                    const keyTargets = {
+                        ArrowLeft: grid.scrollLeft - 32,
+                        ArrowRight: grid.scrollLeft + 32,
+                        PageUp: grid.scrollLeft - page,
+                        PageDown: grid.scrollLeft + page,
+                        Home: 0,
+                        End: maxScroll
+                    };
+                    if (!(ev.key in keyTargets)) return;
+                    ev.preventDefault();
+                    grid.scrollLeft = keyTargets[ev.key];
+                });
+                scrollbar.addEventListener('pointerdown', (ev) => {
+                    if (ev.target === scrollbarThumb && grid.scrollWidth > grid.clientWidth) {
+                        ev.preventDefault();
+                        thumbDragStart = { x: ev.clientX, scrollLeft: grid.scrollLeft };
+                        scrollbar.setPointerCapture(ev.pointerId);
+                    } else if (ev.target === scrollbar) {
+                        const rect = scrollbar.getBoundingClientRect();
+                        const ratio = Math.max(0, Math.min(1, (ev.clientX - rect.left) / rect.width));
+                        grid.scrollLeft = ratio * Math.max(0, grid.scrollWidth - grid.clientWidth);
+                    }
+                });
+                scrollbar.addEventListener('pointermove', (ev) => {
+                    if (!thumbDragStart) return;
+                    const maxScroll = Math.max(0, grid.scrollWidth - grid.clientWidth);
+                    const thumbTravel = scrollbar.clientWidth - scrollbarThumb.offsetWidth;
+                    if (thumbTravel <= 0) return;
+                    grid.scrollLeft = thumbDragStart.scrollLeft
+                        + ((ev.clientX - thumbDragStart.x) / thumbTravel) * maxScroll;
+                });
+                const endThumbDrag = () => { thumbDragStart = null; };
+                scrollbar.addEventListener('pointerup', endThumbDrag);
+                scrollbar.addEventListener('pointercancel', endThumbDrag);
+                grid.addEventListener('scroll', () => updatePeriodScrollbar(grid), { passive: true });
+
+                lane.append(grid, scrollbar);
+                if (periodsLaneResizeObserver) periodsLaneResizeObserver.observe(grid);
+
+                const dayEntries = groupedByDay.get(day) || [];
+                if (dayEntries.length === 0) {
+                    section.classList.add('mc-periods-day-empty');
+                    const emptyHint = document.createElement('div');
+                    emptyHint.className = 'mc-periods-day-empty-hint';
+                    emptyHint.textContent = 'Drag a class from the sidebar to add a period';
+                    grid.appendChild(emptyHint);
+                }
+
+                dayEntries.forEach((entry) => {
                     const item = document.createElement('div');
                     item.className = 'mc-periods-item';
 
@@ -2025,13 +2287,22 @@
 
                     const meta = document.createElement('div');
                     meta.className = 'mc-periods-item-meta';
+                    const titleRow = document.createElement('div');
+                    titleRow.className = 'mc-periods-item-title-row';
                     const titleEl = document.createElement('div');
                     titleEl.className = 'mc-periods-item-title';
                     titleEl.textContent = entry.classTitle;
+                    titleRow.appendChild(titleEl);
+                    if (entry.room) {
+                        const roomEl = document.createElement('div');
+                        roomEl.className = 'mc-periods-item-room';
+                        roomEl.textContent = `• ${entry.room}`;
+                        titleRow.appendChild(roomEl);
+                    }
                     const timeEl = document.createElement('div');
                     timeEl.className = 'mc-periods-item-time';
                     timeEl.textContent = `${formatTimeToAmPm(entry.start)} - ${formatTimeToAmPm(entry.end)}`;
-                    meta.appendChild(titleEl);
+                    meta.appendChild(titleRow);
                     meta.appendChild(timeEl);
 
                     const actions = document.createElement('div');
@@ -2060,11 +2331,29 @@
                     startInput.type = 'time';
                     startInput.className = 'mc-periods-item-editor-start';
                     startInput.value = entry.start;
+                    startInput.setAttribute('aria-label', `Start time for ${entry.classTitle}`);
+                    const startField = document.createElement('label');
+                    startField.className = 'mc-periods-item-editor-field';
+                    startField.appendChild(startInput);
 
                     const endInput = document.createElement('input');
                     endInput.type = 'time';
                     endInput.className = 'mc-periods-item-editor-end';
                     endInput.value = entry.end;
+                    endInput.setAttribute('aria-label', `End time for ${entry.classTitle}`);
+                    const endField = document.createElement('label');
+                    endField.className = 'mc-periods-item-editor-field';
+                    endField.appendChild(endInput);
+
+                    const roomInput = document.createElement('input');
+                    roomInput.type = 'text';
+                    roomInput.className = 'mc-periods-item-editor-room';
+                    roomInput.placeholder = 'Alternate Room';
+                    roomInput.setAttribute('aria-label', `Alternate room for ${entry.classTitle}`);
+                    roomInput.value = entry.room;
+
+                    const roomRow = document.createElement('div');
+                    roomRow.className = 'mc-periods-item-editor-room-row';
 
                     const saveBtn = document.createElement('button');
                     saveBtn.type = 'button';
@@ -2083,6 +2372,7 @@
                         if (revert) {
                             startInput.value = entry.start;
                             endInput.value = entry.end;
+                            roomInput.value = entry.room;
                         }
                         if (activeInlinePeriodEditor
                             && activeInlinePeriodEditor.classId === entry.classId
@@ -2145,7 +2435,7 @@
                         activeInlinePeriodEditor = null;
                         editor.hidden = true;
                         item.classList.remove('mc-periods-item-editing');
-                        updatePeriodTimesInTimetable(entry.classId, entry.periodId, startVal, endVal);
+                        updatePeriodTimesInTimetable(entry.classId, entry.periodId, startVal, endVal, roomInput.value);
                     });
 
                     actions.appendChild(editBtn);
@@ -2155,17 +2445,25 @@
                     topRow.appendChild(meta);
                     topRow.appendChild(actions);
 
-                    editor.appendChild(startInput);
-                    editor.appendChild(endInput);
-                    editor.appendChild(saveBtn);
+                    editor.appendChild(startField);
+                    editor.appendChild(endField);
+                    roomRow.appendChild(roomInput);
+                    roomRow.appendChild(saveBtn);
+                    editor.appendChild(roomRow);
 
                     item.appendChild(topRow);
                     item.appendChild(editor);
                     grid.appendChild(item);
                 });
 
-                section.appendChild(grid);
+                section.appendChild(lane);
                 periodsListEl.appendChild(section);
+            });
+
+            window.requestAnimationFrame(() => {
+                periodsListEl.querySelectorAll('.mc-periods-day-grid').forEach((grid) => {
+                    updatePeriodScrollbar(grid);
+                });
             });
         }
 
@@ -2219,10 +2517,11 @@
         }
 
         function updateSidebarModeUi() {
-            const titleEl = leftHeader.querySelector('.mc-edit-list-title');
-            if (titleEl) titleEl.textContent = sidebarMode === 'blocks' ? 'Blocks' : 'Classes';
-            addBtn.title = sidebarMode === 'blocks' ? 'Add new block' : 'Add new class';
-            sidebarModeBtn.textContent = sidebarMode === 'blocks' ? 'Classes' : 'Blocks';
+            updateTabState();
+            if (typeof addConfirmBtn !== 'undefined') {
+                addConfirmBtn.title = sidebarMode === 'blocks' ? 'Add new block' : 'Add new class';
+                addConfirmBtn.setAttribute('aria-label', sidebarMode === 'blocks' ? 'Create block' : 'Create class');
+            }
             left.classList.toggle('mc-edit-list-blocks', sidebarMode === 'blocks');
         }
 
@@ -2402,7 +2701,7 @@
             el.setAttribute('title', `${getClassTitleById(item.classId)} ${formatTimeToAmPm(item.start)} - ${formatTimeToAmPm(item.end)}`);
             const dayHeight = Math.max(1, blockScheduleDay?.clientHeight || blockScheduleDay?.offsetHeight || 1);
             const topPx = (placement.topPct / 100) * dayHeight;
-            el.dataset.badgeClamped = placement.topPct <= 13.8889 ? 'top' : '';
+            el.dataset.badgeClamped = topPx <= 24 ? 'top' : '';
             el.style.setProperty('--mc-badge-fixed-top', `${Math.round(2 - topPx)}px`);
             const startBadge = el.querySelector('.mc-schedule-time-badge-start');
             if (startBadge) startBadge.textContent = formatTimeToAmPm(item.start);
@@ -2415,7 +2714,7 @@
             if (!blockEditorState || !Array.isArray(blockEditorState.items) || !blockEditorState.items.length) {
                 const empty = document.createElement('div');
                 empty.className = 'mc-periods-empty';
-                empty.textContent = 'No periods yet in this block.';
+                empty.textContent = 'Drag a class into the schedule to get started';
                 blockEditorPeriodsList.appendChild(empty);
                 return;
             }
@@ -2617,6 +2916,10 @@
         }
 
         function closeBlockEditor() {
+            if (blockEditorResizeObserver) {
+                blockEditorResizeObserver.disconnect();
+                blockEditorResizeObserver = null;
+            }
             blockEditorOverlay.hidden = true;
             blockEditorOverlay.classList.remove('visible');
             blockEditorState = null;
@@ -2636,6 +2939,13 @@
             blockEditorOverlay.hidden = false;
             blockEditorOverlay.classList.add('visible');
             renderBlockEditorItems();
+            if (typeof ResizeObserver !== 'undefined' && blockScheduleDay) {
+                if (blockEditorResizeObserver) blockEditorResizeObserver.disconnect();
+                blockEditorResizeObserver = new ResizeObserver(() => {
+                    if (blockEditorState) renderBlockEditorItems();
+                });
+                blockEditorResizeObserver.observe(blockScheduleDay);
+            }
             window.requestAnimationFrame(() => {
                 renderBlockEditorItems();
             });
@@ -2707,7 +3017,7 @@
             ev.preventDefault();
             const startMin = parseTimeToMinutes(item.start || '00:00');
             const endMin = parseTimeToMinutes(item.end || '00:00');
-            blockEditorResizeState = { pointerId: ev.pointerId, itemId: item.id, el, edge, startMin, endMin };
+            blockEditorResizeState = { pointerId: ev.pointerId, itemId: item.id, el, edge, startMin, endMin, startClientY: ev.clientY, hasMoved: false };
             try { el.setPointerCapture(ev.pointerId); } catch (_) {}
             window.addEventListener('pointermove', handleBlockEditorResizeMove, true);
             window.addEventListener('pointerup', handleBlockEditorResizeUp, true);
@@ -2721,14 +3031,33 @@
             const rect = blockScheduleDay.getBoundingClientRect();
             const vrLocal = getViewRange();
             const total = Math.max(1, vrLocal.endMin - vrLocal.startMin);
+
+            // Require a small initial movement to avoid accidental drags
+            const deltaY = ev.clientY - (blockEditorResizeState.startClientY || ev.clientY);
+            if (!blockEditorResizeState.hasMoved && Math.abs(deltaY) < 4) return;
+            if (!blockEditorResizeState.hasMoved) blockEditorResizeState.hasMoved = true;
+
+            // Use cursor position to determine placement (less sensitive than incremental deltas)
             const rawRatio = (ev.clientY - rect.top) / Math.max(1, rect.height);
-            const pointerMin = snapMinutes(vrLocal.startMin + (Math.max(0, Math.min(1, rawRatio)) * total), 5);
-            let nextStart = parseTimeToMinutes(item.start);
-            let nextEnd = parseTimeToMinutes(item.end);
-            if (blockEditorResizeState.edge === 'start') nextStart = Math.max(vrLocal.startMin, Math.min(pointerMin, nextEnd - 5));
-            else nextEnd = Math.min(vrLocal.endMin, Math.max(pointerMin, nextStart + 5));
-            item.start = minutesToTimeString(nextStart);
-            item.end = minutesToTimeString(nextEnd);
+            const clampedRatio = Math.max(0, Math.min(1, rawRatio));
+
+            const originalStart = Math.max(vrLocal.startMin, Math.min(vrLocal.endMin, blockEditorResizeState.startMin || 0));
+            const originalEnd = Math.max(vrLocal.startMin, Math.min(vrLocal.endMin, blockEditorResizeState.endMin || 0));
+            const minDur = 5;
+
+            if (blockEditorResizeState.edge === 'start') {
+                let startMin = vrLocal.startMin + Math.round(clampedRatio * total);
+                startMin = snapMinutes(startMin, 5);
+                startMin = Math.max(vrLocal.startMin, Math.min(startMin, originalEnd - minDur));
+                item.start = minutesToTimeString(startMin);
+                item.end = minutesToTimeString(originalEnd);
+            } else {
+                let endMin = vrLocal.startMin + Math.round(clampedRatio * total);
+                endMin = snapMinutes(endMin, 5);
+                endMin = Math.min(vrLocal.endMin, Math.max(endMin, originalStart + minDur));
+                item.start = minutesToTimeString(originalStart);
+                item.end = minutesToTimeString(endMin);
+            }
             syncBlockEditorTuneInputs(item);
             renderBlockEditorItems();
             const block = findBlockEditorBlock(item.id);
@@ -2766,14 +3095,13 @@
             };
         }
 
-        function getPlacementFromDayBodyPointer(dayBody, clientY, durationMin) {
+        function getPlacementFromDayBodyPointer(dayBody, clientY, durationMin, grabOffsetMin) {
             if (!dayBody) return null;
             const rect = dayBody.getBoundingClientRect();
             const vrLocal = getViewRange();
             const total = Math.max(1, vrLocal.endMin - vrLocal.startMin);
             const rawRatio = (clientY - rect.top) / Math.max(1, rect.height);
-            const centeredRatio = rawRatio - ((durationMin || 0) / total) / 2;
-            const startMin = vrLocal.startMin + (Math.max(0, Math.min(1, centeredRatio)) * total);
+            const startMin = vrLocal.startMin + (rawRatio * total) - grabOffsetMin;
             return computeSchedulePlacement(dayBody.dataset.day, startMin, durationMin);
         }
 
@@ -2790,7 +3118,7 @@
             block.dataset.day = String(placement.day);
             const dayHeight = Math.max(1, dayBody.clientHeight || dayBody.offsetHeight || 1);
             const topPx = (placement.topPct / 100) * dayHeight;
-            block.dataset.badgeClamped = placement.topPct <= 13.8889 ? 'top' : '';
+            block.dataset.badgeClamped = topPx <= 24 ? 'top' : '';
             block.style.setProperty('--mc-badge-fixed-top', `${Math.round(2 - topPx)}px`);
             syncScheduleBlockBadges(block, placement);
         }
@@ -2842,19 +3170,10 @@
             }
 
             if (openTune && dragState.block) {
-                const alreadyFocused = !!focusedPeriod
-                    && focusedPeriod.classId === dragState.classId
-                    && focusedPeriod.periodId === dragState.periodId;
-                selectClassById(dragState.classId);
+                if (selectedId !== dragState.classId) selectClassById(dragState.classId);
                 focusSchedulePeriod(dragState.classId, dragState.periodId);
-                if (alreadyFocused) {
-                    const targetBlock = periodsRow.querySelector(`.mc-schedule-block[data-class-id="${dragState.classId}"][data-period-id="${dragState.periodId}"]`);
-                    if (targetBlock) {
-                        openTunePanel(dragState.classId, dragState.periodId, targetBlock);
-                    }
-                } else {
-                    hideTunePanel();
-                }
+                const targetBlock = periodsRow.querySelector(`.mc-schedule-block[data-class-id="${dragState.classId}"][data-period-id="${dragState.periodId}"]`);
+                if (targetBlock) openTunePanel(dragState.classId, dragState.periodId, targetBlock);
             }
         }
 
@@ -2879,7 +3198,7 @@
 
                 const distanceX = clientX - currentState.startClientX;
                 const distanceY = clientY - currentState.startClientY;
-                if (!currentState.hasMoved && ((distanceX * distanceX) + (distanceY * distanceY) >= 16)) {
+                if (!currentState.hasMoved && ((distanceX * distanceX) + (distanceY * distanceY) >= 4)) {
                     currentState.hasMoved = true;
                     document.body.classList.add('mc-schedule-dragging');
                     if (currentState.block) {
@@ -2900,10 +3219,20 @@
                     dayBody.classList.add('mc-drop-target');
                 }
 
-                const placement = getPlacementFromDayBodyPointer(dayBody, clientY, currentState.durationMin);
+                const placement = getPlacementFromDayBodyPointer(
+                    dayBody,
+                    clientY,
+                    currentState.durationMin,
+                    currentState.grabOffsetMin
+                );
                 if (!placement) return;
                 currentState.currentPlacement = placement;
                 applyScheduleBlockPlacement(currentState.block, placement, currentState.backgroundColor);
+                if (activeTune
+                    && activeTune.classId === currentState.classId
+                    && activeTune.periodId === currentState.periodId) {
+                    positionTunePanel(currentState.block);
+                }
             });
         }
 
@@ -2927,16 +3256,25 @@
 
             ev.preventDefault();
             ev.stopPropagation();
-            hideTunePanel();
             finishScheduleBlockDrag({ cancelled: true });
 
             const originPlacement = computeSchedulePlacement(p.day, startMin, endMin - startMin);
+            const dayBodyRect = block.parentElement.getBoundingClientRect();
+            const blockRect = block.getBoundingClientRect();
+            const viewRange = getViewRange();
+            const durationMin = endMin - startMin;
+            const grabOffsetMin = Math.max(0, Math.min(
+                durationMin,
+                ((ev.clientY - blockRect.top) / Math.max(1, dayBodyRect.height))
+                    * (viewRange.endMin - viewRange.startMin)
+            ));
             scheduleDragState = {
                 pointerId: ev.pointerId,
                 block,
                 classId: cls.id,
                 periodId: p.id,
-                durationMin: endMin - startMin,
+                durationMin,
+                grabOffsetMin,
                 backgroundColor: cls.colour || '#9aa0a6',
                 startClientX: ev.clientX,
                 startClientY: ev.clientY,
@@ -2949,6 +3287,7 @@
             window.addEventListener('pointermove', handleScheduleBlockPointerMove, true);
             window.addEventListener('pointerup', handleScheduleBlockPointerUp, true);
             window.addEventListener('pointercancel', handleScheduleBlockPointerCancel, true);
+            openTunePanel(cls.id, p.id, block);
         }
 
         function updateResizePreview(block, placement) {
@@ -2956,6 +3295,7 @@
             applyScheduleBlockPlacement(block, placement, scheduleResizeState.backgroundColor);
             block.classList.add('mc-schedule-block-resizing');
             syncActiveTuneInputs(placement, scheduleResizeState.activeTuneSnapshot);
+            positionTunePanel(block);
         }
 
         function handleScheduleResizePointerMove(ev) {
@@ -2966,15 +3306,23 @@
             const rect = dayBody.getBoundingClientRect();
             const vrLocal = getViewRange();
             const total = Math.max(1, vrLocal.endMin - vrLocal.startMin);
-            const rawRatio = (ev.clientY - rect.top) / Math.max(1, rect.height);
-            const pointerMin = snapMinutes(vrLocal.startMin + (Math.max(0, Math.min(1, rawRatio)) * total), 5);
+
+            const deltaY = ev.clientY - (resizeState.startClientY || ev.clientY);
+            if (!resizeState.hasMoved && Math.abs(deltaY) < 4) return;
+            if (!resizeState.hasMoved) resizeState.hasMoved = true;
+
+            const deltaMinutes = Math.round((deltaY / Math.max(1, rect.height)) * total);
 
             let nextStart = resizeState.originPlacement.startMin;
             let nextEnd = resizeState.originPlacement.endMin;
             if (resizeState.edge === 'start') {
-                nextStart = Math.max(vrLocal.startMin, Math.min(pointerMin, nextEnd - 5));
+                let candidate = nextStart + deltaMinutes;
+                candidate = snapMinutes(candidate, 5);
+                nextStart = Math.max(vrLocal.startMin, Math.min(candidate, nextEnd - 5));
             } else {
-                nextEnd = Math.min(vrLocal.endMin, Math.max(pointerMin, nextStart + 5));
+                let candidate = nextEnd + deltaMinutes;
+                candidate = snapMinutes(candidate, 5);
+                nextEnd = Math.min(vrLocal.endMin, Math.max(candidate, nextStart + 5));
             }
 
             resizeState.currentPlacement = computeSchedulePlacement(
@@ -3012,10 +3360,6 @@
                 classPeriods[targetClass.id] = next;
                 targetClass.periods = next;
                 saveAndRender();
-                setTimeout(() => {
-                    const block = findScheduleBlock(resizeState.classId, resizeState.periodId);
-                    if (block) openTunePanel(resizeState.classId, resizeState.periodId, block);
-                }, 0);
                 return;
             }
 
@@ -3064,6 +3408,8 @@
                 backgroundColor: cls.colour || '#9aa0a6',
                 originPlacement,
                 currentPlacement: originPlacement,
+                startClientY: ev.clientY,
+                hasMoved: false,
                 activeTuneSnapshot: { classId: activeTune.classId, periodId: activeTune.periodId }
             };
 
@@ -3171,21 +3517,8 @@
             syncActiveTuneBlock();
         }
 
-        function openTunePanel(classId, periodId, anchorEl) {
-            const targetClass = classById(classId);
-            const targetPeriod = periodById(classId, periodId);
-            if (!targetClass || !targetPeriod || !scheduleTuneEl) {
-                hideTunePanel();
-                return;
-            }
-            activeTune = { classId, periodId };
-            focusSchedulePeriod(classId, periodId);
-            syncActiveTuneInputs({
-                startMin: parseTimeToMinutes(targetPeriod.start || '00:00'),
-                endMin: parseTimeToMinutes(targetPeriod.end || '00:00')
-            });
-            scheduleTuneEl.hidden = false;
-
+        function positionTunePanel(anchorEl) {
+            if (!scheduleTuneEl || scheduleTuneEl.hidden || !anchorEl) return;
             const positionRoot = scheduleTuneEl.offsetParent || periodsRow || panel;
             const rootRect = positionRoot.getBoundingClientRect();
             const anchorRect = anchorEl.getBoundingClientRect();
@@ -3199,32 +3532,50 @@
             top = Math.max(12, Math.min(rootRect.height - tuneRect.height - 12, top));
             scheduleTuneEl.style.left = `${Math.round(left)}px`;
             scheduleTuneEl.style.top = `${Math.round(top)}px`;
+        }
+
+        function openTunePanel(classId, periodId, anchorEl) {
+            const targetClass = classById(classId);
+            const targetPeriod = periodById(classId, periodId);
+            if (!targetClass || !targetPeriod || !scheduleTuneEl) {
+                hideTunePanel();
+                return;
+            }
+            activeTune = { classId, periodId };
+            focusSchedulePeriod(classId, periodId);
+            syncActiveTuneInputs({
+                startMin: parseTimeToMinutes(targetPeriod.start || '00:00'),
+                endMin: parseTimeToMinutes(targetPeriod.end || '00:00')
+            });
+            if (tuneRoomEl) tuneRoomEl.value = targetPeriod.room || '';
+            scheduleTuneEl.hidden = false;
+            positionTunePanel(anchorEl);
             syncActiveTuneBlock();
         }
 
         function persistActiveTuneChanges() {
             if (!activeTune) return;
-            const tuneState = { classId: activeTune.classId, periodId: activeTune.periodId };
             const targetClass = classById(activeTune.classId);
             if (!targetClass) return;
             const startVal = tuneStartEl ? tuneStartEl.value : '';
             const endVal = tuneEndEl ? tuneEndEl.value : '';
-            if (!startVal || !endVal) return;
-            if (parseTimeToMinutes(startVal) >= parseTimeToMinutes(endVal)) return;
 
             const next = normalizePeriods(classPeriods[targetClass.id] || []);
             const idx = next.findIndex(x => x.id === activeTune.periodId);
             if (idx === -1) return;
-            next[idx] = Object.assign({}, next[idx], { start: startVal, end: endVal });
+            const period = Object.assign({}, next[idx]);
+            if (startVal && endVal && parseTimeToMinutes(startVal) < parseTimeToMinutes(endVal)) {
+                period.start = startVal;
+                period.end = endVal;
+            }
+            period.room = String(tuneRoomEl?.value || '').trim();
+            next[idx] = period;
             classPeriods[targetClass.id] = next;
             targetClass.periods = next;
             saveAndRender();
-            setTimeout(() => {
-                const targetBlock = periodsRow.querySelector(`.mc-schedule-block[data-class-id="${tuneState.classId}"][data-period-id="${tuneState.periodId}"]`);
-                if (targetBlock) {
-                    openTunePanel(tuneState.classId, tuneState.periodId, targetBlock);
-                }
-            }, 0);
+            try { renderPeriodsOnTimetable(); } catch (_) {}
+            try { updateTimetableIndicator(); } catch (_) {}
+            try { updateLiveWidget(); } catch (_) {}
         }
 
         function updateImportDayUI() {
@@ -3241,9 +3592,7 @@
             updateImportDayUI();
         }
 
-        function openImportOverlay() {
-            importOverlay.classList.add('visible');
-            overlay.classList.add('mc-import-open');
+        function ensureImportSourceOptions() {
             if (importSourceSelect) {
                 importSourceSelect.innerHTML = '';
                 ['Timetable 1', 'Timetable 2', 'Timetable 3'].forEach((name, idx) => {
@@ -3261,8 +3610,7 @@
         }
 
         function closeImportOverlay() {
-            importOverlay.classList.remove('visible');
-            overlay.classList.remove('mc-import-open');
+            setScheduleViewMode('timetable');
         }
 
         function loadPeriodsForTimetableIndex(index) {
@@ -3320,22 +3668,14 @@
             commitViewRangeFromControls(startInput, endInput);
         }
 
-        if (scheduleImportBtn) {
-            scheduleImportBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                openImportOverlay();
+        scheduleViewTabs.forEach((tab) => {
+            tab.addEventListener('click', (ev) => {
+                ev.preventDefault();
+                ev.stopPropagation();
+                const mode = tab.dataset.tab;
+                if (mode) setScheduleViewMode(mode);
             });
-        }
-        importOverlay.addEventListener('click', (e) => {
-            if (e.target === importOverlay) {
-                closeImportOverlay();
-            }
         });
-        const importPanelEl = importOverlay.querySelector('.mc-import-panel');
-        if (importPanelEl) {
-            importPanelEl.addEventListener('click', (e) => e.stopPropagation());
-        }
         if (importAllBtn) {
             importAllBtn.addEventListener('click', () => {
                 setAllImportDays(true);
@@ -3409,8 +3749,24 @@
         if (blockEditorCancelBtn) {
             blockEditorCancelBtn.addEventListener('click', closeBlockEditor);
         }
-        if (blockTuneStartEl) blockTuneStartEl.addEventListener('change', persistBlockTuneChanges);
-        if (blockTuneEndEl) blockTuneEndEl.addEventListener('change', persistBlockTuneChanges);
+        if (blockTuneStartEl) {
+            blockTuneStartEl.addEventListener('blur', persistBlockTuneChanges);
+            blockTuneStartEl.addEventListener('keydown', (ev) => {
+                if (ev.key === 'Enter') {
+                    persistBlockTuneChanges();
+                    blockTuneStartEl.blur();
+                }
+            });
+        }
+        if (blockTuneEndEl) {
+            blockTuneEndEl.addEventListener('blur', persistBlockTuneChanges);
+            blockTuneEndEl.addEventListener('keydown', (ev) => {
+                if (ev.key === 'Enter') {
+                    persistBlockTuneChanges();
+                    blockTuneEndEl.blur();
+                }
+            });
+        }
         if (blockTuneDeleteEl) {
             blockTuneDeleteEl.addEventListener('click', () => {
                 if (!activeBlockEditorItem || !blockEditorState) return;
@@ -3428,6 +3784,7 @@
         }
         if (blockEditorSaveBtn) {
             blockEditorSaveBtn.addEventListener('click', () => {
+                try { console.log('mc:block-editor:save-click', !!blockEditorState, blockEditorState && blockEditorState.id); } catch (_) {}
                 if (!blockEditorState) return;
                 const name = String(blockNameInput?.value || '').trim() || `Block ${blocks.length + 1}`;
                 const nextBlock = {
@@ -3451,17 +3808,34 @@
         }
 
         // Utilities to render
-        function renderSidebarList() {
+        function renderSidebarList(animateSelected = false) {
             updateSidebarModeUi();
+            const addEntry = list.querySelector('.mc-class-add-entry');
             list.innerHTML = '';
+            if (addEntry) list.appendChild(addEntry);
             if (sidebarMode === 'blocks') {
                 blocks.forEach((block) => {
+                    const row = document.createElement('div');
+                    row.className = 'mc-class-item-row';
+
                     const item = document.createElement('div');
                     item.className = 'mc-class-item mc-block-item';
-                    if (selectedBlockId === block.id) item.classList.add('selected');
                     item.dataset.id = block.id;
                     item.draggable = true;
-                    item.innerHTML = `<span class="mc-class-dot mc-block-dot"></span><span class="mc-class-label">${escapeHtml(block.name || 'Untitled block')}</span>`;
+
+                    const dot = document.createElement('span');
+                    dot.className = 'mc-class-dot mc-block-dot';
+                    const label = document.createElement('span');
+                    label.className = 'mc-class-label';
+                    label.textContent = block.name || 'Untitled block';
+
+                    const content = document.createElement('div');
+                    content.className = 'mc-class-item-content';
+                    content.appendChild(dot);
+                    content.appendChild(label);
+
+                    item.appendChild(content);
+
                     item.addEventListener('dragstart', (ev) => {
                         draggedBlockId = block.id;
                         if (ev.dataTransfer) {
@@ -3474,42 +3848,60 @@
                         const targets = periodsRow.querySelectorAll('.mc-drop-target');
                         targets.forEach((target) => target.classList.remove('mc-drop-target'));
                     });
-                    if (selectedBlockId === block.id) {
-                        const itemDelBtn = document.createElement('button');
-                        itemDelBtn.type = 'button';
-                        itemDelBtn.className = 'mc-delete-class-btn';
-                        itemDelBtn.title = 'Delete block';
-                        itemDelBtn.setAttribute('aria-label', 'Delete block');
-                        itemDelBtn.innerHTML = `<img src="${trashIconUrl}" class="mc-delete-class-icon" alt="" aria-hidden="true">`;
-                        itemDelBtn.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            if (!selectedBlockId) return;
-                            if (!confirm('Delete this block?')) return;
-                            if (blockEditorState && blockEditorState.id === selectedBlockId) {
-                                closeBlockEditor();
-                            }
-                            blocks = blocks.filter(x => x.id !== selectedBlockId);
-                            const nextSelectedBlock = blocks.length ? blocks[0].id : null;
-                            selectedBlockId = nextSelectedBlock;
-                            saveBlocks(blocks);
-                            renderSidebarList();
-                        });
-                        item.appendChild(itemDelBtn);
-                    }
-                    item.addEventListener('click', () => {
-                        selectedBlockId = block.id;
-                        openBlockEditor(block);
+
+                    const itemDelBtn = document.createElement('button');
+                    itemDelBtn.type = 'button';
+                    itemDelBtn.className = 'mc-delete-class-btn';
+                    itemDelBtn.title = 'Delete block';
+                    itemDelBtn.setAttribute('aria-label', 'Delete block');
+                    itemDelBtn.innerHTML = `<img src="${deleteCrossIconUrl}" class="mc-delete-class-icon" alt="Delete" aria-hidden="true">`;
+
+                    let confirmState = false;
+                    const resetDeleteState = () => {
+                        confirmState = false;
+                        itemDelBtn.innerHTML = `<img src="${deleteCrossIconUrl}" class="mc-delete-class-icon" alt="Delete" aria-hidden="true">`;
+                        itemDelBtn.classList.remove('mc-delete-class-confirm');
+                    };
+
+                    itemDelBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (!confirmState) {
+                            confirmState = true;
+                            itemDelBtn.innerHTML = `<img src="${deleteCheckIconUrl}" class="mc-delete-class-icon" alt="Confirm delete" aria-hidden="true">`;
+                            itemDelBtn.classList.add('mc-delete-class-confirm');
+                            return;
+                        }
+                        if (blockEditorState && blockEditorState.id === block.id) {
+                            closeBlockEditor();
+                        }
+                        blocks = blocks.filter(x => x.id !== block.id);
+                        saveBlocks(blocks);
                         renderSidebarList();
                     });
-                    list.appendChild(item);
+
+                    itemDelBtn.addEventListener('mouseleave', () => {
+                        if (confirmState) {
+                            resetDeleteState();
+                        }
+                    });
+
+                    item.addEventListener('click', () => {
+                        openBlockEditor(block);
+                    });
+
+                    row.appendChild(item);
+                    row.appendChild(itemDelBtn);
+                    list.appendChild(row);
                 });
                 return;
             }
 
             classes.forEach(c => {
+                const row = document.createElement('div');
+                row.className = 'mc-class-item-row';
+
                 const item = document.createElement('div');
                 item.className = 'mc-class-item';
-                if (selectedId === c.id) item.classList.add('selected');
                 item.dataset.id = c.id;
 
                 const dot = document.createElement('span');
@@ -3532,36 +3924,68 @@
                 item.addEventListener('dragend', () => {
                     draggedClassId = null;
                     item.setAttribute('aria-grabbed', 'false');
-                    const targets = periodsRow.querySelectorAll('.mc-drop-target');
+                    const targets = periodsRow.querySelectorAll('.mc-drop-target, .mc-periods-day-drop-target');
                     targets.forEach(target => target.classList.remove('mc-drop-target'));
+                    periodsRow.querySelectorAll('.mc-periods-day-drop-target').forEach(target => target.classList.remove('mc-periods-day-drop-target'));
                 });
 
-                item.appendChild(dot);
-                item.appendChild(label);
+                const content = document.createElement('div');
+                content.className = 'mc-class-item-content';
+                content.appendChild(dot);
+                content.appendChild(label);
 
-                // Trash icon on the selected item
+                const itemDelBtn = document.createElement('button');
+                itemDelBtn.type = 'button';
+                itemDelBtn.className = 'mc-delete-class-btn';
+                itemDelBtn.title = 'Delete class';
+                itemDelBtn.setAttribute('aria-label', 'Delete class');
+                itemDelBtn.innerHTML = `<img src="${deleteCrossIconUrl}" class="mc-delete-class-icon" alt="Delete" aria-hidden="true">`;
+
+                let confirmState = false;
+                const resetDeleteState = () => {
+                    confirmState = false;
+                    itemDelBtn.innerHTML = `<img src="${deleteCrossIconUrl}" class="mc-delete-class-icon" alt="Delete" aria-hidden="true">`;
+                    itemDelBtn.classList.remove('mc-delete-class-confirm');
+                };
+
+                itemDelBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (!selectedId) return;
+                    if (!confirmState) {
+                        confirmState = true;
+                        itemDelBtn.innerHTML = `<img src="${deleteCheckIconUrl}" class="mc-delete-class-icon" alt="Confirm delete" aria-hidden="true">`;
+                        itemDelBtn.classList.add('mc-delete-class-confirm');
+                        return;
+                    }
+                    classes = classes.filter(x => x.id !== selectedId);
+                    saveClasses(classes);
+                    selectedId = classes.length ? classes[0].id : null;
+                    renderSidebarList();
+                    renderEditFormFor(classes.find(x => x.id === selectedId));
+                });
+
+                itemDelBtn.addEventListener('mouseleave', () => {
+                    if (confirmState) {
+                        resetDeleteState();
+                    }
+                });
+
+                item.appendChild(content);
+                row.appendChild(item);
+                row.appendChild(itemDelBtn);
+
                 if (selectedId === c.id) {
-                    const itemDelBtn = document.createElement('button');
-                    itemDelBtn.type = 'button';
-                    itemDelBtn.className = 'mc-delete-class-btn';
-                    itemDelBtn.title = 'Delete class';
-                    itemDelBtn.setAttribute('aria-label', 'Delete class');
-                    itemDelBtn.innerHTML = `<img src="${trashIconUrl}" class="mc-delete-class-icon" alt="" aria-hidden="true">`;
-                    itemDelBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        if (!selectedId) return;
-                        if (!confirm('Delete this class?')) return;
-                        classes = classes.filter(x => x.id !== selectedId);
-                        saveClasses(classes);
-                        selectedId = classes.length ? classes[0].id : null;
-                        renderSidebarList();
-                        renderEditFormFor(classes.find(x => x.id === selectedId));
-                    });
-                    item.appendChild(itemDelBtn);
+                    if (animateSelected) {
+                        window.requestAnimationFrame(() => item.classList.add('selected'));
+                    } else {
+                        item.classList.add('selected');
+                    }
+                } else {
+                    resetDeleteState();
                 }
 
                 item.addEventListener('click', () => selectClassById(c.id));
-                list.appendChild(item);
+                list.appendChild(row);
             });
 
             if (!classes.length) {
@@ -3570,9 +3994,19 @@
             }
         }
 
+        function renderEmptyClassOverlay() {
+            const emptyPanel = document.createElement('div');
+            emptyPanel.className = 'mc-class-empty-overlay';
+            emptyPanel.innerHTML = `
+                <div class="mc-class-empty-title">Add a new class to get started</div>
+            `;
+            return emptyPanel;
+        }
+
         function selectClassById(id) {
+            if (selectedId !== id) hideTunePanel();
             selectedId = id;
-            renderSidebarList();
+            renderSidebarList(true);
             hideClassroomDropdown();
             const c = classes.find(x => x.id === id);
             renderEditFormFor(c);
@@ -3595,8 +4029,12 @@
         }
 
         function renderEditFormFor(c) {
+            const existingEmptyPanel = right.querySelector('.mc-class-empty-overlay');
             if (!c) {
                 right.classList.add('mc-edit-form-empty');
+                if (!existingEmptyPanel) {
+                    right.appendChild(renderEmptyClassOverlay());
+                }
                 form.querySelectorAll('input,textarea').forEach(el => {
                     if (el.classList.contains('mc-input-colour')) {
                         el.value = '#9aa0a6';
@@ -3611,6 +4049,7 @@
                 return;
             }
             right.classList.remove('mc-edit-form-empty');
+            if (existingEmptyPanel) existingEmptyPanel.remove();
             hideInlineColourPicker();
             form.querySelector('.mc-input-title').value = c.title || '';
             form.querySelector('.mc-input-teacher').value = c.teacher || '';
@@ -3624,35 +4063,13 @@
             renderPeriodsList(c);
         }
 
-        // Add class behaviour
-        addBtn.addEventListener('click', () => {
-            // Create a new unnamed class directly
-            if (sidebarMode === 'blocks') {
-                openBlockEditor();
-                return;
-            }
-            const newClass = {
-                id: generateId(),
-                title: '',
-                teacher: '',
-                room: '',
-                classroom: '',
-                classroomName: '',
-                colour: '#9aa0a6',
-                periods: []
-            };
-            classes.unshift(newClass);
-            saveClasses(classes);
-            selectedId = newClass.id;
-            renderSidebarList();
-            renderEditFormFor(newClass);
-            setTimeout(() => {
-                const titleInput = form.querySelector('.mc-input-title');
-                if (titleInput) titleInput.focus();
-            }, 0);
-        });
-
         // Visual schedule functionality
+        const deleteCrossIconUrl = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL)
+            ? chrome.runtime.getURL('Icons/bannerclose.svg')
+            : '';
+        const deleteCheckIconUrl = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL)
+            ? chrome.runtime.getURL('Icons/check.svg')
+            : '';
         const trashIconUrl = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL)
             ? chrome.runtime.getURL('Icons/Trash Icon.svg')
             : '';
@@ -3672,7 +4089,6 @@
 
         function renderPeriodsList(c) {
             if (!scheduleDaysEl) return;
-            hideTunePanel();
             buildScheduleBoard();
             bindTimeControl(viewStartInput, () => viewEndInput, true);
             bindTimeControl(viewEndInput, () => viewStartInput, false);
@@ -3816,6 +4232,11 @@
             }
             syncFocusedPeriodBlock();
             syncActiveTuneBlock();
+            if (activeTune) {
+                const activeBlock = findScheduleBlock(activeTune.classId, activeTune.periodId);
+                if (activeBlock) openTunePanel(activeTune.classId, activeTune.periodId, activeBlock);
+                else hideTunePanel();
+            }
             renderAllPeriodsView();
         }
 
@@ -3837,8 +4258,35 @@
             });
         }
 
-        if (tuneStartEl) tuneStartEl.addEventListener('change', persistActiveTuneChanges);
-        if (tuneEndEl) tuneEndEl.addEventListener('change', persistActiveTuneChanges);
+        if (tuneStartEl) {
+            tuneStartEl.addEventListener('blur', persistActiveTuneChanges);
+            tuneStartEl.addEventListener('keydown', (ev) => {
+                if (ev.key === 'Enter') {
+                    persistActiveTuneChanges();
+                    tuneStartEl.blur();
+                }
+            });
+        }
+        if (tuneEndEl) {
+            tuneEndEl.addEventListener('blur', persistActiveTuneChanges);
+            tuneEndEl.addEventListener('keydown', (ev) => {
+                if (ev.key === 'Enter') {
+                    persistActiveTuneChanges();
+                    tuneEndEl.blur();
+                }
+            });
+        }
+        if (tuneRoomEl) {
+            tuneRoomEl.addEventListener('change', persistActiveTuneChanges);
+            tuneRoomEl.addEventListener('blur', persistActiveTuneChanges);
+            tuneRoomEl.addEventListener('keydown', (ev) => {
+                if (ev.key === 'Enter') {
+                    ev.preventDefault();
+                    persistActiveTuneChanges();
+                    tuneRoomEl.blur();
+                }
+            });
+        }
 
         if (scheduleClearBtn) {
             updateClearTimetableButton();
@@ -3852,15 +4300,7 @@
             });
         }
 
-        if (scheduleViewToggleBtn) {
-            setScheduleViewMode('timetable');
-            scheduleViewToggleBtn.addEventListener('click', () => {
-                setScheduleViewMode(scheduleViewMode === 'timetable' ? 'periods' : 'timetable');
-                if (scheduleViewMode === 'periods') {
-                    renderAllPeriodsView();
-                }
-            });
-        }
+        setScheduleViewMode('timetable');
 
         if (scheduleBoardEl) {
             scheduleBoardEl.addEventListener('click', (ev) => {
@@ -3950,15 +4390,13 @@
 
         // Click away to hide input
         document.addEventListener('click', function handler(e) {
-            if (!overlay.contains(e.target)) return;
-            if (inlineColourPickerEl && !inlineColourPickerEl.hidden) {
-                const clickedInsidePicker = inlineColourPickerEl.contains(e.target);
-                const clickedTrigger = colourTriggerEl && colourTriggerEl.contains(e.target);
-                if (!clickedInsidePicker && !clickedTrigger) {
-                    hideInlineColourPicker();
-                }
+            if (!overlay.isConnected || !inlineColourPickerEl || inlineColourPickerEl.hidden) return;
+            const clickedInsidePicker = inlineColourPickerEl.contains(e.target);
+            const clickedTrigger = colourTriggerEl && colourTriggerEl.contains(e.target);
+            if (!clickedInsidePicker && !clickedTrigger) {
+                hideInlineColourPicker();
             }
-        });
+        }, true);
 
         // Form inputs (title/teacher/room/colour/classroom)
         form.querySelectorAll('.mc-input-title, .mc-input-teacher, .mc-input-room, .mc-input-colour, .mc-input-classroom').forEach(el => {
@@ -3982,7 +4420,6 @@
             classroomDisplayEl.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                if (!selectedId) return;
                 toggleClassroomDropdown();
             });
 
@@ -4012,14 +4449,12 @@
             });
         }
 
-        sidebarModeBtn.addEventListener('click', () => {
-            sidebarMode = sidebarMode === 'blocks' ? 'classes' : 'blocks';
-            resetClearTimetableButton();
-            renderSidebarList();
-        });
-
-
         closeBtn.addEventListener('click', () => {
+            if (scheduleBoardResizeObserver) {
+                scheduleBoardResizeObserver.disconnect();
+                scheduleBoardResizeObserver = null;
+            }
+            disconnectPeriodsLaneResizeObserver();
             hideClassroomDropdown();
             closeImportOverlay();
             hideTunePanel();
@@ -4029,6 +4464,11 @@
         // Close on overlay click outside panel
         overlay.addEventListener('click', (e) => {
             if (e.target === overlay) {
+                if (scheduleBoardResizeObserver) {
+                    scheduleBoardResizeObserver.disconnect();
+                    scheduleBoardResizeObserver = null;
+                }
+                disconnectPeriodsLaneResizeObserver();
                 hideClassroomDropdown();
                 closeImportOverlay();
                 hideTunePanel();
@@ -4055,6 +4495,14 @@
 
         buildScheduleBoard();
 
+        if (typeof ResizeObserver !== 'undefined' && scheduleBoardEl) {
+            scheduleBoardResizeObserver = new ResizeObserver(() => {
+                if (!overlay.isConnected) return;
+                renderPeriodsList(classById(selectedId));
+            });
+            scheduleBoardResizeObserver.observe(scheduleBoardEl);
+        }
+
         // Initial render
         renderSidebarList();
         if (selectedId) selectClassById(selectedId);
@@ -4076,6 +4524,13 @@
             const topPx = Math.round(window.innerHeight - container.offsetHeight - 8);
             container.style.top = `${topPx}px`;
         }
+    }
+
+    function positionTodayPanel() {
+        const todayPanel = mcTimetable.todayPanel;
+        if (!todayPanel) return;
+        todayPanel.style.top = '384px';
+        todayPanel.style.removeProperty('right');
     }
 
     function updateTimetableIndicator() {
@@ -4156,6 +4611,9 @@
         console.debug('showTimetableMenu', anchor && anchor.className);
         const container = createTimetableMenu();
         if (!document.body.contains(container)) document.body.appendChild(container);
+        if (mcTimetable.todayPanel && !document.body.contains(mcTimetable.todayPanel)) {
+            document.body.appendChild(mcTimetable.todayPanel);
+        }
 
         // Apply initial sizing so position can be calculated
         container.style.visibility = '';
@@ -4163,11 +4621,25 @@
         // use fixed positioning so the panel stays put during scroll
         container.style.position = 'fixed';
         container.style.zIndex = 1000000;
+        if (mcTimetable.todayPanel) {
+            if (mcTimetable.todayHideTimer) {
+                clearTimeout(mcTimetable.todayHideTimer);
+                mcTimetable.todayHideTimer = null;
+            }
+            mcTimetable.todayPanel.style.position = 'fixed';
+            mcTimetable.todayPanel.style.zIndex = '1000000';
+            mcTimetable.todayPanel.style.display = 'block';
+            mcTimetable.todayPanel.classList.remove('mc-today-panel-visible');
+            positionTodayPanel();
+        }
 
         // Trigger slide-in animation
         requestAnimationFrame(() => {
             container.classList.add('mc-timetable-visible');
+            if (mcTimetable.todayPanel) mcTimetable.todayPanel.classList.add('mc-today-panel-visible');
+            positionTodayPanel();
         });
+        setTimeout(positionTodayPanel, 360);
 
         updateTimetableIndicator();
         // render period blocks on the timeline
@@ -4194,13 +4666,24 @@
         
         // Trigger slide-out animation
         mcTimetable.container.classList.remove('mc-timetable-visible');
+        if (mcTimetable.todayPanel) {
+            mcTimetable.todayPanel.classList.remove('mc-today-panel-visible');
+            if (mcTimetable.todayHideTimer) clearTimeout(mcTimetable.todayHideTimer);
+            mcTimetable.todayHideTimer = setTimeout(() => {
+                if (mcTimetable.todayPanel) mcTimetable.todayPanel.style.display = 'none';
+                mcTimetable.todayHideTimer = null;
+            }, 450);
+        }
         
         // Remove after animation completes
         setTimeout(() => {
             if (mcTimetable.container && mcTimetable.container.parentElement) {
                 mcTimetable.container.parentElement.removeChild(mcTimetable.container);
             }
-        }, 340); // matches animation duration
+            if (mcTimetable.todayPanel && mcTimetable.todayPanel.parentElement) {
+                mcTimetable.todayPanel.parentElement.removeChild(mcTimetable.todayPanel);
+            }
+        }, 450); // matches the delayed Today panel animation
         
         document.removeEventListener('click', onDocumentClickForTimetable);
         document.removeEventListener('keydown', onDocumentKeydownForTimetable);
@@ -4216,7 +4699,7 @@
 
     function onDocumentClickForTimetable(e) {
         if (!mcTimetable.container) return;
-        if (e.target.closest('.mc-timetable') || e.target.closest('.mc-left-action-btn')) return;
+        if (e.target.closest('.mc-timetable') || e.target.closest('.mc-today-panel') || e.target.closest('.mc-left-action-btn')) return;
         hideTimetableMenu();
     }
 
@@ -4225,8 +4708,24 @@
     }
 
     // Update indicator on resize/scroll too
-    window.addEventListener('resize', () => { if (mcTimetable.container) { updateTimetableIndicator(); renderPeriodsOnTimetable(); } });
-    window.addEventListener('scroll', () => { if (mcTimetable.container) { updateTimetableIndicator(); renderPeriodsOnTimetable(); } });
+    let timetableIndicatorFrame = 0;
+    function scheduleTimetableIndicatorUpdate() {
+        if (timetableIndicatorFrame) return;
+        timetableIndicatorFrame = requestAnimationFrame(() => {
+            timetableIndicatorFrame = 0;
+            if (mcTimetable.container && mcTimetable.container.classList.contains('mc-timetable-visible')) {
+                updateTimetableIndicator();
+            }
+        });
+    }
+
+    window.addEventListener('resize', () => {
+        if (!mcTimetable.container || !mcTimetable.container.classList.contains('mc-timetable-visible')) return;
+        scheduleTimetableIndicatorUpdate();
+        renderPeriodsOnTimetable();
+        positionTodayPanel();
+    }, { passive: true });
+    window.addEventListener('scroll', scheduleTimetableIndicatorUpdate, { passive: true });
 
     // Helper: read classes from storage for current timetable, with periods attached
     function getStoredClasses() {
@@ -4272,47 +4771,13 @@
         } catch (e) { return []; }
     }
 
-    // Sync timetable data from chrome.storage.sync to localStorage
+    // Local-only timetable sync; nothing is pushed to the cloud.
     function syncTimetableFromChrome() {
-        if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.sync) return;
-        
-        const classesKey = 'mcTimetableClassesShared';
-        const periodsKey = 'mcTimetableClasses_' + mcTimetable.currentTimetableIndex;
-        const viewRangeKey = 'mcTimetableViewRange';
-        
-        chrome.storage.sync.get([classesKey, periodsKey, viewRangeKey], (result) => {
-            if (chrome.runtime.lastError) return;
-            
-            // Sync classes
-            if (result[classesKey] && Array.isArray(result[classesKey])) {
-                try {
-                    localStorage.setItem(classesKey, JSON.stringify(result[classesKey]));
-                } catch (e) {}
+        try {
+            if (mcTimetable.container && mcTimetable.container.classList.contains('visible')) {
+                renderPeriodsOnTimetable();
             }
-            
-            // Sync periods
-            if (result[periodsKey] && typeof result[periodsKey] === 'object') {
-                try {
-                    localStorage.setItem(periodsKey, JSON.stringify(result[periodsKey]));
-                } catch (e) {}
-            }
-            
-            // Sync view range
-            if (result[viewRangeKey] && typeof result[viewRangeKey] === 'object') {
-                try {
-                    localStorage.setItem(viewRangeKey, JSON.stringify(result[viewRangeKey]));
-                } catch (e) {}
-            }
-
-            // Manual refresh is now triggered only by clicking outside the notes panel.
-            
-            // Re-render the timetable if it's visible
-            try {
-                if (mcTimetable.container && mcTimetable.container.classList.contains('visible')) {
-                    renderPeriodsOnTimetable();
-                }
-            } catch (e) {}
-        });
+        } catch (e) {}
     }
 
     // Sync on page load
@@ -4395,7 +4860,6 @@
     let mcPeriodDetailMoveHandler = null;
 
     function scheduleHidePeriodDetail(ms) {
-        console.debug('scheduleHidePeriodDetail', ms);
         if (mcPeriodDetailHideTimeout) clearTimeout(mcPeriodDetailHideTimeout);
         mcPeriodDetailHideTimeout = setTimeout(hidePeriodDetailCard, ms || 200);
     }
@@ -4404,7 +4868,6 @@
     }
 
     function showPeriodDetailCard(targetEl, cls, period, mouseEvent) {
-        console.debug('showPeriodDetailCard called', cls && cls.title, period && (period.start + '-' + period.end));
         // Create/update a persistent card that remains while hovered
         hidePeriodDetailCard();
         const card = document.createElement('div');
@@ -4413,7 +4876,8 @@
         const dayName = dayNames[(period.day||0)];
         const metaParts = [];
         if (cls.teacher) metaParts.push(escapeHtml(cls.teacher));
-        if (cls.room) metaParts.push(escapeHtml(cls.room));
+        const room = period.room || cls.room;
+        if (room) metaParts.push(escapeHtml(room));
 
         const startFancy = formatTimeToAmPm(period.start || '--:--');
         const endFancy = formatTimeToAmPm(period.end || '--:--');
@@ -4423,25 +4887,22 @@
             <div class="mc-card-content">
                 <div class="mc-card-title">${escapeHtml(cls.title || '')}</div>
                 ${metaParts.length? `<div class="mc-card-meta">${metaParts.join(' • ')}</div>`: ''}
-                <div class="mc-card-period">${escapeHtml(dayName)} • ${escapeHtml(startFancy)} — ${escapeHtml(endFancy)}</div>
+                <div class="mc-card-period">${escapeHtml(dayName)} • ${escapeHtml(startFancy)} - ${escapeHtml(endFancy)}</div>
             </div>
         `;
 
         document.body.appendChild(card);
         mcPeriodDetailEl = card;
 
-        // Allow interactions: keep card visible while the mouse is over it
         card.addEventListener('mouseenter', () => { cancelHidePeriodDetail(); });
         card.addEventListener('mouseleave', () => { scheduleHidePeriodDetail(150); });
 
-        // Position card near the cursor if we have a mouseEvent, otherwise to the right of timetable
         const blockRect = targetEl.getBoundingClientRect();
         const containerRect = mcTimetable.container.getBoundingClientRect();
         const cardRect = card.getBoundingClientRect();
 
         let left, top;
         if (mouseEvent && typeof mouseEvent.clientX === 'number') {
-            // Prefer to the right of cursor; if not enough space, place to left
             const offset = 12;
             left = mouseEvent.clientX + offset + window.scrollX;
             if (left + cardRect.width > window.scrollX + window.innerWidth - 8) {
@@ -4499,7 +4960,6 @@
             window.addEventListener('mousemove', mcPeriodDetailMoveHandler);
         }
 
-        console.debug('placedPeriodDetail', { left: Math.round(left), top: Math.round(top), width: cardRect.width, height: cardRect.height });
     }
 
     function hidePeriodDetailCard() {
@@ -4510,6 +4970,75 @@
     }
 
     function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    function renderTodayPanel(classes) {
+        const row = mcTimetable.todayPanel && mcTimetable.todayPanel.querySelector('.mc-today-row');
+        if (!row) return;
+
+        row.innerHTML = '';
+        const now = new Date();
+        const today = now.getDay();
+        const nowMin = now.getHours() * 60 + now.getMinutes();
+        const entries = [];
+
+        (classes || []).forEach((cls) => {
+            (cls.periods || []).forEach((period) => {
+                if (!period || Number(period.day) !== today || !period.start || !period.end) return;
+                const startMin = parseTimeToMinutes(period.start);
+                const endMin = parseTimeToMinutes(period.end);
+                if (endMin <= startMin) return;
+                entries.push({ cls, period, startMin, endMin });
+            });
+        });
+
+        entries.sort((a, b) => a.startMin - b.startMin);
+
+        const visibleEntries = entries.filter((entry) => entry.endMin > nowMin);
+
+        if (!visibleEntries.length) {
+            const empty = document.createElement('div');
+            empty.className = 'mc-today-empty';
+            empty.textContent = 'Nothing else scheduled today...';
+            row.appendChild(empty);
+            return;
+        }
+
+        visibleEntries.forEach(({ cls, period, startMin, endMin }) => {
+            const isActive = startMin <= nowMin && nowMin < endMin;
+            const card = document.createElement('div');
+            card.className = `mc-today-card mc-live-card ${isActive ? 'mc-live-card-active' : 'mc-live-card-upcoming'}`;
+            card.setAttribute('role', 'button');
+            card.tabIndex = 0;
+            card.setAttribute('aria-label', `${cls.title || 'Class'} ${formatTimeToAmPm(period.start)} to ${formatTimeToAmPm(period.end)}`);
+
+            const colour = escapeHtml(cls.colour || '#9aa0a6');
+            const metaParts = [];
+            if (cls.teacher) metaParts.push(escapeHtml(cls.teacher));
+            const room = period.room || cls.room;
+            if (room) metaParts.push(escapeHtml(room));
+            card.innerHTML = `
+                <div class="mc-card-swatch mc-card-swatch-today" style="--swatch-color: ${colour};"></div>
+                <div class="mc-card-mini-content">
+                    <div class="mc-card-mini-title">${escapeHtml(cls.title || '')}</div>
+                    ${metaParts.length ? `<div class="mc-card-mini-meta">${metaParts.join(' • ')}</div>` : ''}
+                    <div class="mc-card-mini-period">${escapeHtml(formatTimeToAmPm(period.start))} - ${escapeHtml(formatTimeToAmPm(period.end))}</div>
+                </div>
+            `;
+
+            const activate = () => {
+                if (cls.classroom && String(cls.classroom).trim()) navigateToClassroom(cls.classroom);
+            };
+            card.addEventListener('click', activate);
+            card.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    activate();
+                }
+            });
+            row.appendChild(card);
+        });
+    }
+
     function renderPeriodsOnTimetable() {
         const container = mcTimetable.container;
         if (!container || !document.body.contains(container)) return;
@@ -4518,7 +5047,19 @@
         container.querySelectorAll('.mc-period-block').forEach(el => el.remove());
 
         const classes = getStoredClasses();
+        renderTodayPanel(classes);
         if (!classes || !classes.length) return;
+
+        const view = getViewRange();
+        if (view.endMin <= view.startMin) return;
+
+        const timelines = new Map(
+            Array.from(container.querySelectorAll('.mc-timetable-timeline[data-day]'))
+                .map(timeline => [timeline.dataset.day, timeline])
+        );
+        const timelineHeights = new Map(
+            Array.from(timelines, ([day, timeline]) => [day, timeline.offsetHeight])
+        );
 
         // Collect blocks per day so we can compute overlaps and split columns
         const dayBuckets = {};
@@ -4528,28 +5069,18 @@
                 // Basic sanity checks
                 if (!period || typeof period.day === 'undefined' || !period.start || !period.end) return;
                 const dayIndex = period.day || 0;
-                const dayTimeline = container.querySelector('.mc-timetable-timeline[data-day="' + (dayIndex) + '"]');
+                const dayKey = String(dayIndex);
+                const dayTimeline = timelines.get(dayKey);
                 if (!dayTimeline) return;
 
-                const timelineHeight = dayTimeline.offsetHeight;
-
-                function toMinutes(t) {
-                    if (!t) return 0;
-                    const parts = String(t).split(':');
-                    const h = parseInt(parts[0],10); const m = parseInt(parts[1],10);
-                    if (isNaN(h) || isNaN(m)) return 0;
-                    return h*60 + m;
-                }
-
-                const startMin = toMinutes(period.start);
-                const endMin = toMinutes(period.end);
+                const timelineHeight = timelineHeights.get(dayKey);
+                const startMin = parseTimeToMinutes(String(period.start));
+                const endMin = parseTimeToMinutes(String(period.end));
                 if (endMin <= startMin) return;
 
                 // Use the configured view range, clamp and scale within it
-                const view = getViewRange();
                 const viewStart = view.startMin;
                 const viewEnd = view.endMin;
-                if (viewEnd <= viewStart) return;
 
                 const clampedStart = Math.max(startMin, viewStart);
                 const clampedEnd = Math.min(endMin, viewEnd);
@@ -4575,15 +5106,12 @@
                 block.setAttribute('title', cls.title || '');
                 block.setAttribute('aria-label', cls.title || '');
 
-                console.debug('created period block', cls.id, period.id, top, height);
-
                 block.addEventListener('mouseenter', (e) => {
-                    console.debug('period block mouseenter', cls && cls.id, period && period.id);
                     cancelHidePeriodDetail();
                     // Pass the mouse event so the detail card can position next to the cursor
                     showPeriodDetailCard(block, cls, period, e);
                 });
-                block.addEventListener('mouseleave', (e) => { console.debug('period block mouseleave', cls && cls.id, period && period.id); scheduleHidePeriodDetail(200); });
+                block.addEventListener('mouseleave', () => scheduleHidePeriodDetail(200));
 
                 if (!dayBuckets[dayIndex]) dayBuckets[dayIndex] = { timeline: dayTimeline, blocks: [] };
                 dayBuckets[dayIndex].blocks.push({ el: block, top, height });
@@ -4653,11 +5181,17 @@
                 });
 
                 const colCount = Math.max(1, cols.length);
-                const columnWidth = (colCount === 1) ? timelineWidth : Math.max(6, Math.floor((timelineWidth - (colCount - 1) * gap) / colCount));
+                const columnWidth = (colCount === 1)
+                    ? timelineWidth
+                    : Math.max(6, Math.floor((timelineWidth - ((colCount - 1) * gap)) / colCount));
+
+                // Compute an outer left offset so the columns are visually balanced inside the timeline
+                const totalColsWidth = (columnWidth * colCount) + ((colCount - 1) * gap);
+                const leftOffset = Math.max(0, Math.round((timelineWidth - totalColsWidth) / 2));
 
                 comp.forEach(item => {
                     const col = item.colIndex || 0;
-                    const leftPx = Math.round(col * (columnWidth + gap));
+                    const leftPx = leftOffset + Math.round(col * (columnWidth + gap));
                     const widthPx = (colCount === 1) ? timelineWidth : columnWidth;
                     item.el.style.left = `${leftPx}px`;
                     item.el.style.width = `${widthPx}px`;
@@ -4671,7 +5205,7 @@
     // Apply sidebar height adjustment immediately on script load
     (function() {
         try {
-            let savedHeightAdjust = 312;
+            let savedHeightAdjust = 420;
             try {
                 if (typeof window !== 'undefined' && Number.isFinite(window.__mgcSidebarHeightAdjust)) {
                     savedHeightAdjust = window.__mgcSidebarHeightAdjust;
@@ -4680,7 +5214,7 @@
                     if (raw !== null) savedHeightAdjust = parseInt(raw, 10);
                 }
             } catch (_) {}
-            if (!Number.isFinite(savedHeightAdjust)) savedHeightAdjust = 312;
+            if (!Number.isFinite(savedHeightAdjust)) savedHeightAdjust = 420;
 
             const adjustedValue = 624 - savedHeightAdjust;
             document.documentElement.style.setProperty('--enrolled-height-adjust', adjustedValue + 'px');
@@ -4924,6 +5458,306 @@
     let hintUi = null; 
     let hintShownOnce = false;
 
+    const COLOUR_PALETTE_KEY = 'modernClassroom_colourPalette';
+    const COLOUR_PALETTE_LIMIT = 10;
+
+    function normalizePaletteColour(value) {
+        const raw = String(value || '').trim();
+        const hex = raw.startsWith('#') ? raw : `#${raw}`;
+        if (!/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(hex)) return null;
+        if (hex.length === 4) {
+            return `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}`.toLowerCase();
+        }
+        return hex.toLowerCase();
+    }
+
+    function readColourPalette() {
+        try {
+            const stored = JSON.parse(localStorage.getItem(COLOUR_PALETTE_KEY) || '[]');
+            return Array.isArray(stored) ? stored.map(normalizePaletteColour).filter(Boolean).slice(0, COLOUR_PALETTE_LIMIT) : [];
+        } catch (_) {
+            return [];
+        }
+    }
+
+    function writeColourPalette(colours) {
+        try { localStorage.setItem(COLOUR_PALETTE_KEY, JSON.stringify(colours.slice(0, COLOUR_PALETTE_LIMIT))); } catch (_) {}
+    }
+
+    function createColourPaletteControls({ container, addContainer = container, getColor, onSelect }) {
+        const paletteShell = document.createElement('div');
+        paletteShell.className = 'mc-colour-palette-shell mc-picker-palette-shell';
+        const palette = document.createElement('div');
+        palette.className = 'mc-colour-palette mc-picker-palette';
+        const leftFade = document.createElement('span');
+        leftFade.className = 'mc-colour-palette-fade mc-picker-palette-fade mc-colour-palette-fade-left';
+        const rightFade = document.createElement('span');
+        rightFade.className = 'mc-colour-palette-fade mc-picker-palette-fade mc-colour-palette-fade-right';
+        paletteShell.appendChild(palette);
+        paletteShell.appendChild(leftFade);
+        paletteShell.appendChild(rightFade);
+
+        const render = () => {
+            palette.innerHTML = '';
+            const colours = readColourPalette();
+            colours.forEach((colour) => {
+                const swatch = document.createElement('button');
+                swatch.type = 'button';
+                swatch.className = 'mc-colour-palette-swatch mc-picker-swatch';
+                swatch.style.backgroundColor = colour;
+                swatch.title = `Use ${colour}`;
+                swatch.setAttribute('aria-label', `Use colour ${colour}`);
+                swatch.addEventListener('click', () => onSelect(colour));
+                palette.appendChild(swatch);
+            });
+        };
+
+        const add = document.createElement('button');
+        add.type = 'button';
+        add.className = 'mc-colour-palette-add mc-picker-add';
+        add.textContent = '+';
+        add.title = 'Save current colour';
+        add.setAttribute('aria-label', 'Save current colour to palette');
+        add.addEventListener('click', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            const colour = normalizePaletteColour(getColor());
+            if (!colour) return;
+            const colours = readColourPalette().filter((item) => item !== colour);
+            writeColourPalette([colour, ...colours]);
+            render();
+        });
+
+        container.appendChild(paletteShell);
+        addContainer.appendChild(add);
+        render();
+        return { palette, add, render };
+    }
+
+    if (typeof window !== 'undefined') {
+        window.MCColourPickerPalette = { create: createColourPaletteControls };
+    }
+
+    function createColourPicker({ container, initialColor = '#9aa0a6', title = '', onClose = null, onColorChange = null, defaultColor = null, onDefault = null }) {
+        const normalizeColour = (value) => {
+            let colour = String(value || '').trim();
+            if (!colour.startsWith('#')) colour = `#${colour}`;
+            if (/^#([0-9a-f]{3})$/i.test(colour)) {
+                colour = `#${colour[1]}${colour[1]}${colour[2]}${colour[2]}${colour[3]}${colour[3]}`;
+            }
+            return /^#[0-9a-f]{6}$/i.test(colour) ? colour.toLowerCase() : null;
+        };
+
+        const hsvToRgb = (h, s, v) => {
+            const c = v * s;
+            const hh = (h / 60) % 6;
+            const x = c * (1 - Math.abs((hh % 2) - 1));
+            let r = 0;
+            let g = 0;
+            let b = 0;
+            if (hh < 1) { r = c; g = x; }
+            else if (hh < 2) { r = x; g = c; }
+            else if (hh < 3) { g = c; b = x; }
+            else if (hh < 4) { g = x; b = c; }
+            else if (hh < 5) { r = x; b = c; }
+            else { r = c; b = x; }
+            const m = v - c;
+            return {
+                r: Math.round((r + m) * 255),
+                g: Math.round((g + m) * 255),
+                b: Math.round((b + m) * 255)
+            };
+        };
+
+        const rgbToHex = (r, g, b) => {
+            const toHex = (value) => Math.max(0, Math.min(255, value)).toString(16).padStart(2, '0');
+            return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+        };
+
+        const hexToHsv = (colour) => {
+            const safe = normalizeColour(colour) || '#9aa0a6';
+            const r = parseInt(safe.slice(1, 3), 16) / 255;
+            const g = parseInt(safe.slice(3, 5), 16) / 255;
+            const b = parseInt(safe.slice(5, 7), 16) / 255;
+            const max = Math.max(r, g, b);
+            const min = Math.min(r, g, b);
+            const delta = max - min;
+            let h = 0;
+            if (delta) {
+                if (max === r) h = 60 * (((g - b) / delta) % 6);
+                else if (max === g) h = 60 * ((b - r) / delta + 2);
+                else h = 60 * ((r - g) / delta + 4);
+            }
+            if (h < 0) h += 360;
+            return { h, s: max ? delta / max : 0, v: max };
+        };
+
+        const startingColor = normalizeColour(initialColor) || '#9aa0a6';
+        const root = document.createElement('div');
+        root.className = 'mc-picker-surface mc-colour-picker';
+
+        if (title) {
+            const header = document.createElement('div');
+            header.className = 'mc-picker-header';
+            const heading = document.createElement('div');
+            heading.className = 'mc-picker-title';
+            heading.textContent = title;
+            header.appendChild(heading);
+            const headerActions = document.createElement('div');
+            headerActions.className = 'mc-picker-header-actions';
+            if (defaultColor && typeof onDefault === 'function') {
+                const defaultButton = document.createElement('button');
+                defaultButton.type = 'button';
+                defaultButton.className = 'mc-picker-default';
+                defaultButton.textContent = 'Revert';
+                defaultButton.title = 'Use the default colour';
+                defaultButton.setAttribute('aria-label', 'Use the default colour');
+                defaultButton.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    onDefault();
+                });
+                headerActions.appendChild(defaultButton);
+            }
+            if (onClose) {
+                const close = document.createElement('button');
+                close.type = 'button';
+                close.className = 'close mc-picker-close';
+                close.textContent = '×';
+                close.setAttribute('aria-label', 'Close colour picker');
+                close.addEventListener('click', onClose);
+                headerActions.appendChild(close);
+            }
+            header.appendChild(headerActions);
+            root.appendChild(header);
+        }
+
+        const sv = document.createElement('div');
+        sv.className = 'mc-picker-sv';
+        const canvas = document.createElement('canvas');
+        canvas.className = 'mc-picker-sv-canvas';
+        canvas.width = 280;
+        canvas.height = 130;
+        const marker = document.createElement('div');
+        marker.className = 'mc-picker-marker';
+        sv.append(canvas, marker);
+
+        const hueRow = document.createElement('div');
+        hueRow.className = 'mc-picker-row mc-picker-hue-row';
+        const preview = document.createElement('div');
+        preview.className = 'mc-picker-preview';
+        const hue = document.createElement('input');
+        hue.type = 'range';
+        hue.min = '0';
+        hue.max = '360';
+        hue.className = 'mc-picker-hue';
+        hueRow.append(preview, hue);
+
+        const inputRow = document.createElement('div');
+        inputRow.className = 'mc-picker-row mc-picker-input-row';
+        const hexRow = document.createElement('div');
+        hexRow.className = 'mc-picker-hex-row';
+        const hex = document.createElement('input');
+        hex.type = 'text';
+        hex.className = 'mc-picker-hex';
+        hex.value = startingColor;
+        hex.placeholder = '#rrggbb';
+        hex.setAttribute('aria-label', 'Hex colour');
+        hexRow.appendChild(hex);
+        inputRow.appendChild(hexRow);
+
+        const palette = createColourPaletteControls({
+            container: inputRow,
+            addContainer: hexRow,
+            getColor: () => hex.value,
+            onSelect: (colour) => setColour(colour, 'palette')
+        });
+
+        root.append(sv, hueRow, inputRow);
+        if (container) container.appendChild(root);
+
+        let hsv = hexToHsv(startingColor);
+        let isDragging = false;
+
+        const drawSv = () => {
+            const context = canvas.getContext('2d');
+            if (!context) return;
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.fillStyle = `hsl(${hsv.h}, 100%, 50%)`;
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            const white = context.createLinearGradient(0, 0, canvas.width, 0);
+            white.addColorStop(0, '#fff');
+            white.addColorStop(1, 'rgba(255,255,255,0)');
+            context.fillStyle = white;
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            const black = context.createLinearGradient(0, 0, 0, canvas.height);
+            black.addColorStop(0, 'rgba(0,0,0,0)');
+            black.addColorStop(1, '#000');
+            context.fillStyle = black;
+            context.fillRect(0, 0, canvas.width, canvas.height);
+        };
+
+        const updateMarker = () => {
+            const width = canvas.offsetWidth || canvas.width;
+            const height = canvas.offsetHeight || canvas.height;
+            marker.style.left = `${hsv.s * width}px`;
+            marker.style.top = `${(1 - hsv.v) * height}px`;
+        };
+
+        const emitColour = (source) => {
+            const rgb = hsvToRgb(hsv.h, hsv.s, hsv.v);
+            const colour = rgbToHex(rgb.r, rgb.g, rgb.b);
+            if (document.activeElement !== hex) hex.value = colour;
+            preview.style.backgroundColor = colour;
+            drawSv();
+            updateMarker();
+            if (typeof onColorChange === 'function') onColorChange(colour, source);
+        };
+
+        function setColour(value, source = 'input') {
+            const colour = normalizeColour(value);
+            if (!colour) return false;
+            hsv = hexToHsv(colour);
+            hex.value = colour;
+            hue.value = String(Math.round(hsv.h));
+            emitColour(source);
+            return true;
+        }
+
+        const handleSvInput = (clientX, clientY) => {
+            const rect = canvas.getBoundingClientRect();
+            if (!rect.width || !rect.height) return;
+            hsv.s = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+            hsv.v = 1 - Math.max(0, Math.min(1, (clientY - rect.top) / rect.height));
+            emitColour('sv');
+        };
+
+        hue.addEventListener('input', () => {
+            hsv.h = Number(hue.value);
+            emitColour('hue');
+        });
+        hex.addEventListener('change', () => setColour(hex.value, 'hex'));
+        sv.addEventListener('mousedown', (event) => {
+            isDragging = true;
+            handleSvInput(event.clientX, event.clientY);
+        });
+        const onMouseMove = (event) => {
+            if (isDragging) handleSvInput(event.clientX, event.clientY);
+        };
+        const onMouseUp = () => { isDragging = false; };
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
+
+        drawSv();
+        updateMarker();
+        preview.style.backgroundColor = startingColor;
+        return { root, sv, canvas, marker, hueRow, hue, preview, inputRow, hexRow, hex, palette, setColor: setColour };
+    }
+
+    if (typeof window !== 'undefined') {
+        window.MCColourPicker = { create: createColourPicker };
+    }
+
     const availableIcons = [
         { title: 'Maths & Science', icons: [
             'Square Root Icon.svg',
@@ -5130,183 +5964,37 @@
         return STORAGE_KEY_PREFIX + location.origin;
     }
     function storageGet(key) {
-        return new Promise(async (resolve) => {
-            // For cross-device sync: try chrome.storage.sync first (works for published extensions)
-            // Fall back to localStorage for unpacked extensions and offline reliability
-            const isIconMapKey = key.includes(':icons');
-            let syncVal = null;
-            try {
-                if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.sync) {
-                    syncVal = await syncStorageGet(key);
-                    if (syncVal !== undefined && syncVal !== null) {
-                        // Icon maps in sync intentionally exclude data URLs, so avoid clobbering
-                        // local custom icon mappings. Merge local+sync and prefer local values.
-                        if (isIconMapKey && typeof syncVal === 'object' && syncVal !== null) {
-                            let localVal = null;
-                            try {
-                                const localRaw = localStorage.getItem(key);
-                                if (localRaw !== null) {
-                                    localVal = JSON.parse(localRaw);
-                                }
-                            } catch (_) {}
-                            if (localVal && typeof localVal === 'object') {
-                                const merged = { ...syncVal, ...localVal };
-                                try { localStorage.setItem(key, JSON.stringify(merged)); } catch (_) {}
-                                resolve(merged);
-                                return;
-                            }
-                        }
-                        // Found in sync — also cache to localStorage for fast offline access
-                        try { localStorage.setItem(key, JSON.stringify(syncVal)); } catch (_) {}
-                        resolve(syncVal);
-                        return;
-                    }
-                }
-            } catch (_) {}
-            
-            // localStorage is the fallback — persists across extension reinstalls 
-            // and works for unpacked extensions where sync isn't available
+        if (typeof window.storageGet === 'function') {
+            return window.storageGet(key, null);
+        }
+        return new Promise((resolve) => {
             try {
                 const raw = localStorage.getItem(key);
-                if (raw !== null) {
-                    const parsed = JSON.parse(raw);
-                    // If we have local data but sync didn't, populate sync for future syncing
-                    if (syncVal === null || syncVal === undefined) {
-                        try {
-                            if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.sync) {
-                                syncStorageSet(key, parsed).catch(() => {});
-                            }
-                        } catch (_) {}
-                    }
-                    resolve(parsed);
+                if (raw === null) {
+                    resolve(null);
                     return;
                 }
-            } catch (_) {}
-            
-            // Last resort: try chrome.storage.local 
-            try {
-                if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-                    chrome.storage.local.get([key], (res) => {
-                        const val = res[key];
-                        if (val !== undefined && val !== null) {
-                            // Re-populate localStorage and sync
-                            try { localStorage.setItem(key, JSON.stringify(val)); } catch (_) {}
-                            try { syncStorageSet(key, val).catch(() => {}); } catch (_) {}
-                            resolve(val);
-                        } else {
-                            resolve(null);
-                        }
-                    });
-                    return;
+                try {
+                    resolve(JSON.parse(raw));
+                } catch {
+                    resolve(raw);
                 }
-            } catch (_) {}
-            resolve(null);
+            } catch (_) {
+                resolve(null);
+            }
         });
     }
     function storageSet(key, value) {
+        if (typeof window.storageSet === 'function') {
+            return window.storageSet(key, value);
+        }
         return new Promise((resolve) => {
-            const str = JSON.stringify(value);
-            let syncCompleted = false;
-            let chromeCompleted = false;
-            let localStorageCompleted = false;
-
-            function checkComplete() {
-                if (syncCompleted && chromeCompleted && localStorageCompleted) {
-                    resolve();
-                }
-            }
-
-            // Always try to set localStorage first (immediate, works offline)
             try {
+                const str = typeof value === 'string' ? value : JSON.stringify(value);
                 localStorage.setItem(key, str);
-                localStorageCompleted = true;
             } catch (e) {
                 console.warn('localStorage.setItem failed:', e);
-                localStorageCompleted = true; // Mark as done even on failure
             }
-
-            // Write to chrome.storage.sync for cross-device sync (published extensions only)
-            // Filter out large data URLs from icon maps to avoid hitting sync quota limits
-            try {
-                if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.sync) {
-                    let syncValue = value;
-                    // If this is an icon map (key ends with ':icons'), filter out data URLs
-                    if (key.includes(':icons') && typeof value === 'object' && value !== null) {
-                        syncValue = {};
-                        for (const [k, v] of Object.entries(value)) {
-                            if (!v || !v.startsWith || !v.startsWith('data:')) {
-                                syncValue[k] = v;
-                            }
-                        }
-                    }
-                    chrome.storage.sync.set({ [key]: syncValue }, function() {
-                        if (chrome.runtime?.lastError) {
-                            // This will fail for unpacked extensions - that's expected
-                            console.debug('chrome.storage.sync.set info:', chrome.runtime.lastError.message);
-                        }
-                        syncCompleted = true;
-                        checkComplete();
-                    });
-                } else {
-                    syncCompleted = true;
-                }
-            } catch (err) {
-                console.debug('chrome.storage.sync.set error:', err);
-                syncCompleted = true;
-            }
-
-            // Also write to chrome.storage.local as secondary cache
-            try {
-                if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-                    chrome.storage.local.set({ [key]: value }, function() {
-                        if (chrome.runtime?.lastError) {
-                            console.warn('chrome.storage.local.set failed:', chrome.runtime.lastError);
-                        }
-                        chromeCompleted = true;
-                        checkComplete();
-                    });
-                } else {
-                    chromeCompleted = true;
-                }
-            } catch (err) {
-                console.warn('chrome.storage.local.set error:', err);
-                chromeCompleted = true;
-            }
-
-            checkComplete();
-        });
-    }
-    function syncStorageGet(key) {
-        return new Promise((resolve) => {
-            try {
-                if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.sync) {
-                    chrome.storage.sync.get([key], (res) => {
-                        if (chrome.runtime.lastError) {
-                            console.warn('syncStorageGet error:', chrome.runtime.lastError);
-                            resolve(null);
-                            return;
-                        }
-                        resolve(res[key]);
-                    });
-                    return;
-                }
-            } catch (_) {}
-            resolve(null);
-        });
-    }
-    function syncStorageSet(key, value) {
-        return new Promise((resolve) => {
-            try {
-                if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.sync) {
-                    chrome.storage.sync.set({ [key]: value }, () => {
-                        if (chrome.runtime.lastError) {
-                            console.warn('syncStorageSet error:', chrome.runtime.lastError);
-                        }
-                        resolve();
-                    });
-                    return;
-                }
-            } catch (_) {}
             resolve();
         });
     }
@@ -5331,6 +6019,8 @@
     function computeStableKey(el) {
         const anchor = el.closest('a[href]') || el.querySelector && el.querySelector('a[href]');
         if (anchor && anchor.href) {
+            const courseMatch = anchor.href.match(/\/c\/([^/?#]+)/);
+            if (courseMatch) return 'course:' + courseMatch[1];
             return 'href:' + anchor.href;
         }
         const label = normalizeWhitespace(el.textContent || (el.getAttribute && el.getAttribute('aria-label')) || '');
@@ -5349,13 +6039,45 @@
         }
         return 'path:' + textHash(path.join('>'));
     }
+
+    function computeClassLabelKey(el) {
+        const anchor = el.closest('a[href]') || el.querySelector && el.querySelector('a[href]');
+        if (!anchor) return null;
+        const label = normalizeWhitespace(anchor.getAttribute('aria-label') || anchor.textContent || '');
+        return label ? 'class-label:' + textHash(label.toLowerCase()) : null;
+    }
+
+    function getStoredIconValue(map, el) {
+        if (!map || !el) return null;
+        const stableKey = computeStableKey(el);
+        if (map[stableKey]) return map[stableKey];
+
+        const labelKey = computeClassLabelKey(el);
+        if (labelKey && map[labelKey]) return map[labelKey];
+
+        const anchor = el.closest('a[href]') || el.querySelector && el.querySelector('a[href]');
+        const href = anchor && anchor.href;
+        if (href) {
+            const matchingLegacyKey = Object.keys(map).find((key) => {
+                if (!key.startsWith('href:')) return false;
+                const legacyHref = key.slice(5);
+                const legacyCourse = legacyHref.match(/\/c\/([^/?#]+)/);
+                const currentCourse = href.match(/\/c\/([^/?#]+)/);
+                return legacyCourse && currentCourse && legacyCourse[1] === currentCourse[1];
+            });
+            if (matchingLegacyKey && map[matchingLegacyKey]) return map[matchingLegacyKey];
+        }
+        return null;
+    }
     async function persistColorForElement(el, hex) {
         el.dataset.dnaUneditedIcon = 'false';
         updateVisibleIconEditHint();
         const key = pageStorageKey();
         const map = (await storageGet(key)) || {};
         const stableKey = computeStableKey(el);
+        const labelKey = computeClassLabelKey(el);
         map[stableKey] = hex;
+        if (labelKey) map[labelKey] = hex;
         await storageSet(key, map);
         try {
             const stored = (await storageGet(key)) || {};
@@ -5417,8 +6139,10 @@
         const key = pageStorageKey() + ':icons';
         const map = (await storageGet(key)) || {};
         const stableKey = computeStableKey(el);
+        const labelKey = computeClassLabelKey(el);
         const portable = toRelativeIconPath(iconUrl);
         map[stableKey] = portable;
+        if (labelKey) map[labelKey] = portable;
         await storageSet(key, map);
         try {
             const stored = (await storageGet(key)) || {};
@@ -5441,6 +6165,12 @@
     let iconEditHintElement = null;
     let iconEditHintResizeObserver = null;
     let iconEditHintObservedElements = [];
+    let iconEditHintDismissed = false;
+
+    storageGetBool(pageStorageKey() + ':editHintDismissed').then((dismissed) => {
+        iconEditHintDismissed = dismissed;
+        updateVisibleIconEditHint();
+    });
 
     function observeIconEditHintLayout(...elements) {
         if (typeof ResizeObserver === 'undefined') return;
@@ -5457,6 +6187,11 @@
     }
 
     function updateVisibleIconEditHint() {
+        if (iconEditHintDismissed) {
+            if (iconEditHintElement) iconEditHintElement.hidden = true;
+            return;
+        }
+
         const icons = Array.from(document.querySelectorAll('.kWQ5wd[data-dna-unedited-icon="true"]'))
             .filter(el => el.closest('a.uTwgne'));
 
@@ -5490,8 +6225,26 @@
         if (!iconEditHintElement) {
             iconEditHintElement = document.createElement('div');
             iconEditHintElement.className = 'mgc-icon-edit-hint';
-            iconEditHintElement.textContent = 'Click the icon to customise';
             iconEditHintElement.setAttribute('role', 'tooltip');
+
+            const hintText = document.createElement('span');
+            hintText.textContent = 'Click the icon to customise';
+            iconEditHintElement.appendChild(hintText);
+
+            const dismissButton = document.createElement('button');
+            dismissButton.className = 'mgc-icon-edit-hint-dismiss';
+            dismissButton.type = 'button';
+            dismissButton.setAttribute('aria-label', 'Dismiss tip');
+            dismissButton.title = 'Dismiss tip';
+            dismissButton.textContent = '×';
+            dismissButton.addEventListener('click', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                iconEditHintDismissed = true;
+                iconEditHintElement.hidden = true;
+                storageSetBool(pageStorageKey() + ':editHintDismissed', true);
+            });
+            iconEditHintElement.appendChild(dismissButton);
         }
 
         if (iconEditHintElement.parentElement !== hintHost) {
@@ -5514,13 +6267,15 @@
     }
 
     async function restoreSavedColors(root = document) {
+        const roots = Array.isArray(root) ? root : [root];
         const key = pageStorageKey();
         const map = (await storageGet(key)) || {};
         const iconKey = key + ':icons';
         const iconMap = (await storageGet(iconKey)) || {};
 
         try {
-            const nodes = (root.querySelectorAll ? root.querySelectorAll('.kWQ5wd') : []);
+            const nodes = [];
+            roots.forEach(searchRoot => nodes.push(...getIconElements(searchRoot)));
             nodes.forEach(el => {
                 const k = computeStableKey(el);
                 const hex = map[k];
@@ -5535,7 +6290,7 @@
                         }
                     }
                 }
-                const icon = iconMap[k];
+                const icon = getStoredIconValue(iconMap, el);
                 if (icon) {
                     const resolvedIcon = resolveIconUrl(icon);
                     el.style.setProperty('--dna-icon-url', `url("${resolvedIcon}")`);
@@ -5545,27 +6300,31 @@
         } catch (_) {}
 
         try {
-            refreshActiveClassroomHoverEdit(root);
+            roots.forEach(refreshActiveClassroomHoverEdit);
         } catch (_) {}
 
         updateVisibleIconEditHint();
 
         for (const [savedKey, hex] of Object.entries(map)) {
             if (/[#.>:\[]/.test(savedKey) && typeof hex === 'string') {
-                try {
-                    const el = root.querySelector(savedKey);
-                    if (el) {
-                        el.style.setProperty('--dna-icon-color', hex);
-                        // Also set text color
-                        const parent = el.closest('a.uTwgne');
-                        if (parent) {
-                            const textEl = parent.querySelector('.GRvzhf.YVvGBb');
-                            if (textEl) {
-                                textEl.style.color = hex;
+                for (const searchRoot of roots) {
+                    try {
+                        const el = searchRoot.matches && searchRoot.matches(savedKey)
+                            ? searchRoot
+                            : searchRoot.querySelector(savedKey);
+                        if (el) {
+                            el.style.setProperty('--dna-icon-color', hex);
+                            // Also set text color
+                            const parent = el.closest('a.uTwgne');
+                            if (parent) {
+                                const textEl = parent.querySelector('.GRvzhf.YVvGBb');
+                                if (textEl) {
+                                    textEl.style.color = hex;
+                                }
                             }
                         }
-                    }
-                } catch (_) {}
+                    } catch (_) {}
+                }
             }
         }
     }
@@ -5772,14 +6531,20 @@
         });
     }
 
+    function getIconElements(root) {
+        const elements = root.querySelectorAll ? Array.from(root.querySelectorAll('.kWQ5wd')) : [];
+        if (root.matches && root.matches('.kWQ5wd')) elements.unshift(root);
+        return elements;
+    }
+
     function refreshActiveClassroomHoverEdit(root = document) {
-        const elements = root.querySelectorAll ? root.querySelectorAll('.kWQ5wd') : [];
+        const elements = getIconElements(root);
         elements.forEach(attachActiveClassroomHoverEdit);
         try { syncActiveClassroomHoverState(root); } catch (_) {}
     }
 
     function attachIconPickersInDom(root = document) {
-        const elements = root.querySelectorAll('.kWQ5wd');
+        const elements = getIconElements(root);
         elements.forEach((el) => {
             if (el.dataset.dnaPickerAttached === '1') return;
             el.dataset.dnaPickerAttached = '1';
@@ -5885,34 +6650,28 @@
         document.documentElement.appendChild(host);
         const shadow = host.attachShadow({ mode: 'open' });
 
+        const colourStylesheet = document.createElement('link');
+        colourStylesheet.rel = 'stylesheet';
+        colourStylesheet.href = chrome.runtime.getURL('color-pickers.css');
+        host.style.visibility = 'hidden';
+        let resolveStylesReady;
+        const stylesReady = new Promise((resolve) => { resolveStylesReady = resolve; });
+        const revealPicker = () => {
+            host.style.visibility = 'visible';
+            resolveStylesReady();
+        };
+        colourStylesheet.addEventListener('load', revealPicker, { once: true });
+        colourStylesheet.addEventListener('error', revealPicker, { once: true });
+        window.setTimeout(revealPicker, 1500);
+        shadow.appendChild(colourStylesheet);
+
         const style = document.createElement('style');
         style.textContent = `
-            .picker { pointer-events: auto; box-sizing: border-box; position: absolute; width: 380px; padding: 10px; border-radius: 40px;corner-shape: squircle;background: var(--picker-bg, #212126); color: #fff; box-shadow: 0 10px 30px rgba(0,0,0,.35); font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; border: 1.5px solid var(--picker-border, rgba(43, 45, 63, 0.421)) !important; overflow: visible; isolation: isolate; z-index: 2; --picker-bg: #212126; --picker-border: rgba(43, 45, 63, 0.421); }
-            .picker-pointer { position: absolute; width: 20px; height: 20px; background: var(--picker-bg, #212126); transform: rotate(45deg); pointer-events: none; z-index: -1; box-sizing: border-box; display: none; box-shadow: none; border: transparent; border-top: none; border-right: none; border-radius: 0px 0px 0px 5px; }
-            .picker-pointer.left { left: -10.8px; top: 40px; }
-            .picker-pointer.right { right: -10.8px; top: 40px; }
-            .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-            .title { font-size: 13px; opacity: .8; }
-            .close { background: transparent; border: 0; color: #fff; cursor: pointer; font-size: 26px; line-height: 1; opacity: .8; margin-right: 8px;}
-            .close:hover { opacity: 1; }
-            .wheel { position: relative; display: block; width: 100%; height: 160px; margin: 6px 0; cursor: crosshair; border-radius: 20px; corner-shape: squircle; overflow: hidden; }
-            .marker { position: absolute; width: 12px; height: 12px; border: 2px solid #fff; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 0 1px rgba(0,0,0,.6); pointer-events:none; }
-            .row { display:flex; align-items:center; gap:8px; padding: 6px 0 10px; width: 100%; margin: 0; }
-            .preview { width: 35px; height: 10px; border-radius: 5px;}
-            .hex-input { width: 100%; box-sizing: border-box; padding: 6px 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); background: transparent; color: inherit; margin: 6px 0; font-family: inherit; }
-            .hex-input::placeholder { color: rgba(255, 255, 255, 0.35); }
-            .hex-input-inline { width: 120px; margin-right: 8px; margin-left: 6px; padding: 4px 8px; height: 28px; font-size: 12px; border-radius: 6px; }
-            input[type="range"] { width: 100%; -webkit-appearance: none; appearance: none; height: 10px; border-radius: 6px; background: linear-gradient(90deg, hsl(0,100%,50%) 0%, hsl(60,100%,50%) 16.66%, hsl(120,100%,50%) 33.33%, hsl(180,100%,50%) 50%, hsl(240,100%,50%) 66.66%, hsl(300,100%,50%) 83.33%, hsl(360,100%,50%) 100%); outline: none; align-items: flex-start; }
-            input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 14px; border-radius: 4px; background: #ffffff34; border: solid 1.5px #ffffff; backdrop-filter: blur(2px); margin-top: -2px; }
-            input[type="range"]::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 2px rgba(0,0,0,0.14); border: 0; }
-            input[type="range"]::-ms-thumb { width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 2px rgba(0,0,0,0.14); border: 0; }
-            .footer { display:flex; justify-content: flex-end; gap: 6px; margin-top: 6px; }
-            .btn { padding: 6px 10px; border-radius: 8px; border: 0; cursor: pointer; }
-            .icons { display: block; max-height: 220px; overflow: auto; background: transparent; }
+            .icons { display: block; max-height: 220px; overflow: auto; background: #212126; border-top: 1.5px solid rgba(43, 45, 63, 0.421); margin-top: 10px; border-radius: 0px 0px 10px 10px; }
             .icon-group { padding: 6px 8px; }
             .icon-group-title { font-size: 12px; opacity: .8; color: inherit; margin: 6px 4px; }
-            .icon-grid { display: grid; grid-template-columns: repeat(auto-fill, 35px); grid-auto-rows: 35px; gap: 10px 13px; align-items: start; justify-content: start; }
-            .iconBtn { width: 35px; height: 35px; border-radius: 8px; background: #2a2a30ff; border: 1.5px solid rgba(43, 45, 63, 0.421) !important; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+            .icon-grid { display: grid; grid-template-columns: repeat(auto-fill, 35px); grid-auto-rows: 35px; gap: 12px; align-items: start; justify-content: start; }
+            .iconBtn { width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0.6; border-radius: 12px; transition: 0.2s; background: rgb(42, 42, 48); border: 1.5px solid rgba(43, 45, 63, 0.42) }
             .iconBtn:hover { transform: scale(1.1); transition: 0.2s; cursor: pointer; }
             .icon { width: 20px; height: 20px; }
 
@@ -5928,67 +6687,36 @@
 
             .picker:not(.light) .icon { filter: invert(1) brightness(1.1) contrast(1.1); }
 
-            .picker.light { --picker-bg: #f8fafd; --picker-border: rgba(235, 237, 255, 0.58); background: var(--picker-bg, #f8fafd); color: #111; border: 1.5px solid var(--picker-border, rgba(235, 237, 255, 0.58)) !important; }
-            .picker.light .close { color: #111; }
-            .picker.light .marker { border-color: #000; box-shadow: 0 0 0 1px rgba(0,0,0,.2); }
-            .picker.light .preview { border-color: rgba(0,0,0,.15); }
-            .picker.light .iconBtn { background: #ffffffff; border: 1.5px solid rgba(235, 237, 255, 0.58) !important; }
+            .picker.light .icons { background: #f8fafd; border-top: 1.5px solid rgba(235, 237, 255, 0.58); }
+            .picker.light .iconBtn { background: rgb(255, 255, 255); border: 1.5px solid rgba(235, 237, 255, 0.58) }
             .picker.light .icon { filter: none; }
         `;
         shadow.appendChild(style);
 
         const wrapper = document.createElement('div');
-        wrapper.className = 'picker';
+        wrapper.className = 'picker mc-picker-surface';
+        wrapper.style.display = 'none';
+        wrapper.style.visibility = 'hidden';
+        wrapper.style.position = 'absolute';
 
         const pointer = document.createElement('div');
         pointer.className = 'picker-pointer';
         pointer.setAttribute('aria-hidden', 'true');
         wrapper.appendChild(pointer);
 
-        const header = document.createElement('div');
-        header.className = 'header';
-        const title = document.createElement('div');
-        title.className = 'title';
-        title.textContent = '';
-        const closeBtn = document.createElement('button');
-        closeBtn.className = 'close';
-        closeBtn.textContent = '×';
-        closeBtn.addEventListener('click', () => hideWheel());
-        header.appendChild(title);
-        header.appendChild(closeBtn);
-
-    const canvas = document.createElement('canvas');
-    canvas.className = 'wheel';
-    canvas.width = 360; canvas.height = 160;
-        const marker = document.createElement('div');
-        marker.className = 'marker';
-
-    const wheelBox = document.createElement('div');
-    wheelBox.style.position = 'relative';
-    wheelBox.style.width = '100%';
-    wheelBox.style.height = '160px';
-    wheelBox.style.margin = '0';
-    wheelBox.appendChild(canvas);
-    wheelBox.appendChild(marker);
-
-    const hexInput = document.createElement('input');
-    hexInput.type = 'text';
-    hexInput.className = 'hex-input';
-    hexInput.placeholder = '#rrggbb';
-
-    const row = document.createElement('div');
-    row.className = 'row';
-        const preview = document.createElement('div');
-        preview.className = 'preview';
-    const slider = document.createElement('input');
-    slider.type = 'range';
-    slider.min = '0'; slider.max = '360'; slider.value = '0';
-        row.appendChild(preview);
-        row.appendChild(slider);
-
-    wrapper.appendChild(header);
-    wrapper.appendChild(wheelBox);
-    wrapper.appendChild(row);
+        const picker = window.MCColourPicker.create({
+            container: wrapper,
+            initialColor: '#ffffff',
+            title: 'Icon colour',
+            onClose: hideWheel,
+            onColorChange: (colour) => applySidebarPickerColour(colour)
+        });
+    const canvas = picker.canvas;
+    const marker = picker.marker;
+    const preview = picker.preview;
+    const slider = picker.hue;
+    const hexInput = picker.hex;
+    const iconsControls = picker.inputRow;
 
         const iconsGrid = document.createElement('div');
         iconsGrid.className = 'icons';
@@ -6225,145 +6953,27 @@
         wrapper.appendChild(iconsGrid);
         shadow.appendChild(wrapper);
 
-    wheelUi = { host, shadow, wrapper, canvas, marker, slider, preview, iconsGrid, hexInput, pointer };
-    wheelUi.currentH = 0;
-    wheelUi.currentS = 1;
-    wheelUi.currentV = 1;
-    slider.value = String(Math.round(wheelUi.currentH));
-    applyWheelTheme();
-    drawColorWheel(canvas.getContext('2d'), canvas.width, canvas.height, wheelUi.currentH);
-    try { updatePreviewAndApply(); } catch (_) {}
+    wheelUi = { host, shadow, wrapper, canvas, marker, slider, preview, iconsGrid, hexInput, pointer, stylesReady };
 
-        let dragging = false;
-        const onPointer = (evt) => {
-            const rect = canvas.getBoundingClientRect();
-            const x = (evt.clientX - rect.left);
-            const y = (evt.clientY - rect.top);
-            const { s, v } = positionToSV(canvas, x, y);
-            wheelUi.currentS = s; wheelUi.currentV = v;
-            updateMarkerFromSV();
-            updatePreviewAndApply();
-        };
-        canvas.addEventListener('mousedown', (e) => { dragging = true; onPointer(e); });
-        window.addEventListener('mousemove', (e) => { if (dragging) onPointer(e); });
-        window.addEventListener('mouseup', () => { dragging = false; });
-        canvas.addEventListener('touchstart', (e) => { dragging = true; onPointer(e.touches[0]); e.preventDefault(); }, { passive: false });
-        window.addEventListener('touchmove', (e) => { if (dragging) onPointer(e.touches[0]); }, { passive: false });
-        window.addEventListener('touchend', () => { dragging = false; });
-        slider.min = '0'; slider.max = '360'; slider.value = '0';
-        slider.addEventListener('input', () => {
-            wheelUi.currentH = Number(slider.value);
-            try { drawColorWheel(canvas.getContext('2d'), canvas.width, canvas.height, wheelUi.currentH); } catch (_) {}
-            updateMarkerFromSV();
-            updatePreviewAndApply();
-        });
-
-        function commitHexInput() {
-            const raw = (hexInput.value || '').trim();
-            if (!raw) return;
-            let v = raw.startsWith('#') ? raw : ('#' + raw);
-            if (!/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(v)) {
-                try { hexInput.style.borderColor = 'rgba(255,80,80,0.9)'; setTimeout(() => hexInput.style.borderColor = 'rgba(255,255,255,0.08)', 700); } catch (_) {}
-                return;
-            }
-            try {
-                const { h, s, v: val } = hexToHsv(v);
-                wheelUi.currentH = h; wheelUi.currentS = s; wheelUi.currentV = val;
-                slider.value = String(Math.round(h));
-                drawColorWheel(canvas.getContext('2d'), canvas.width, canvas.height, wheelUi.currentH);
-                updateMarkerFromSV();
-                updatePreviewAndApply();
-            } catch (_) {}
-        }
-        hexInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') commitHexInput(); });
-        hexInput.addEventListener('blur', commitHexInput);
-
+    function applySidebarPickerColour(hex) {
+        if (!elementAwaitingColor) return;
         try {
-            hexInput.classList.add('hex-input-inline');
-            header.insertBefore(hexInput, header.firstChild);
+            elementAwaitingColor.style.setProperty('--dna-icon-color', hex);
+            const parent = elementAwaitingColor.closest('a.uTwgne');
+            const textElement = parent && parent.querySelector('.GRvzhf.YVvGBb');
+            if (textElement) textElement.style.color = hex;
         } catch (_) {}
 
-        function updateMarkerFromSV() {
-            const cx = (wheelUi.currentS || 0) * wheelUi.canvas.width;
-            const cy = (1 - (wheelUi.currentV || 0)) * wheelUi.canvas.height;
-            marker.style.left = `${cx}px`;
-            marker.style.top = `${cy}px`;
-        }
-
-        function updatePreviewAndApply() {
-            const h = (wheelUi.currentH !== undefined) ? wheelUi.currentH : 0;
-            const s = (wheelUi.currentS !== undefined) ? wheelUi.currentS : 0;
-            const v = (wheelUi.currentV !== undefined) ? wheelUi.currentV : 1;
-            const { r, g, b } = hsvToRgb(h, s, v);
-            const hex = rgbToHex(r, g, b);
-            preview.style.background = hex;
-            try { if (wheelUi && wheelUi.hexInput) wheelUi.hexInput.value = hex; } catch (_) {}
-            if (elementAwaitingColor) {
-                try { 
-                    elementAwaitingColor.style.setProperty('--dna-icon-color', hex);
-                    // Also set text color
-                    const parent = elementAwaitingColor.closest('a.uTwgne');
-                    if (parent) {
-                        const textEl = parent.querySelector('.GRvzhf.YVvGBb');
-                        if (textEl) {
-                            textEl.style.color = hex;
-                            console.log('Wheel: Set text color to:', hex);
-                        } else {
-                            console.log('Wheel: Could not find text element');
-                        }
-                    } else {
-                        console.log('Wheel: Could not find parent a.uTwgne');
-                    }
-                } catch (_) {
-                    console.log('Wheel: Error setting color:', _);
-                }
-                clearTimeout(persistTimer);
-                persistTimer = setTimeout(() => {
-                    persistColorForElement(elementAwaitingColor, hex);
-                }, 150);
-            }
-        }
-
-        wheelUi.updateFromHex = function(hex) {
-            const { h, s, v } = hexToHsv(hex);
-            wheelUi.currentH = h; wheelUi.currentS = s; wheelUi.currentV = v; slider.value = String(Math.round(h));
-            try { drawColorWheel(canvas.getContext('2d'), canvas.width, canvas.height, wheelUi.currentH); } catch (_) {}
-            updateMarkerFromSV();
-            wheelUi.preview.style.background = hex;
-            try { if (wheelUi && wheelUi.hexInput) wheelUi.hexInput.value = hex; } catch (_) {}
-        };
-        wheelUi.updatePreviewAndApply = updatePreviewAndApply;
-
-        return wheelUi;
+        clearTimeout(persistTimer);
+        persistTimer = setTimeout(() => {
+            persistColorForElement(elementAwaitingColor, hex);
+        }, 150);
     }
 
-    function drawColorWheel(ctx, width, height, hue) {
-        const h = (typeof hue === 'number') ? hue : ((wheelUi && wheelUi.currentH) || 0);
-        const img = ctx.createImageData(width, height);
-        const data = img.data;
-
-        for (let y = 0; y < height; y++) {
-            const v = 1 - (y + 0.5) / height;
-            for (let x = 0; x < width; x++) {
-                const idx = (y * width + x) * 4;
-                const s = (x + 0.5) / width;
-                const { r, g, b } = hsvToRgb(h, s, v);
-                data[idx + 0] = r;
-                data[idx + 1] = g;
-                data[idx + 2] = b;
-                data[idx + 3] = 255;
-            }
-        }
-
-        ctx.putImageData(img, 0, 0);
-    }
-
-    function positionToSV(canvas, x, y) {
-        const clampedX = Math.max(0, Math.min(canvas.width, x));
-        const clampedY = Math.max(0, Math.min(canvas.height, y));
-        const s = (clampedX / canvas.width);
-        const v = 1 - (clampedY / canvas.height);
-        return { s, v };
+    wheelUi.updateFromHex = (hex) => picker.setColor(hex, 'initial');
+    wheelUi.updatePreviewAndApply = () => {};
+    applyWheelTheme();
+    return wheelUi;
     }
 
     function showColorWheelFor(targetElement, event) {
@@ -6379,11 +6989,19 @@
         const pref = (event && event.clientX !== undefined)
             ? { left: 95, top: event.clientY}
             : targetElement.getBoundingClientRect();
-        ui.wrapper.style.visibility = 'hidden';
         ui.wrapper.style.display = 'block';
-        positionPickerWithinViewport(pref.left, pref.top);
-        ui.wrapper.style.visibility = 'visible';
-        updatePickerPointerForTarget();
+        ui.wrapper.style.visibility = 'hidden';
+
+        const revealPositionedPicker = () => {
+            if (!wheelUi || elementAwaitingColor !== targetElement) return;
+            requestAnimationFrame(() => {
+                if (!wheelUi || elementAwaitingColor !== targetElement) return;
+                positionPickerWithinViewport(pref.left, pref.top);
+                updatePickerPointerForTarget();
+                ui.wrapper.style.visibility = 'visible';
+            });
+        };
+        ui.stylesReady.then(revealPositionedPicker);
 
         const style = getComputedStyle(targetElement);
         const variableColor = style.getPropertyValue('--dna-icon-color').trim();
@@ -6531,6 +7149,24 @@
     function rgbToHex(r, g, b) {
         const toHex = (n) => n.toString(16).padStart(2, '0');
         return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+    }
+
+    function drawColorWheel(ctx, width, height, hue) {
+        const image = ctx.createImageData(width, height);
+        const data = image.data;
+        for (let y = 0; y < height; y++) {
+            const value = 1 - (y + 0.5) / height;
+            for (let x = 0; x < width; x++) {
+                const index = (y * width + x) * 4;
+                const saturation = (x + 0.5) / width;
+                const colour = hsvToRgb(hue, saturation, value);
+                data[index] = colour.r;
+                data[index + 1] = colour.g;
+                data[index + 2] = colour.b;
+                data[index + 3] = 255;
+            }
+        }
+        ctx.putImageData(image, 0, 0);
     }
 
     function hexToHsv(hex) {
@@ -6721,10 +7357,28 @@ function initialize() {
             }
         }
 
+        const pendingColorRestoreRoots = new Set();
+        let colorRestoreFrame = 0;
+        function scheduleColorRestoration(root) {
+            pendingColorRestoreRoots.add(root);
+            if (colorRestoreFrame) return;
+
+            colorRestoreFrame = requestAnimationFrame(() => {
+                colorRestoreFrame = 0;
+                const roots = Array.from(pendingColorRestoreRoots);
+                pendingColorRestoreRoots.clear();
+                const topLevelRoots = roots.filter(root =>
+                    !roots.some(other => other !== root && other.contains(root))
+                );
+
+                topLevelRoots.forEach(attachIconPickersInDom);
+                restoreSavedColors(topLevelRoots);
+            });
+        }
+
         const observer = new MutationObserver(function(mutations) {
             let shouldCheckForButton = false;
             let shouldCheckForSidebar = false;
-            let shouldRestoreColors = false;
             
             mutations.forEach(function(mutation) {
                 if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
@@ -6743,15 +7397,11 @@ function initialize() {
                                 if (node.querySelector('.STek2d')) {
                                     shouldCheckForSidebar = true;
                                 }
-                                if (node.matches && node.matches('.kWQ5wd') || (node.querySelector && node.querySelector('.kWQ5wd'))) {
-                                    setTimeout(() => attachIconPickersInDom(node), 0);
-                                    shouldRestoreColors = true;
+                                const hasIcons = (node.matches && node.matches('.kWQ5wd')) || node.querySelector('.kWQ5wd');
+                                const hasSidebarLinks = (node.matches && node.matches('a.uTwgne')) || node.querySelector('a.uTwgne');
+                                if (hasIcons || hasSidebarLinks) {
+                                    scheduleColorRestoration(node);
                                 }
-                                // Check if this is a sidebar link that needs color restoration
-                                if (node.matches && node.matches('a.uTwgne') || (node.querySelector && node.querySelector('a.uTwgne'))) {
-                                    shouldRestoreColors = true;
-                                }
-                                setTimeout(() => restoreSavedColors(node), 0);
                             }
                         }
                     }
@@ -6769,9 +7419,6 @@ function initialize() {
                 }, 100);
             }
 
-            if (shouldRestoreColors) {
-                setTimeout(() => restoreSavedColors(), 50);
-            }
         });
 
         observer.observe(document.body, {

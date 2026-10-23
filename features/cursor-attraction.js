@@ -24,14 +24,15 @@
     }
 
     function loadInitialMovementPreference() {
+        homeMovementEnabled = true;
         try {
             const raw = localStorage.getItem(HOME_TOGGLE_STORAGE_KEY);
             if (!raw) {
                 return;
             }
             const parsed = JSON.parse(raw);
-            if (parsed && typeof parsed.movement === 'boolean') {
-                homeMovementEnabled = parsed.movement;
+            if (parsed && typeof parsed === 'object') {
+                delete parsed.movement;
             }
         } catch (_) {}
     }
@@ -355,11 +356,9 @@
     }
 
     window.addEventListener('mc-home-movement-toggle-changed', (event) => {
-        if (event && event.detail && typeof event.detail.enabled === 'boolean') {
-            homeMovementEnabled = event.detail.enabled;
-            if (!homeMovementEnabled) {
-                resetHomeCardsWhenInactive();
-            }
+        homeMovementEnabled = true;
+        if (event && event.detail && event.detail.enabled === false) {
+            resetHomeCardsWhenInactive();
         }
     });
 

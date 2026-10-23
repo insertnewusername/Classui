@@ -4,42 +4,21 @@
    },
    "content_scripts": [ {
       "css": [ "styles.css", "dark.css", "color-pickers.css" ],
-      "js": [
-         "features/storage-utils.js",
-         "features/cloud-sync.js",
-         "features/assignment-stars.js",
-         "features/classwork-completion-indicator.js",
-         "features/clock.js",
-         "features/core-timetable-sidebar-icons.js",
-         "features/cursor-attraction.js",
-         "features/decoration.js",
-         "features/download-buttons.js",
-         "features/floating-notes.js",
-         "features/font-picker.js",
-         "features/homebar-streamside.js",
-         "features/settings-panel.js",
-         "features/sidebar-controls.js",
-         "features/sidebar-titles-banners.js",
-         "features/tutorial-content.js",
-         "features/tutorial-modal.js",
-         "features/hide-classroom-tools.js",
-         "features/updates-popup.js",
-         "features/update-checker.js",
-         "content.js"
-      ],
+      "js": [ "Features/storage-utils.js", "Features/cloud-sync.js", "Features/tutorial-content.js", "Features/download-buttons.js", "Features/core-timetable-sidebar-icons.js", "Features/decoration.js", "Features/sidebar-controls.js", "Features/settings-panel.js", "Features/sidebar-titles-banners.js", "Features/tutorial-modal.js", "Features/updates-popup.js", "Features/update-checker.js", "Features/homebar-streamside.js", "Features/classroom-search.js", "Features/clock.js", "Features/cursor-attraction.js", "Features/floating-notes.js", "Features/assignment-stars.js", "Features/font-picker.js", "content.js" ],
       "matches": [ "*://classroom.google.com/*" ]
    } ],
-   "description": "GC Visuals – Enhanced Google Classroom with dark mode, strict 3‑zone colors, and liquid glass",
+   "description": "Redefine Google Classroom with Dark mode, Search, Extensive customisation, and new intuitive features",
    "icons": {
-      "128": "icon128.png",
-      "48": "icon48.png"
+      "128": "Images/Thumbs/icon128.png",
+      "48": "Images/Thumbs/icon48.png"
    },
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1KOl1wqEhkNkPIYleIHAvxzWm+dug6p9XhIqHz2gnD3QwmEZuyO+RitPE/qPmFez8htoNNwJZvaKUQ7AdV9mEZd6oJvU5V3xnZAfi2fTuyhPDnQ+PP/FcENSUDgVnQZ9E0Nf7k/a+9QLAP7FGFozQa8o2FY8jtBpiptxh+H4bfhTmwt1Za1IVAgJidwVMbCGpLGS5hajHTZvDOh5RGfiCq7lzmg8Zucm1SwnDmJ9dsuqEq61SfV8ge4f2FJOSgbD7TN5A11kOhh7XHQ0NNuIHPQkF/6mwGrxgwiF2cSge3HfKhKXDK4UKHEEcTogvoRnLWRc1LIJT71tPPjdR15F4wIDAQAB",
    "manifest_version": 3,
-   "name": "GC Visuals",
+   "name": "GC visuals",
    "permissions": [ "storage" ],
-   "version": "3.15.15",
+   "version": "3.16.4",
    "web_accessible_resources": [ {
       "matches": [ "*://classroom.google.com/*" ],
-      "resources": [ "Icons/*", "Tutorial/*", "Decoration/*", "Changelogs/*", "color-pickers.css" ]
+      "resources": [ "Icons/*", "Images/*", "Changelogs/*", "color-pickers.css" ]
    } ]
 }

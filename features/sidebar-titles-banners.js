@@ -81,6 +81,14 @@ function setTitle(courseId, newTitle) {
 // Cache titles in memory for faster access
 let cachedTitles = {};
 
+function notifyClassroomTitleUpdate() {
+  try {
+    window.dispatchEvent(new CustomEvent('mc-classroom-titles-updated', {
+      detail: { titles: cachedTitles }
+    }));
+  } catch (_) {}
+}
+
 function getCachedTitles(callback) {
   getTitles(({ titles = {} }) => {
     cachedTitles = titles;
@@ -104,6 +112,7 @@ function applySidebarCourseTextColor(sidebarLink, color) {
 
 function updateSidebarTitle(courseId, newTitle) {
   cachedTitles[courseId] = newTitle;
+  notifyClassroomTitleUpdate();
   
   const sidebarLinks = document.querySelectorAll(`a[data-id="${courseId}"]`);
   sidebarLinks.forEach(sidebarLink => {
@@ -216,6 +225,7 @@ function restoreTitles() {
 
   getTitles(({ titles = {} }) => {
     cachedTitles = titles;
+    notifyClassroomTitleUpdate();
     updateCoursePageHeaderTitleForActiveCourse();
     
     document.querySelectorAll("li[data-course-id]").forEach(card => {
@@ -337,7 +347,7 @@ document.body.addEventListener("click", (e) => {
   const input = document.createElement("input");
   input.type = "text";
   input.value = currentText;
-  input.style.cssText = `width:90%;font:${window.getComputedStyle(titleNode).font};`;
+  input.style.cssText = `width:100%;font:${window.getComputedStyle(titleNode).font};`;
 
   titleNode.textContent = "";
   titleNode.appendChild(input);
@@ -528,63 +538,36 @@ document.body.addEventListener('click', (e) => {
 function openColorPickerForClassroomPage(banner, triggerBtn) {
   closeColorPicker();
 
-  const isDarkMode = document.body.classList.contains('dark-mode') || document.body.classList.contains('dark');
-
   const courseId = getActiveSidebarCourseId();
   if (!courseId) return;
 
   const currentColor = getCardIconColorForCourse(courseId) || '#9aa0a6';
 
   const popup = document.createElement('div');
-  popup.className = 'card-icon-color-picker-popup';
-  popup.style.cssText = `
-    position: fixed;
-    background: ${isDarkMode ? '#212126' : 'white'};
-    border: 1px solid ${isDarkMode ? 'rgba(43, 45, 63, 0.421)' : '#ddd'};
-    border-radius: 20px;
-    padding: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    z-index: 10000;
-    color: ${isDarkMode ? '#ddd' : 'inherit'};
-    min-width: 280px;
-  `;
+  popup.className = 'card-icon-color-picker-popup mc-icon-picker-colour-surface';
 
-  // Title
-  const title = document.createElement('div');
-  title.textContent = 'Classroom Colour';
-  title.style.cssText = `font-weight: 600; font-size: 13px; margin-bottom: 12px; color: ${isDarkMode ? '#ddd' : '#333'};`;
-  popup.appendChild(title);
-
-  // SV Box (Saturation/Value)
-  const svWrapper = document.createElement('div');
-  svWrapper.className = 'home-sv-wrapper';
-  
-  const svCanvas = document.createElement('canvas');
-  svCanvas.className = 'home-sv-canvas';
-  svCanvas.width = 280;
-  svCanvas.height = 120;
-  
-  const svMarker = document.createElement('div');
-  svMarker.className = 'home-sv-marker';
-  
-  svWrapper.appendChild(svCanvas);
-  svWrapper.appendChild(svMarker);
-  popup.appendChild(svWrapper);
-
-  // Hue Slider
-  const hueSlider = document.createElement('input');
-  hueSlider.type = 'range';
-  hueSlider.min = '0';
-  hueSlider.max = '360';
-  hueSlider.className = 'home-hue-slider';
-  popup.appendChild(hueSlider);
-  
-  // Hex Input
-  const hexInput = document.createElement('input');
-  hexInput.type = 'text';
-  hexInput.className = 'home-hex-input';
-  hexInput.placeholder = '#RRGGBB';
-  popup.appendChild(hexInput);
+  const picker = window.MCColourPicker.create({
+    container: popup,
+    initialColor: currentColor,
+    title: 'Classroom Colour',
+    onColorChange: (colour) => {
+      const hsv = hexToHsv(colour);
+      currentH = hsv.h;
+      currentS = hsv.s;
+      currentV = hsv.v;
+      hueSlider.value = currentH;
+      drawSvBox();
+      updateMarkerPosition();
+      updateColorFromHsv();
+    }
+  });
+  const svWrapper = picker.sv;
+  const svCanvas = picker.canvas;
+  const svMarker = picker.marker;
+  const hueSlider = picker.hue;
+  const hexInput = picker.hex;
+  const controlsRow = picker.inputRow;
+  const hexRow = picker.hexRow;
 
   // State
   let currentH = 0;
@@ -771,7 +754,12 @@ function openColorPickerForClassroomPage(banner, triggerBtn) {
   });
 
 
-  document.body.appendChild(popup);
+  const popupAnchor = triggerBtn.parentElement || document.body;
+  if (popupAnchor !== document.body) {
+    const anchorPosition = window.getComputedStyle(popupAnchor).position;
+    if (anchorPosition === 'static') popupAnchor.style.position = 'relative';
+  }
+  popupAnchor.appendChild(popup);
   __currentColorPicker = popup;
   __currentColorPickerTrigger = triggerBtn;
 
@@ -785,23 +773,8 @@ function openColorPickerForClassroomPage(banner, triggerBtn) {
     updateMarkerPosition();
   }, 50);
 
-  // Position popup (anchor to bottom left of trigger button)
-  requestAnimationFrame(() => {
-    const rect = triggerBtn.getBoundingClientRect();
-    let left = rect.left;
-    let top = rect.bottom + 4;
-
-    // Keep within viewport
-    if (left + popup.offsetWidth > window.innerWidth - 8) {
-      left = window.innerWidth - popup.offsetWidth - 8;
-    }
-    if (top + popup.offsetHeight > window.innerHeight - 8) {
-      top = rect.top - popup.offsetHeight - 4;
-    }
-
-    popup.style.left = left - 10 + 'px';
-    popup.style.top = top + 10 + 'px';
-  });
+  popup.style.right = '7px';
+  popup.style.top = '151px';
 
   // Close on outside click
   setTimeout(() => {
@@ -825,63 +798,36 @@ function openColorPickerForClassroomPage(banner, triggerBtn) {
 function openColorPickerForCard(card, triggerBtn) {
   closeColorPicker();
 
-  const isDarkMode = document.body.classList.contains('dark-mode') || document.body.classList.contains('dark');
-
   const courseId = card.dataset.courseId;
   if (!courseId) return;
 
   const currentColor = getCardIconColorForCourse(courseId) || '#9aa0a6';
 
   const popup = document.createElement('div');
-  popup.className = 'card-icon-color-picker-popup';
-  popup.style.cssText = `
-    position: fixed;
-    background: ${isDarkMode ? '#212126' : 'white'};
-    border: 1px solid ${isDarkMode ? 'rgba(43, 45, 63, 0.421)' : '#ddd'};
-    border-radius: 20px;
-    padding: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    z-index: 10000;
-    color: ${isDarkMode ? '#ddd' : 'inherit'};
-    min-width: 280px;
-  `;
+  popup.className = 'card-icon-color-picker-popup mc-icon-picker-colour-surface';
 
-  // Title
-  const title = document.createElement('div');
-  title.textContent = 'Classroom Colour';
-  title.style.cssText = `font-weight: 600; font-size: 13px; margin-bottom: 12px; color: ${isDarkMode ? '#ddd' : '#333'};`;
-  popup.appendChild(title);
-
-  // SV Box (Saturation/Value)
-  const svWrapper = document.createElement('div');
-  svWrapper.className = 'home-sv-wrapper';
-  
-  const svCanvas = document.createElement('canvas');
-  svCanvas.className = 'home-sv-canvas';
-  svCanvas.width = 280;
-  svCanvas.height = 120;
-  
-  const svMarker = document.createElement('div');
-  svMarker.className = 'home-sv-marker';
-  
-  svWrapper.appendChild(svCanvas);
-  svWrapper.appendChild(svMarker);
-  popup.appendChild(svWrapper);
-
-  // Hue Slider
-  const hueSlider = document.createElement('input');
-  hueSlider.type = 'range';
-  hueSlider.min = '0';
-  hueSlider.max = '360';
-  hueSlider.className = 'home-hue-slider';
-  popup.appendChild(hueSlider);
-  
-  // Hex Input
-  const hexInput = document.createElement('input');
-  hexInput.type = 'text';
-  hexInput.className = 'home-hex-input';
-  hexInput.placeholder = '#RRGGBB';
-  popup.appendChild(hexInput);
+  const picker = window.MCColourPicker.create({
+    container: popup,
+    initialColor: currentColor,
+    title: 'Classroom Colour',
+    onColorChange: (colour) => {
+      const hsv = hexToHsv(colour);
+      currentH = hsv.h;
+      currentS = hsv.s;
+      currentV = hsv.v;
+      hueSlider.value = currentH;
+      drawSvBox();
+      updateMarkerPosition();
+      updateColorFromHsv();
+    }
+  });
+  const svWrapper = picker.sv;
+  const svCanvas = picker.canvas;
+  const svMarker = picker.marker;
+  const hueSlider = picker.hue;
+  const hexInput = picker.hex;
+  const controlsRow = picker.inputRow;
+  const hexRow = picker.hexRow;
 
   // State
   let currentH = 0;
@@ -1066,7 +1012,12 @@ function openColorPickerForCard(card, triggerBtn) {
     }
   });
 
-  document.body.appendChild(popup);
+  const popupAnchor = triggerBtn.parentElement || document.body;
+  if (popupAnchor !== document.body) {
+    const anchorPosition = window.getComputedStyle(popupAnchor).position;
+    if (anchorPosition === 'static') popupAnchor.style.position = 'relative';
+  }
+  popupAnchor.appendChild(popup);
   __currentColorPicker = popup;
   __currentColorPickerTrigger = triggerBtn;
 
@@ -1080,23 +1031,8 @@ function openColorPickerForCard(card, triggerBtn) {
     updateMarkerPosition();
   }, 50);
 
-  // Position popup (anchor to bottom left of trigger button)
-  requestAnimationFrame(() => {
-    const rect = triggerBtn.getBoundingClientRect();
-    let left = rect.left;
-    let top = rect.bottom + 4;
-
-    // Keep within viewport
-    if (left + popup.offsetWidth > window.innerWidth - 8) {
-      left = window.innerWidth - popup.offsetWidth - 8;
-    }
-    if (top + popup.offsetHeight > window.innerHeight - 8) {
-      top = rect.top - popup.offsetHeight - 4;
-    }
-
-    popup.style.left = left - 10 + 'px';
-    popup.style.top = top + 10 + 'px';
-  });
+  popup.style.right = '7px';
+  popup.style.top = '151px';
 
   // Close on outside click
   setTimeout(() => {
@@ -1128,18 +1064,21 @@ document.body.addEventListener('click', (e) => {
 });
 
 const MGC_BANNER_TINT_KEY = 'modernClassroom_banner_tint_by_course';
-const MGC_BANNER_TINT_DEFAULTS = { color: '#000000', opacity: 0.15 };
+const MGC_BANNER_TINT_DEFAULTS = { color: '#000000', opacity: 0.15, textColor: '#ffffff' };
 
 function normalizeBannerTintSettings(raw) {
   const safe = raw && typeof raw === 'object' ? raw : {};
   const color = (typeof safe.color === 'string' && /^#[0-9a-fA-F]{6}$/.test(safe.color))
     ? safe.color
     : MGC_BANNER_TINT_DEFAULTS.color;
+  const textColor = typeof safe.textColor === 'string' && /^#[0-9a-fA-F]{6}$/.test(safe.textColor)
+    ? safe.textColor
+    : MGC_BANNER_TINT_DEFAULTS.textColor;
   const opacityNum = Number(safe.opacity);
   const opacity = Number.isFinite(opacityNum)
     ? Math.max(0, Math.min(1, opacityNum))
     : MGC_BANNER_TINT_DEFAULTS.opacity;
-  return { color, opacity };
+  return { color, opacity, textColor };
 }
 
 function hexToRgba(hex, alpha) {
@@ -1186,9 +1125,14 @@ function applyBannerTintToCard(card, settings) {
   const elements = [];
   try {
     card.style.setProperty('--mgc-banner-tint-background', hexToRgba(safe.color, safe.opacity));
+    if (safe.textColor) {
+      card.style.setProperty('--mgc-home-widget-text-color', safe.textColor);
+    } else {
+      card.style.removeProperty('--mgc-home-widget-text-color');
+    }
   } catch (e) {}
 
-  card.querySelectorAll('.slDfNd.ZmqAt.z07MGc').forEach((el) => {
+  card.querySelectorAll('.slDfNd.ZmqAt.z07MGc, .slDfNd.ZmqAt.sQg4he').forEach((el) => {
     elements.push(el);
   });
 
@@ -1203,62 +1147,48 @@ function applyBannerTintToCard(card, settings) {
 function applyBannerTintToStreamForCourse(courseId, settings) {
   if (!courseId) return;
   const safe = normalizeBannerTintSettings(settings);
+  const tintColor = hexToRgba(safe.color, safe.opacity);
 
-  const selectors = [
-    `.PFLqgc.KFl4Z[data-mgc-bg-course="${courseId}"]`,
-    `.vFkiub.KFl4Z[data-mgc-bg-course="${courseId}"]`,
-    `.PFLqgc.PagUde[data-mgc-bg-course="${courseId}"]`,
-    `.vFkiub.PagUde[data-mgc-bg-course="${courseId}"]`
-  ];
+  const banners = Array.from(document.querySelectorAll(
+    '.PFLqgc.KFl4Z, .vFkiub.KFl4Z, .PFLqgc.PagUde, .vFkiub.PagUde, header[role="banner"]'
+  ));
 
-  selectors.forEach((selector) => {
-    document.querySelectorAll(selector).forEach((banner) => {
-      try {
-        banner.style.removeProperty('--mgc-banner-tint-color');
-        banner.style.removeProperty('--mgc-banner-tint-opacity');
-      } catch (e) {}
+  banners.forEach((banner) => {
+    if (!(banner instanceof HTMLElement)) return;
 
-      const wrapper = banner.closest('.qyN25') || banner.parentElement;
-      if (wrapper) {
-        wrapper.querySelectorAll('.T4tcpe').forEach((t4) => {
-          try {
-            t4.style.removeProperty('--mgc-banner-tint-color');
-            t4.style.removeProperty('--mgc-banner-tint-opacity');
-            t4.style.setProperty('--mgc-banner-tint-background', hexToRgba(safe.color, safe.opacity));
-          } catch (e) {}
-        });
+    try {
+      banner.setAttribute('data-mgc-bg-course', courseId);
+      banner.style.removeProperty('--mgc-banner-tint-color');
+      banner.style.removeProperty('--mgc-banner-tint-opacity');
+      banner.style.removeProperty('--mgc-banner-tint-color-rgba');
+      banner.style.setProperty('--mgc-banner-tint-background', tintColor);
+      banner.style.setProperty('background-color', tintColor, 'important');
+      banner.style.setProperty('background-blend-mode', 'normal', 'important');
+      if (safe.textColor) {
+        banner.style.setProperty('--mgc-home-widget-text-color', safe.textColor);
+      } else {
+        banner.style.removeProperty('--mgc-home-widget-text-color');
       }
+    } catch (e) {}
+
+    const wrapper = banner.closest('.qyN25') || banner.parentElement;
+    if (!wrapper) return;
+
+    wrapper.querySelectorAll('.T4tcpe').forEach((t4) => {
+      try {
+        t4.setAttribute('data-mgc-bg-course', courseId);
+        t4.style.removeProperty('--mgc-banner-tint-color');
+        t4.style.removeProperty('--mgc-banner-tint-opacity');
+        t4.style.setProperty('--mgc-banner-tint-background', tintColor);
+        t4.style.setProperty('background-color', tintColor, 'important');
+        if (safe.textColor) {
+          t4.style.setProperty('--mgc-home-widget-text-color', safe.textColor);
+        } else {
+          t4.style.removeProperty('--mgc-home-widget-text-color');
+        }
+      } catch (e) {}
     });
   });
-
-  // Also apply tints to any visible banner/header elements even if they don't
-  // have the data-mgc-bg-course attribute yet (this happens when the tint is
-  // changed without changing the background image). We only do this for the
-  // active course to avoid affecting other pages.
-  try {
-    const activeId = typeof getActiveSidebarCourseId === 'function' ? getActiveSidebarCourseId() : null;
-    if (activeId === courseId) {
-      const banners = document.querySelectorAll('.PFLqgc, .vFkiub, header[role="banner"]');
-      banners.forEach((b) => {
-        try {
-          b.style.removeProperty('--mgc-banner-tint-color');
-          b.style.removeProperty('--mgc-banner-tint-opacity');
-          b.style.removeProperty('--mgc-banner-tint-color-rgba');
-        } catch (e) {}
-
-        const streamWrapper = b.closest('.qyN25') || b.parentElement;
-        if (streamWrapper) {
-          streamWrapper.querySelectorAll('.T4tcpe').forEach((t4) => {
-            try {
-              t4.style.removeProperty('--mgc-banner-tint-color');
-              t4.style.removeProperty('--mgc-banner-tint-opacity');
-              t4.style.setProperty('--mgc-banner-tint-background', hexToRgba(safe.color, safe.opacity));
-            } catch (e) {}
-          });
-        }
-      });
-    }
-  } catch (e) {}
 }
 
 function applyStoredBannerTints() {
@@ -1377,6 +1307,7 @@ function openImagePickerForCard(card, triggerEl) {
   const urlArr = [CUSTOM_MARKER, ...urlArrBase];
   const bannerImagesIconUrl = chrome.runtime.getURL('Icons/bannerimages.svg');
   const bannerTintIconUrl = chrome.runtime.getURL('Icons/bannertint.svg');
+  const textColorIconUrl = chrome.runtime.getURL('Icons/textrecolour.svg');
   const bannerResetIconUrl = chrome.runtime.getURL('Icons/bannerreset.svg');
   const bannerCloseIconUrl = chrome.runtime.getURL('Icons/bannerclose.svg');
 
@@ -1400,8 +1331,13 @@ function openImagePickerForCard(card, triggerEl) {
   const previewTint = document.createElement('div');
   previewTint.className = 'image-picker-preview-tint';
 
+  const previewText = document.createElement('div');
+  previewText.className = 'image-picker-preview-text';
+  previewText.textContent = 'Preview';
+
   previewFrame.appendChild(preview);
   previewFrame.appendChild(previewTint);
+  previewFrame.appendChild(previewText);
   previewShell.appendChild(previewFrame);
 
   const content = document.createElement('div');
@@ -1433,8 +1369,17 @@ function openImagePickerForCard(card, triggerEl) {
   tintTabBtn.setAttribute('aria-label', 'Tints');
   tintTabBtn.setAttribute('aria-pressed', 'false');
 
+  const textColorTabBtn = document.createElement('button');
+  textColorTabBtn.type = 'button';
+  textColorTabBtn.className = 'image-picker-side-button';
+  textColorTabBtn.innerHTML = `<img class="image-picker-side-button-icon" src="${textColorIconUrl}" alt="" aria-hidden="true">`;
+  textColorTabBtn.setAttribute('aria-label', 'Text colour');
+  textColorTabBtn.title = 'Text colour';
+  textColorTabBtn.setAttribute('aria-pressed', 'false');
+
   tabControls.appendChild(bannerTabBtn);
   tabControls.appendChild(tintTabBtn);
+  tabControls.appendChild(textColorTabBtn);
   // Close button to dismiss the picker
   const closeBtn = document.createElement('button');
   closeBtn.className = 'image-picker-side-icon-button image-picker-close';
@@ -1477,9 +1422,11 @@ function openImagePickerForCard(card, triggerEl) {
       const tint = normalizeBannerTintSettings(getBannerTintSettingsForCourse(courseKey));
       previewTint.style.backgroundColor = tint.color;
       previewTint.style.opacity = String(tint.opacity);
+      previewText.style.color = tint.textColor || MGC_BANNER_TINT_DEFAULTS.textColor;
     } catch (e) {
       previewTint.style.backgroundColor = MGC_BANNER_TINT_DEFAULTS.color;
       previewTint.style.opacity = String(MGC_BANNER_TINT_DEFAULTS.opacity);
+      previewText.style.color = MGC_BANNER_TINT_DEFAULTS.textColor;
     }
   }
 
@@ -1502,39 +1449,24 @@ function openImagePickerForCard(card, triggerEl) {
     title.textContent = 'Tint';
     leftGroup.appendChild(title);
 
-    const hexInput = document.createElement('input');
-    hexInput.type = 'text';
-    hexInput.className = 'home-hex-input image-picker-paint-hex';
-    hexInput.placeholder = '#RRGGBB';
-    leftGroup.appendChild(hexInput);
-
     topRow.appendChild(leftGroup);
     tintPanel.appendChild(topRow);
 
     const colorSection = document.createElement('div');
-    colorSection.className = 'home-color-picker-section image-picker-paint-color-section';
+    colorSection.className = 'home-color-picker-section image-picker-paint-color-section mc-picker-surface';
 
-    const svWrapper = document.createElement('div');
-    svWrapper.className = 'home-sv-wrapper';
-
-    const svCanvas = document.createElement('canvas');
-    svCanvas.className = 'home-sv-canvas';
-    svCanvas.width = 280;
-    svCanvas.height = 200;
-
-    const svMarker = document.createElement('div');
-    svMarker.className = 'home-sv-marker';
-
-    svWrapper.appendChild(svCanvas);
-    svWrapper.appendChild(svMarker);
-    colorSection.appendChild(svWrapper);
-
-    const hueSlider = document.createElement('input');
-    hueSlider.type = 'range';
-    hueSlider.min = '0';
-    hueSlider.max = '360';
-    hueSlider.className = 'home-hue-slider';
-    colorSection.appendChild(hueSlider);
+    const picker = window.MCColourPicker.create({
+      container: colorSection,
+      initialColor: current.color || MGC_BANNER_TINT_DEFAULTS.color,
+      onColorChange: (colour) => commit(colour, opacitySlider.value)
+    });
+    const svWrapper = picker.sv;
+    const svCanvas = picker.canvas;
+    const svMarker = picker.marker;
+    const hueSlider = picker.hue;
+    const hexInput = picker.hex;
+    const controlsRow = picker.inputRow;
+    const hexRow = picker.hexRow;
 
     tintPanel.appendChild(colorSection);
 
@@ -1761,6 +1693,41 @@ function openImagePickerForCard(card, triggerEl) {
     });
 
     content.appendChild(tintPanel);
+  }
+
+  function renderTextColorPanel() {
+    const currentCourseId = card && card.dataset ? card.dataset.courseId : null;
+    const current = getBannerTintSettingsForCourse(currentCourseId);
+    content.innerHTML = '';
+
+    const textColorPanel = document.createElement('div');
+    textColorPanel.className = 'image-picker-paint-panel';
+
+    const topRow = document.createElement('div');
+    topRow.className = 'image-picker-paint-top-row';
+    const title = document.createElement('div');
+    title.className = 'image-picker-custom-title image-picker-paint-title';
+    title.textContent = 'Text colour';
+    topRow.appendChild(title);
+    textColorPanel.appendChild(topRow);
+
+    const colorSection = document.createElement('div');
+    colorSection.className = 'home-color-picker-section image-picker-paint-color-section mc-picker-surface';
+    window.MCColourPicker.create({
+      container: colorSection,
+      initialColor: current.textColor || MGC_BANNER_TINT_DEFAULTS.textColor,
+      onColorChange: (colour) => {
+        const settings = getBannerTintSettingsForCourse(currentCourseId);
+        settings.textColor = colour;
+        saveBannerTintSettingsForCourse(currentCourseId, settings);
+        applyBannerTintToCard(card, settings);
+        applyBannerTintToStreamForCourse(currentCourseId, settings);
+        updatePreview();
+      }
+    });
+
+    textColorPanel.appendChild(colorSection);
+    content.appendChild(textColorPanel);
   }
 
   function renderBannerGrid() {
@@ -2223,15 +2190,20 @@ function openImagePickerForCard(card, triggerEl) {
 
   let activeTab = 'banners';
   function setActiveTab(nextTab) {
-    activeTab = nextTab === 'tints' ? 'tints' : 'banners';
+    activeTab = nextTab === 'tints' || nextTab === 'text-color' ? nextTab : 'banners';
     const showingBanners = activeTab === 'banners';
+    const showingTints = activeTab === 'tints';
+    const showingTextColor = activeTab === 'text-color';
     bannerTabBtn.classList.toggle('active', showingBanners);
     bannerTabBtn.setAttribute('aria-pressed', showingBanners ? 'true' : 'false');
-    tintTabBtn.classList.toggle('active', !showingBanners);
-    tintTabBtn.setAttribute('aria-pressed', !showingBanners ? 'true' : 'false');
+    tintTabBtn.classList.toggle('active', showingTints);
+    tintTabBtn.setAttribute('aria-pressed', showingTints ? 'true' : 'false');
+    textColorTabBtn.classList.toggle('active', showingTextColor);
+    textColorTabBtn.setAttribute('aria-pressed', showingTextColor ? 'true' : 'false');
 
     if (showingBanners) renderBannerGrid();
-    else renderTintPanel();
+    else if (showingTints) renderTintPanel();
+    else renderTextColorPanel();
   }
 
   bannerTabBtn.addEventListener('click', (e) => {
@@ -2242,6 +2214,11 @@ function openImagePickerForCard(card, triggerEl) {
   tintTabBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     setActiveTab('tints');
+  });
+
+  textColorTabBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    setActiveTab('text-color');
   });
 
   if (urlArr.length === 0) {
@@ -2366,14 +2343,6 @@ async function refreshCardBackgroundsFromStorage() {
       cachedCardBackgrounds = (data && typeof data === 'object') ? data : {};
       return cachedCardBackgrounds;
     }
-
-    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.sync) {
-      const data = await new Promise((resolve) => {
-        chrome.storage.sync.get('modernClassroom_card_backgrounds', resolve);
-      });
-      cachedCardBackgrounds = data?.modernClassroom_card_backgrounds || {};
-      return cachedCardBackgrounds;
-    }
   } catch (_) {}
 
   try {
@@ -2392,11 +2361,6 @@ async function persistCardBackgroundsToStorage() {
     } catch (_) {}
   }
 
-  try {
-    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.sync) {
-      chrome.storage.sync.set({ 'modernClassroom_card_backgrounds': cachedCardBackgrounds });
-    }
-  } catch (e) {}
   try { localStorage.setItem('modernClassroom_card_backgrounds', JSON.stringify(cachedCardBackgrounds)); } catch (e) {}
 }
 
@@ -2427,15 +2391,6 @@ async function refreshCardIconColorsFromStorage(force = false) {
       hasHydratedCardIconColors = true;
       return cachedCardIconColors;
     }
-
-    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.sync) {
-      const data = await new Promise((resolve) => {
-        chrome.storage.sync.get('modernClassroom_card_icon_colors', resolve);
-      });
-      cachedCardIconColors = data?.modernClassroom_card_icon_colors || {};
-      hasHydratedCardIconColors = true;
-      return cachedCardIconColors;
-    }
   } catch (_) {}
 
   try {
@@ -2455,11 +2410,6 @@ async function persistCardIconColorsToStorage() {
     } catch (_) {}
   }
 
-  try {
-    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.sync) {
-      chrome.storage.sync.set({ 'modernClassroom_card_icon_colors': cachedCardIconColors });
-    }
-  } catch (e) {}
   try { localStorage.setItem('modernClassroom_card_icon_colors', JSON.stringify(cachedCardIconColors)); } catch (e) {}
 }
 
@@ -2500,6 +2450,46 @@ function isMgcCourseIconElement(el) {
   return el.matches('.Cxyznd, [class*="Cxyznd"], .P47N4e, .gmNu1d');
 }
 
+function isClassworkPage() {
+  return /\/w(?:\/|$)/.test(window.location.pathname || '');
+}
+
+function getClassworkItemForIcon(icon) {
+  if (!icon) return null;
+
+  const directItem = icon.closest('[data-course-work-id], [data-stream-item-id], [role="listitem"]');
+  if (directItem) return directItem;
+
+  const assignmentLink = icon.closest('a[href*="/a/"], a[aria-label^="Assignment:"]');
+  if (assignmentLink) {
+    return assignmentLink.closest('[role="listitem"]') || assignmentLink.parentElement;
+  }
+
+  let ancestor = icon.parentElement;
+  for (let depth = 0; ancestor && depth < 8; depth += 1, ancestor = ancestor.parentElement) {
+    if (ancestor.querySelector('a[href*="/a/"], a[aria-label^="Assignment:"]')) return ancestor;
+  }
+
+  return null;
+}
+
+function isSubmittedClassworkItem(icon) {
+  const iconStatus = icon.querySelector('.PazDv')?.textContent || '';
+  if (/\b(?:turned\s+in|submitted|handed\s+in|completed\s+assignment)\b/i.test(iconStatus)) {
+    return true;
+  }
+
+  const item = getClassworkItemForIcon(icon);
+  if (!item) return false;
+
+  const semanticLabels = Array.from(item.querySelectorAll('[aria-label], [title]'))
+    .map((node) => `${node.getAttribute('aria-label') || ''} ${node.getAttribute('title') || ''}`)
+    .join(' ');
+  const itemText = `${semanticLabels} ${item.textContent || ''}`.replace(/\s+/g, ' ').trim();
+
+  return /\b(?:turned\s+in|submitted|handed\s+in|completed\s+assignment)\b/i.test(itemText);
+}
+
 function getMgcCourseIconElements(root = document) {
   const scope = root && typeof root.querySelectorAll === 'function' ? root : document;
   const seen = new Set();
@@ -2522,6 +2512,20 @@ function applyMgcCourseIconColor(root, color, options = {}) {
 
   getMgcCourseIconElements(root).forEach((el) => {
     try {
+      if (isClassworkPage()) {
+        if (!getClassworkItemForIcon(el) || isSubmittedClassworkItem(el)) {
+          if (el.dataset.mgcColorApplied === 'true') {
+            el.style.removeProperty('background-color');
+            delete el.dataset.mgcColorApplied;
+          }
+          return;
+        }
+
+        el.style.backgroundColor = color;
+        el.dataset.mgcColorApplied = 'true';
+        return;
+      }
+
       if (skipIfAlreadySet && el.style.backgroundColor === color) {
         if (markApplied) el.dataset.mgcColorApplied = 'true';
         return;
@@ -2600,8 +2604,10 @@ function addColorPickerToClassroomHeader() {
       // Check if button already exists
       let existingBtn = host.querySelector('.my-extension-icon-color-picker');
       if (existingBtn) {
+        existingBtn.classList.add('mc-picker-trigger');
         // Update the existing button's swatch with the current course's color
         const colorSwatch = existingBtn.querySelector('div');
+        if (colorSwatch) colorSwatch.classList.add('mc-picker-trigger-swatch');
         const savedColor = getCardIconColorForCourse(courseId);
         const defaultColor = '#9aa0a6';
         if (colorSwatch) {
@@ -2614,12 +2620,11 @@ function addColorPickerToClassroomHeader() {
       }
 
       const colorPickerBtn = document.createElement('button');
-      colorPickerBtn.className = 'my-extension-icon-color-picker';
+      colorPickerBtn.className = 'my-extension-icon-color-picker mc-picker-trigger';
       colorPickerBtn.setAttribute('aria-label', 'Change icon background color');
-      colorPickerBtn.style.cssText = `position:absolute;bottom:15px;right:15px;width:28px;height:28px;padding:0;border:none;background:none;cursor:pointer;border-radius:6px;transition:all 0.2s ease;z-index:30; opacity:1;box-shadow:none !important;`;
 
       const colorSwatch = document.createElement('div');
-      colorSwatch.style.cssText = 'width:100%;height:100%;border-radius:12px;border:2px solid rgba(255, 255, 255, 0.36);cursor:pointer;background:#9aa0a6;box-shadow:none !important;';
+      colorSwatch.className = 'mc-picker-trigger-swatch';
       colorPickerBtn.appendChild(colorSwatch);
 
       // Apply saved color if exists, otherwise use and apply the default visual color
@@ -2680,19 +2685,40 @@ function applyHeaderBackground(url, courseId) {
     }
   }
 
-  // 3. State needs update: Clear ALL previously marked elements to prevent "ghost" backgrounds
-  // This ensures that when we move from top-header application to banner application, the top-header is wiped
+  // 3. State needs update: Clear previously marked elements except any current targets.
+  // This reduces flash by not wiping the current banner until the new target is available.
+  const oldMarkedElements = Array.from(document.querySelectorAll('[data-mgc-bg-course]'));
+  const targetBanners = Array.from(document.querySelectorAll(bannerSelector));
+  const targetHeaderEls = Array.from(document.querySelectorAll(roleBannerSelector)).filter(el => {
+    return el.getAttribute('role') !== 'navigation' && el.tagName !== 'NAV';
+  });
+  const preserveSet = new Set([...targetBanners, ...targetHeaderEls]);
+
   try {
-    document.querySelectorAll('[data-mgc-bg-course]').forEach(el => {
-      try { 
-        el.style.removeProperty('background-image'); 
-        el.removeAttribute('data-mgc-bg-course'); 
+    oldMarkedElements.forEach(el => {
+      if (preserveSet.has(el)) return;
+      try {
+        el.style.removeProperty('background-image');
+        el.removeAttribute('data-mgc-bg-course');
       } catch (e) {}
     });
   } catch (e) {}
   __mgc_currentHeaderCourse = null;
 
-  if (!url) return true;
+  if (!url) {
+    // If no custom banner is applied, keep the active course marked so tint-only settings still work.
+    if (targetBanners.length > 0) {
+      targetBanners.forEach((el) => {
+        try { el.setAttribute('data-mgc-bg-course', courseId); } catch (e) {}
+      });
+      return true;
+    }
+
+    if (targetHeaderEls.length > 0) {
+      try { targetHeaderEls[0].setAttribute('data-mgc-bg-course', courseId); } catch (e) {}
+    }
+    return true;
+  }
 
   // 4. Primary targets: Actual classroom banners
   const actualBanners = Array.from(document.querySelectorAll(bannerSelector));

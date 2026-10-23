@@ -1,78 +1,244 @@
 
-function injectGlassFilter() {
-    if (document.querySelector('#liquid-glass-svg-filter')) return;
+const SIDEBAR_HEIGHT_PROMPT_DISMISSED_KEY = 'modernClassroom_sidebarHeightPromptDismissed';
 
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.id = 'liquid-glass-svg-filter';
-    svg.style.display = 'none';
+function mountSidebarHeightPrompt() {
+    if (!document.body || document.querySelector('.mc-sidebar-height-prompt')) return;
 
-    // ---- Filter 1: Default more distortion (scale 300) ----
-    const filter1 = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
-    filter1.id = 'glass-distortion';
-    filter1.setAttribute('x', '0%');
-    filter1.setAttribute('y', '0%');
-    filter1.setAttribute('width', '100%');
-    filter1.setAttribute('height', '100%');
-    filter1.setAttribute('filterUnits', 'objectBoundingBox');
-    filter1.innerHTML = `
-        <feTurbulence type="fractalNoise" baseFrequency="0.003 0.007" numOctaves="1" seed="17" result="turbulence"/>
-        <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="300" xChannelSelector="R" yChannelSelector="G"/>
-    `;
-    svg.appendChild(filter1);
-
-    // ---- Filter 2: Strong (for large areas) ----
-    const filter2 = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
-    filter2.id = 'glass-distortion-strong';
-    filter2.setAttribute('x', '0%');
-    filter2.setAttribute('y', '0%');
-    filter2.setAttribute('width', '100%');
-    filter2.setAttribute('height', '100%');
-    filter2.setAttribute('filterUnits', 'objectBoundingBox');
-    filter2.innerHTML = `
-        <feTurbulence type="fractalNoise" baseFrequency="0.002 0.005" numOctaves="1" seed="42" result="turbulence"/>
-        <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="400" xChannelSelector="R" yChannelSelector="G"/>
-    `;
-    svg.appendChild(filter2);
-
-    // ---- Filter 3: Subtle (for small elements) ----
-    const filter3 = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
-    filter3.id = 'glass-distortion-subtle';
-    filter3.setAttribute('x', '0%');
-    filter3.setAttribute('y', '0%');
-    filter3.setAttribute('width', '100%');
-    filter3.setAttribute('height', '100%');
-    filter3.setAttribute('filterUnits', 'objectBoundingBox');
-    filter3.innerHTML = `
-        <feTurbulence type="fractalNoise" baseFrequency="0.008 0.008" numOctaves="1" seed="5" result="turbulence"/>
-        <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="120" xChannelSelector="R" yChannelSelector="G"/>
-    `;
-    svg.appendChild(filter3);
-
-    document.head.appendChild(svg);
-}
-// ---- Liquid Glass: apply saved state on page load ----
-(function applyLiquidGlassOnLoad() {
-    const isEnabled = localStorage.getItem('glassEnabled') === 'true';
-    if (isEnabled) {
-        injectGlassFilter();               // <-- ADD THIS
-        document.body.classList.add('cui-glass-enabled');
+    let dismissed = false;
+    try {
+        dismissed = localStorage.getItem(SIDEBAR_HEIGHT_PROMPT_DISMISSED_KEY) === 'true';
+    } catch (error) {
+        console.error('Unable to read sidebar height prompt dismissal state.', error);
     }
-})();
+    if (dismissed) return;
 
+    const prompt = document.createElement('section');
+    prompt.className = 'mc-sidebar-height-prompt';
+    prompt.setAttribute('aria-label', 'Adjust maximum sidebar height');
 
+    const title = document.createElement('div');
+    title.className = 'mc-sidebar-height-prompt-title';
+    title.textContent = 'Adjust maximum sidebar height';
 
+    const subtext = document.createElement('div');
+    subtext.className = 'mc-sidebar-height-prompt-subtext';
+    subtext.textContent = 'This can be adjusted in settings later';
 
+    const slider = document.createElement('input');
+    slider.type = 'range';
+    slider.className = 'sidebar-height-slider mc-sidebar-height-prompt-slider';
+    slider.min = '-168';
+    slider.max = '612';
+    slider.step = '20';
 
+    let initialHeight = 420;
+    let hasInteracted = false;
+    try {
+        const savedHeight = parseInt(localStorage.getItem('sidebarHeightAdjust'), 10);
+        if (Number.isFinite(savedHeight)) initialHeight = savedHeight;
+    } catch (error) {
+        console.error('Unable to read saved sidebar height.', error);
+    }
+    slider.value = String(initialHeight);
 
+    const revealSidebarForAdjustment = () => {
+        const sidebar = document.querySelector('.STek2d');
+        if (!sidebar) return;
+        sidebar.classList.add('sidebar-visible');
+        document.querySelector('.sidebar-hotspot')?.classList.add('sidebar-hide-indicator');
+    };
+    const restoreSidebarAfterAdjustment = () => {
+        if (window.innerWidth > 1042) return;
+        document.querySelector('.STek2d')?.classList.remove('sidebar-visible');
+        document.querySelector('.sidebar-hotspot')?.classList.remove('sidebar-hide-indicator');
+    };
+    const restoreSidebarHeightPreview = () => {
+        document.querySelectorAll('.STek2d div[role="group"]').forEach((element) => {
+            element.style.setProperty('height', 'auto', 'important');
+        });
+        restoreSidebarAfterAdjustment();
+    };
 
+    const applyHeight = (value, persist, userInteraction = false) => {
+        const numValue = parseInt(value, 10);
+        if (!Number.isFinite(numValue)) return;
 
+        if (typeof window.__mgcApplySidebarHeightAdjust === 'function') {
+            window.__mgcApplySidebarHeightAdjust(numValue, persist, userInteraction);
+        } else {
+            const adjustedValue = 624 - numValue;
+            document.documentElement.style.setProperty('--enrolled-height-adjust', `${adjustedValue}px`);
+            document.body.style.setProperty('--enrolled-height-adjust', `${adjustedValue}px`);
+            window.__mgcSidebarHeightAdjust = numValue;
+            const enrolledEls = document.querySelectorAll('.STek2d div[role="group"]');
+            const calcExpression = document.body.classList.contains('calendar-hidden')
+                ? `calc((100vh - ${adjustedValue}px + 52px) / var(--sidebar-scale, 1))`
+                : `calc((100vh - ${adjustedValue}px) / var(--sidebar-scale, 1))`;
+            enrolledEls.forEach((element) => element.style.setProperty('height', calcExpression, 'important'));
 
+            if (persist) {
+                try {
+                    localStorage.setItem('sidebarHeightAdjust', String(numValue));
+                } catch (error) {
+                    console.error('Unable to save sidebar height.', error);
+                }
+                if (typeof storageSet === 'function') {
+                    storageSet('sidebarHeightAdjust', numValue).catch((error) => {
+                        console.error('Unable to sync sidebar height.', error);
+                    });
+                }
+            }
+        }
+    };
 
+    slider.addEventListener('pointerdown', revealSidebarForAdjustment);
+    slider.addEventListener('pointerup', restoreSidebarAfterAdjustment);
+    slider.addEventListener('pointercancel', restoreSidebarAfterAdjustment);
+    slider.addEventListener('input', () => {
+        hasInteracted = true;
+        revealSidebarForAdjustment();
+        applyHeight(slider.value, false, true);
+    });
+    slider.addEventListener('change', () => {
+        applyHeight(slider.value, true, true);
+        restoreSidebarHeightPreview();
+    });
 
+    const actions = document.createElement('div');
+    actions.className = 'mc-sidebar-height-prompt-actions';
+    const dismissButton = document.createElement('button');
+    dismissButton.type = 'button';
+    dismissButton.className = 'mc-sidebar-height-prompt-dismiss';
+    dismissButton.textContent = 'Done';
+    dismissButton.addEventListener('click', () => {
+        applyHeight(slider.value, true, true);
+        restoreSidebarHeightPreview();
+        try {
+            localStorage.setItem(SIDEBAR_HEIGHT_PROMPT_DISMISSED_KEY, 'true');
+        } catch (error) {
+            console.error('Unable to save sidebar height prompt dismissal.', error);
+        }
+        prompt.classList.remove('is-visible');
+        prompt.setAttribute('aria-hidden', 'true');
+        dismissButton.disabled = true;
+        prompt.addEventListener('transitionend', (event) => {
+            if (event.target === prompt && event.propertyName === 'opacity') prompt.remove();
+        }, { once: true });
+        setTimeout(() => prompt.remove(), 300);
+    });
 
+    actions.appendChild(dismissButton);
+    prompt.append(title, subtext, slider, actions);
+    document.body.appendChild(prompt);
+    requestAnimationFrame(() => prompt.classList.add('is-visible'));
 
+    if (typeof storageGet === 'function') {
+        storageGet('sidebarHeightAdjust', initialHeight).then((savedHeight) => {
+            if (hasInteracted) return;
+            const parsedHeight = parseInt(savedHeight, 10);
+            if (!Number.isFinite(parsedHeight)) return;
+            slider.value = String(parsedHeight);
+            applyHeight(parsedHeight, false);
+        }).catch((error) => {
+            console.error('Unable to load saved sidebar height.', error);
+        });
+    }
+}
 
+if (document.body) {
+    mountSidebarHeightPrompt();
+} else {
+    document.addEventListener('DOMContentLoaded', mountSidebarHeightPrompt, { once: true });
+}
 
+function applySavedPeopleViewMode() {
+    const apply = (value) => {
+        if (!document.body) return;
+        document.body.classList.toggle('listv', value === 'list');
+    };
+
+    let storedValue = null;
+    try { storedValue = localStorage.getItem('peopleViewMode'); } catch (_) {}
+    apply(storedValue === 'list' ? 'list' : 'grid');
+
+    if (typeof storageGet === 'function') {
+        storageGet('peopleViewMode', 'grid').then(value => {
+            apply(value === 'list' ? 'list' : 'grid');
+        }).catch(() => {});
+    }
+}
+
+function persistPeopleViewMode(mode) {
+    if (typeof storageSet === 'function') {
+        storageSet('peopleViewMode', mode).catch(() => {});
+        return;
+    }
+
+    try { localStorage.setItem('peopleViewMode', JSON.stringify(mode)); } catch (_) {}
+}
+
+function setupPeopleViewControl() {
+    if (!document.body) return;
+
+    document.querySelectorAll('h2').forEach((heading) => {
+        if (heading.textContent.trim() !== 'Classmates') return;
+
+        const header = heading.parentElement;
+        if (!header || header.querySelector('.mc-people-view-control')) return;
+
+        const control = document.createElement('div');
+        control.className = 'mc-people-view-control';
+        control.style.cssText = 'display:flex;align-items:center;gap:4px;margin-left:auto;';
+        control.setAttribute('aria-label', 'People view');
+
+        const buttons = {};
+        ['grid', 'list'].forEach((mode) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'people-view';
+            button.textContent = mode === 'grid' ? 'Grid' : 'List';
+            button.setAttribute('aria-label', `Show people in ${mode}`);
+            button.addEventListener('click', () => {
+                document.body.classList.toggle('listv', mode === 'list');
+                persistPeopleViewMode(mode);
+                updateButtons();
+            });
+            buttons[mode] = button;
+            control.appendChild(button);
+        });
+
+        const updateButtons = () => {
+            const listActive = document.body.classList.contains('listv');
+            ['grid', 'list'].forEach((mode) => {
+                const active = mode === (listActive ? 'list' : 'grid');
+                buttons[mode].classList.toggle('active', active);
+                buttons[mode].style.fontWeight = active ? '700' : '400';
+                buttons[mode].setAttribute('aria-pressed', String(active));
+            });
+        };
+
+        header.style.display = 'flex';
+        header.style.alignItems = 'center';
+        header.appendChild(control);
+        updateButtons();
+    });
+}
+
+function watchPeopleViewControl() {
+    setupPeopleViewControl();
+    if (!document.body) return;
+
+    const observer = new MutationObserver(setupPeopleViewControl);
+    try { observer.observe(document.body, { childList: true, subtree: true }); } catch (_) {}
+}
+
+if (document.body) {
+    applySavedPeopleViewMode();
+    watchPeopleViewControl();
+} else {
+    document.addEventListener('DOMContentLoaded', applySavedPeopleViewMode, { once: true });
+    document.addEventListener('DOMContentLoaded', watchPeopleViewControl, { once: true });
+}
 
 function insertCustomSettingsPanel() {
     const profilePanel = document.querySelector('.mSaSG.pEwOBc.Aopndd, .mSaSG.pEwOBc, .Aopndd.mSaSG');
@@ -152,187 +318,15 @@ function insertCustomSettingsPanel() {
         };
     })();
 
-    // --- Tutorial Panel ---
+    // --- Feature Guide Panel ---
     const tutorialPanel = document.createElement('div');
     tutorialPanel.className = 'mSaSG pEwOBc Aopndd';
     tutorialPanel.id = 'my-extension-tutorial-panel';
     tutorialPanel.style.marginBottom = '24px';
 
-    // Embed tutorial directly
-    const tutorialContainer = document.createElement('div');
-    tutorialContainer.style.cssText = 'margin-top:0;';
-
-    // Create tutorial modal inline
-    const modal = document.createElement("div");
-    modal.className = "tutorial-modal";
-    // Apply popup-specific styles
-    modal.style.padding = "20px";
-    modal.style.height = "500px";
-    modal.style.paddingBottom = "0px";
-    modal.style.cssText = 'max-width: none; width: 100%; height: 500px; margin: 0; border: none; border-radius: 20px; padding: 0;';
-
-    // Main container
-    const container = document.createElement("div");
-    container.className = "tutorial-container";
-
-    // The selected feature is shown above the navigation rail.
-    const guidemenu = document.createElement("div");
-    guidemenu.className = "tutorial-guidemenu";
-    guidemenu.style.gap = "4px";
-    guidemenu.style.padding = "5px";
-
-    const baseUrl = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL)
-            ? chrome.runtime.getURL('Tutorial/')
-            : 'Tutorial/';
-    const features = typeof window.getTutorialFeatures === 'function'
-        ? window.getTutorialFeatures(baseUrl)
-        : [];
-
-    const getThumbnailUrl = (feature) => {
-        const themeFolder = document.body.classList.contains('dark-mode') ? 'Dark Mode' : 'Light Mode';
-        return `${baseUrl}Tutorial Thumbs/${themeFolder}/${feature.thumbnail}`;
-    };
-
-    const normalizeImageSize = (value, fallbackUnit = '%') => {
-        if (value === undefined || value === null) return '';
-        if (typeof value === 'number' && Number.isFinite(value)) return `${value}${fallbackUnit}`;
-        const raw = String(value).trim();
-        if (!raw) return '';
-        return /^\d+(\.\d+)?$/.test(raw) ? `${raw}${fallbackUnit}` : raw;
-    };
-
-    // Helper to render a feature's content
-    function renderFeatureContent(feature) {
-        rightPanel.innerHTML = "";
-        const panel = document.createElement("div");
-        panel.id = `panel-settings-${feature.id}`;
-        panel.className = "tutorial-panel active";
-        const titleEl = document.createElement("h2");
-        titleEl.className = "tutorial-feature-title";
-        titleEl.textContent = feature.title;
-        panel.appendChild(titleEl);
-        feature.content.forEach((block) => {
-            if (block.type === 'text') {
-                const textEl = document.createElement("p");
-                textEl.className = "tutorial-feature-text";
-                textEl.textContent = block.text;
-                panel.appendChild(textEl);
-            } else if (block.type === 'break') {
-                const spacerEl = document.createElement('div');
-                const rawSize = Number(block.size);
-                const size = Number.isFinite(rawSize) ? Math.max(0, rawSize) : 16;
-                spacerEl.style.height = `${size}px`;
-                spacerEl.setAttribute('aria-hidden', 'true');
-                panel.appendChild(spacerEl);
-            } else if (block.type === 'image') {
-                const imgEl = document.createElement("img");
-                imgEl.className = "tutorial-feature-image";
-                imgEl.src = block.src;
-                imgEl.alt = feature.title;
-                const width = normalizeImageSize(block.width, '%');
-                const height = normalizeImageSize(block.height, 'px');
-                if (width) imgEl.style.width = width;
-                if (height) imgEl.style.height = height;
-                panel.appendChild(imgEl);
-            } else if (block.type === 'youtube') {
-                const yt = document.createElement('iframe');
-                yt.className = 'tutorial-feature-youtube';
-                yt.width = '100%';
-                yt.height = '315';
-                yt.src = `https://www.youtube.com/embed/${block.id}?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&fs=0&disablekb=1&playsinline=1`;
-                yt.title = feature.title + ' Video';
-                yt.frameBorder = '0';
-                yt.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
-                yt.allowFullscreen = true;
-                panel.appendChild(yt);
-            }
-        });
-        rightPanel.appendChild(panel);
+    if (typeof window.showClassroomTutorial === 'function') {
+        window.showClassroomTutorial({ target: tutorialPanel });
     }
-
-    features.forEach((feature, index) => {
-        const item = document.createElement("div");
-        item.className = "tutorial-feature-item";
-        if (index === 0) item.classList.add("active");
-
-        const image = document.createElement("img");
-        image.className = "tutorial-feature-preview";
-        image.alt = `${feature.title} preview`;
-        image.src = getThumbnailUrl(feature);
-        item.appendChild(image);
-
-        const label = document.createElement("span");
-        label.className = "tutorial-feature-label";
-        label.textContent = feature.title;
-        item.appendChild(label);
-
-        item.addEventListener("click", () => selectFeature(index));
-
-        guidemenu.appendChild(item);
-    });
-
-    const rail = document.createElement("div");
-    rail.className = "tutorial-navigation";
-    const previousButton = document.createElement("button");
-    previousButton.type = "button";
-    previousButton.className = "tutorial-navigation-button tutorial-navigation-previous";
-    previousButton.textContent = "â€¹";
-    previousButton.setAttribute("aria-label", "Previous tutorial");
-    const nextButton = document.createElement("button");
-    nextButton.type = "button";
-    nextButton.className = "tutorial-navigation-button tutorial-navigation-next";
-    nextButton.textContent = "â€º";
-    nextButton.setAttribute("aria-label", "Next tutorial");
-    rail.append(previousButton, guidemenu, nextButton);
-
-    // Content panel (only one feature at a time)
-    const rightPanel = document.createElement("div");
-    rightPanel.className = "tutorial-content";
-    function selectFeature(index) {
-        if (!features.length) return;
-        const selectedIndex = Math.max(0, Math.min(index, features.length - 1));
-        guidemenu.querySelectorAll(".tutorial-feature-item").forEach((item, itemIndex) => {
-            item.classList.toggle("active", itemIndex === selectedIndex);
-        });
-        currentFeature = selectedIndex;
-        renderFeatureContent(features[selectedIndex]);
-        updateCarousel();
-    }
-    function updateCarousel() {
-        previousButton.disabled = currentFeature === 0;
-        nextButton.disabled = currentFeature === features.length - 1;
-        guidemenu.querySelectorAll(".tutorial-feature-item").forEach((item, index) => {
-            const distance = index - currentFeature;
-            item.style.setProperty("--carousel-distance", distance);
-            item.dataset.carouselDistance = distance;
-            item.classList.toggle("active", distance === 0);
-        });
-    }
-    const themeObserver = new MutationObserver(() => {
-        guidemenu.querySelectorAll(".tutorial-feature-preview").forEach((image, index) => {
-            image.src = getThumbnailUrl(features[index]);
-        });
-    });
-    themeObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
-    previousButton.addEventListener("click", () => selectFeature(currentFeature - 1));
-    nextButton.addEventListener("click", () => selectFeature(currentFeature + 1));
-    let currentFeature = 0;
-    // Render the first feature by default
-    if (features.length > 0) {
-        renderFeatureContent(features[0]);
-        updateCarousel();
-    } else {
-        const emptyState = document.createElement('p');
-        emptyState.className = 'tutorial-feature-text';
-        emptyState.textContent = 'No tutorial content available.';
-        rightPanel.appendChild(emptyState);
-    }
-
-    container.appendChild(rightPanel);
-    container.appendChild(rail);
-    modal.appendChild(container);
-    tutorialContainer.appendChild(modal);
-    tutorialPanel.appendChild(tutorialContainer);
 
   // --- Customisation Panel ---
   const newPanel = document.createElement('div');
@@ -487,7 +481,7 @@ function insertCustomSettingsPanel() {
     const tabPanes = {};
     const tabButtons = {};
 
-    ['Tutorial', 'Sidebar', 'Background', 'Layout'].forEach((name, index) => {
+    ['Guide', 'Sidebar', 'Background', 'Other'].forEach((name, index) => {
         const slug = name.toLowerCase();
         const button = document.createElement('button');
         button.type = 'button';
@@ -526,11 +520,11 @@ function insertCustomSettingsPanel() {
         button.addEventListener('click', () => selectSettingsTab(slug));
     });
 
-    selectSettingsTab('tutorial');
+    selectSettingsTab('guide');
 
     newPanel.appendChild(tabs);
     newPanel.appendChild(tabContent);
-    tabPanes.tutorial.appendChild(tutorialPanel);
+    tabPanes.guide.appendChild(tutorialPanel);
 
     const toggleTodoBtn = document.createElement('button');
     toggleTodoBtn.className = 'setting-toggle-btn sidebar-pill-toggle-btn';
@@ -585,14 +579,14 @@ function insertCustomSettingsPanel() {
   profilePanel.insertAdjacentElement('afterend', newPanel);
 
   // Support aria-labels in multiple languages
-    setupToggleButton('#toggle-todo-btn', '[aria-label="To-do"], [aria-label="To do"], [aria-label="Por hacer"], [aria-label="Ã€ faire"], [aria-label="Aufgaben"], [aria-label="A fazer"], [aria-label="Da fare"], [aria-label="Te doen"], [aria-label="Ð—Ð°Ð´Ð°Ñ‡Ð¸"], [aria-label="å¾…åš"], [aria-label="å¾…åŸ·è¡Œ"], [aria-label="ã‚„ã‚‹ã“ã¨ãƒªã‚¹ãƒˆ"], [aria-label="í•  ì¼"], [href*="/todo"], [data-href*="/todo"]', 'hideTodo');
-  setupToggleButton('#toggle-calendar-btn', '[aria-label="Calendar"], [aria-label="Calendario"], [aria-label="Calendrier"], [aria-label="Kalender"], [aria-label="CalendÃ¡rio"], [aria-label="Calendario"], [aria-label="Agenda"], [aria-label="ÐšÐ°Ð»ÐµÐ½Ð´Ð°Ñ€ÑŒ"], [aria-label="æ—¥åŽ†"], [aria-label="æ—¥æ›†"], [aria-label="ã‚«ãƒ¬ãƒ³ãƒ€ãƒ¼"], [aria-label="ì¼ì •"]', 'hideCalendar', 'calendar-hidden');
+    setupToggleButton('#toggle-todo-btn', '[aria-label="To-do"], [aria-label="To do"], [aria-label="Por hacer"], [aria-label="À faire"], [aria-label="Aufgaben"], [aria-label="A fazer"], [aria-label="Da fare"], [aria-label="Te doen"], [aria-label="Задачи"], [aria-label="待做"], [aria-label="待執行"], [aria-label="やることリスト"], [aria-label="할 일"], [href*="/todo"], [data-href*="/todo"]', 'hideTodo');
+  setupToggleButton('#toggle-calendar-btn', '[aria-label="Calendar"], [aria-label="Calendario"], [aria-label="Calendrier"], [aria-label="Kalender"], [aria-label="Calendário"], [aria-label="Calendario"], [aria-label="Agenda"], [aria-label="Календарь"], [aria-label="日历"], [aria-label="日曆"], [aria-label="カレンダー"], [aria-label="일정"]', 'hideCalendar', 'calendar-hidden');
   setupToggleButton('#toggle-gemini-btn', '[aria-label="Gemini"], a[href="/u/0/ai"], a[href*="/ai"]', 'hideGemini');
 
   const panelRoot = document.querySelector('#my-extension-settings-panel');
-  const tutorialBase = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL)
-      ? chrome.runtime.getURL('Tutorial/')
-      : 'chrome-extension://__MSG_@@extension_id__/Tutorial/';
+    const settingsImagesBase = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL)
+        ? chrome.runtime.getURL('Images/Settings/')
+        : 'chrome-extension://__MSG_@@extension_id__/Images/Settings/';
 
   if (panelRoot) {
   (function setupDecorationSection() {
@@ -705,8 +699,8 @@ function insertCustomSettingsPanel() {
       };
 
       const base = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL)
-          ? chrome.runtime.getURL('Decoration/')
-          : 'chrome-extension://__MSG_@@extension_id__/Decoration/';
+          ? chrome.runtime.getURL('Images/Decoration/')
+          : 'chrome-extension://__MSG_@@extension_id__/Images/Decoration/';
 
       const syncDecorationInvertUI = (filename) => {
           const isCustom = filename === '__CUSTOM__';
@@ -771,16 +765,16 @@ function insertCustomSettingsPanel() {
                     item.dataset.decorationUrl = `url("${base}${file}")`;
                     item.textContent = file.replace(/[-_]/g,' ').replace(/\.png$/i,'');
                     item.title = file.replace(/[-_]/g,' ').replace(/\.png$/i,'');
-
+                    
                     const loadDecorationImage = () => {
                         if (!item.style.getPropertyValue('--decoration-url')) {
                             item.style.setProperty('--decoration-url', item.dataset.decorationUrl);
                         }
                     };
                     item.addEventListener('mouseenter', loadDecorationImage);
-
+                    
                     item.addEventListener('click', async () => {
-                        try {
+                        try { 
                             await applyDecoration(file);
                         } catch(_) {}
                         grid.querySelectorAll('.decoration-item').forEach(it => it.classList.remove('selected'));
@@ -799,23 +793,23 @@ function insertCustomSettingsPanel() {
                 customBtn.type = 'button';
                 customBtn.textContent = '+';
                 customBtn.title = 'Add custom decoration';
-
+                
                 const hiddenFileInput = document.createElement('input');
                 hiddenFileInput.type = 'file';
                 hiddenFileInput.accept = 'image/jpeg,image/png,image/gif,image/webp,.jpg,.jpeg,.png,.gif,.webp';
                 hiddenFileInput.style.display = 'none';
                 document.body.appendChild(hiddenFileInput);
-
+                
                 hiddenFileInput.addEventListener('change', async (e) => {
                     const file = e.target.files[0];
                     if (!file) return;
-
+                    
                     // Check file size (limit to 5MB)
                     if (file.size > 5 * 1024 * 1024) {
                         alert('File size must be less than 5MB');
                         return;
                     }
-
+                    
                     const reader = new FileReader();
                     reader.onload = async (event) => {
                         const dataUrl = event.target.result;
@@ -832,15 +826,15 @@ function insertCustomSettingsPanel() {
                         } catch(_) {}
                     };
                     reader.readAsDataURL(file);
-
+                    
                     // Reset input
                     hiddenFileInput.value = '';
                 });
-
+                
                 customBtn.addEventListener('click', () => {
                     hiddenFileInput.click();
                 });
-
+                
                 grid.appendChild(customBtn);
 
                 // Restore previously selected decoration (including custom)
@@ -860,7 +854,7 @@ function insertCustomSettingsPanel() {
 
                     // Clear any previous selection
                     grid.querySelectorAll('.decoration-item').forEach(it => it.classList.remove('selected'));
-
+                    
                     // Apply the saved decoration
                     if (saved === '__CUSTOM__') {
                         // Custom decoration
@@ -869,7 +863,7 @@ function insertCustomSettingsPanel() {
                                 resolve(data['decoration:custom']);
                             });
                         });
-
+                        
                         if (customData) {
                             customBtn.classList.add('selected');
                             await applyDecorationFilename('__CUSTOM__', { persist: false });
@@ -897,6 +891,7 @@ function insertCustomSettingsPanel() {
                 })();
 
             } catch (e) {
+                console.error('loadDecorationList error:', e, 'listUrl=', listUrl);
                 grid.innerHTML = '<div style="color:var(--text-color, #666)">No decorations found.</div>';
             }
         })();
@@ -916,7 +911,7 @@ function insertCustomSettingsPanel() {
             frame.style.cssText = 'width:100%;height:90px;border-radius:10px;corner-shape:squircle;overflow:hidden;display:block;flex-shrink:0;';
             const img = document.createElement('img');
             const isDark = document.body.classList.contains('dark-mode');
-            img.src = tutorialBase + (isDark ? darkImgFile : lightImgFile);
+            img.src = settingsImagesBase + (isDark ? darkImgFile : lightImgFile);
             img.alt = label;
             img.style.cssText = 'width:140px;height:90px;object-fit:cover;object-position:top center;display:block;';
             img.dataset.lightImg = lightImgFile;
@@ -930,8 +925,8 @@ function insertCustomSettingsPanel() {
             return outer;
         };
 
-        const classicOpt = makeOption('classic-option', 'classicsidebar.png', 'darkclassicsidebar.png', 'Docked');
-        const floatingOpt = makeOption('floating-option', 'floatingsidebar.png', 'darkfloatingsidebar.png', 'Floating');
+        const classicOpt = makeOption('classic-option', 'classicsidebar.jpeg', 'darkclassicsidebar.jpeg', 'Docked');
+        const floatingOpt = makeOption('floating-option', 'floatingsidebar.jpeg', 'darkfloatingsidebar.jpeg', 'Floating');
         chooser.appendChild(classicOpt);
         chooser.appendChild(floatingOpt);
 
@@ -967,7 +962,7 @@ function insertCustomSettingsPanel() {
     const minusBtn = document.createElement('button');
     minusBtn.type = 'button';
     minusBtn.className = 'mgc-scale-btn mgc-scale-minus';
-    minusBtn.textContent = 'âˆ’';
+    minusBtn.textContent = '−';
     minusBtn.style.cssText = 'height:100%;border-radius:12px;cursor:pointer;transition:opacity 0.2s ease;line-height:1;font-size:20px;font-weight:700;flex:1;';
 
     const plusBtn = document.createElement('button');
@@ -1026,7 +1021,7 @@ function insertCustomSettingsPanel() {
         setSidebarSizeValue(currentSize + 1);
     });
 
-
+    
     controlsRow.appendChild(minusBtn);
     controlsRow.appendChild(plusBtn);
     sizeRow.appendChild(sizeLabel);
@@ -1043,11 +1038,11 @@ function insertCustomSettingsPanel() {
     sizeRow.appendChild(controlsRow);
 
 
-
+    
     // Update dots after they're created
     updateScaleButtons(String(initialSize));
     setSidebarSizeValue(initialSize, false);
-
+    
     // Load from sync storage in background
     reconcileSync('sidebarSize', 3, initialSize, (storedSize) => {
         const syncSize = (storedSize !== null) ? parseInt(storedSize, 10) : 3;
@@ -1118,6 +1113,62 @@ function insertCustomSettingsPanel() {
 
         layoutRow.appendChild(actionsRow);
 
+        const featureRow = document.createElement('div');
+        featureRow.className = 'layout-feature-row';
+        featureRow.style.cssText = 'display:flex;gap:12px;flex-wrap:wrap;padding:0px;';
+
+        const featureConfigs = [
+            { key: 'modernClassroom_featureTimetable', label: 'Timetable' },
+            { key: 'modernClassroom_featureSearch', label: 'Search' },
+            { key: 'modernClassroom_featureNotes', label: 'Notes' }
+        ];
+
+        featureConfigs.forEach((feature) => {
+            const card = document.createElement('div');
+            card.className = 'layout-feature-card';
+            card.style.cssText = 'flex:1 1 150px;min-width:150px;display:flex;flex-direction:column;gap:8px;box-sizing:border-box;';
+
+            const title = document.createElement('div');
+            title.textContent = feature.label;
+            title.style.cssText = 'font-size:13px;font-weight:600;';
+
+            const toggle = document.createElement('button');
+            toggle.type = 'button';
+            toggle.className = 'setting-toggle-btn layout-feature-toggle';
+            toggle.style.cssText = 'width:100%;padding:10px 12px;border-radius:5px;font-size:13px;font-weight:600;';
+            toggle.setAttribute('aria-label', `Toggle ${feature.label}`);
+
+            const updateFeatureAppearance = (enabled) => {
+                try {
+                    const isDark = document.body.classList.contains('dark-mode');
+                    card.style.opacity = enabled ? '1' : '0.7';
+                    card.style.borderColor = enabled
+                } catch (_) {}
+                toggle.classList.toggle('active', enabled);
+                toggle.dataset.enabled = String(enabled);
+                toggle.textContent = enabled ? 'On' : 'Off';
+                toggle.setAttribute('aria-pressed', String(enabled));
+            };
+
+            toggle.addEventListener('click', () => {
+                const enabled = toggle.dataset.enabled !== 'true';
+                writePref(feature.key, enabled);
+                updateFeatureAppearance(enabled);
+                window.setTimeout(() => {
+                    try { window.location.reload(); } catch (_) {}
+                }, 80);
+            });
+
+            card.appendChild(title);
+            card.appendChild(toggle);
+            featureRow.appendChild(card);
+
+            const initialValue = readLocalRaw(feature.key);
+            updateFeatureAppearance(initialValue === null ? true : initialValue !== 'false');
+        });
+
+        layoutRow.appendChild(featureRow);
+
         function updatePreviewAppearance(mode) {
             try {
                 // Keep preview sizes reflecting their types
@@ -1169,22 +1220,18 @@ function insertCustomSettingsPanel() {
         standardBtn.addEventListener('click', () => applyLayoutMode('standard'));
         fillBtn.addEventListener('click', () => applyLayoutMode('fill'));
 
-        // Initialize state from localStorage first
         let stored = readLocalRaw('layoutMode') || 'standard';
         let currentLayoutMode = stored;
         applyLayoutMode(stored, false);
-
-        // Then load from sync storage in background
+        
         reconcileSync('layoutMode', 'standard', stored, (syncStored) => {
             currentLayoutMode = syncStored;
             applyLayoutMode(syncStored, false);
         });
 
-        // Keep preview in sync with dark mode changes
         onBodyClassChange(() => updatePreviewAppearance(currentLayoutMode));
 
-        // Place the layout controls in their own tab.
-        tabPanes.layout.appendChild(layoutRow);
+        tabPanes.other.appendChild(layoutRow);
     })();
 
                 const sidebarSection = document.createElement('div');
@@ -1258,7 +1305,7 @@ function insertCustomSettingsPanel() {
                     frame.style.cssText = 'width:100%;height:90px;border-radius:10px;corner-shape:squircle;overflow:hidden;display:block;flex-shrink:0;';
                     const img = document.createElement('img');
                     const isDark = document.body.classList.contains('dark-mode');
-                    img.src = tutorialBase + (isDark ? darkImgFile : lightImgFile);
+                    img.src = settingsImagesBase + (isDark ? darkImgFile : lightImgFile);
                     img.alt = label;
                     img.style.cssText = 'width:140px;height:90px;object-fit:cover;object-position:top center;display:block;';
                     img.dataset.lightImg = lightImgFile;
@@ -1272,8 +1319,8 @@ function insertCustomSettingsPanel() {
                     return outer;
                 }
 
-                const showOneOpt = makeHoverExpandOption('sidebar-show-one-option', 'showone.png', 'showone dark.png', 'Expand Class');
-                const showAllOpt = makeHoverExpandOption('sidebar-show-all-option', 'showall.png', 'showall dark.png', 'Expand Sidebar');
+                const showOneOpt = makeHoverExpandOption('sidebar-show-one-option', 'showone.jpeg', 'showone dark.jpeg', 'Expand Class');
+                const showAllOpt = makeHoverExpandOption('sidebar-show-all-option', 'showall.jpeg', 'showall dark.jpeg', 'Expand Sidebar');
                 const classicImg = classicOpt.querySelector('img');
                 const floatingImg = floatingOpt.querySelector('img');
                 const showOneImg = showOneOpt.querySelector('img');
@@ -1306,7 +1353,7 @@ function insertCustomSettingsPanel() {
                 sliderInput.min = '-168';
                 sliderInput.max = '612';
                 sliderInput.step = '20';
-
+                
                 // Load from localStorage immediately
                 let initialHeight = readLocalNumber('sidebarHeightAdjust', 420);
                 sliderInput.value = initialHeight;
@@ -1321,6 +1368,8 @@ function insertCustomSettingsPanel() {
                     const numValue = parseInt(value, 10);
                     if (!Number.isFinite(numValue)) return;
                     initialHeight = numValue;
+                    const promptSlider = document.querySelector('.mc-sidebar-height-prompt-slider');
+                    if (promptSlider) promptSlider.value = String(numValue);
                     if (persist) {
                         writePref('sidebarHeightAdjust', numValue);
                     }
@@ -1378,12 +1427,19 @@ function insertCustomSettingsPanel() {
                 showAllOpt.addEventListener('click', () => applySidebarHoverExpandMode(true));
 
                 let initialIconMode = readLocalRaw('sidebarUseNewIcons');
-                initialIconMode = initialIconMode === null ? true : initialIconMode !== 'false';
+                const parseIconMode = (value) => {
+                    if (value === null || typeof value === 'undefined') return true;
+                    if (typeof value === 'string') return value !== 'false';
+                    return value !== false;
+                };
+                initialIconMode = parseIconMode(initialIconMode);
                 applySidebarIconMode(initialIconMode, false);
 
-                reconcileSync('sidebarUseNewIcons', true, initialIconMode, (syncValue) => {
-                    applySidebarIconMode(!!syncValue, false);
-                });
+                if (typeof storageGet === 'function') {
+                    storageGet('sidebarUseNewIcons', true).then((storedValue) => {
+                        applySidebarIconMode(parseIconMode(storedValue), false);
+                    }).catch(() => {});
+                }
 
                 let initialHoverExpand = readLocalBool('sidebarExpandAllHover', false);
                 applySidebarHoverExpandMode(initialHoverExpand, false);
@@ -1405,7 +1461,7 @@ function insertCustomSettingsPanel() {
 
                 const endInteraction = () => {
                     sidebarForceVisible = false;
-
+                    
                     // Re-evaluate sidebar visibility based on screen size
                     const currentSidebar = document.querySelector('.STek2d');
                     if (currentSidebar) {
@@ -1416,7 +1472,7 @@ function insertCustomSettingsPanel() {
                             if (sidebarHotspot) sidebarHotspot.classList.remove('sidebar-hide-indicator');
                         }
                     }
-
+                    
                     const enrolledEls = document.querySelectorAll('.STek2d div[role="group"]');
                     enrolledEls.forEach(el => el.style.setProperty('height', 'auto', 'important'));
                 };
@@ -1429,6 +1485,7 @@ function insertCustomSettingsPanel() {
                     previewScheduled = true;
                     const run = () => {
                         previewScheduled = false;
+                        if (!sidebarForceVisible) return;
                         const enrolledEls = document.querySelectorAll('.STek2d div[role="group"]');
                         if (!enrolledEls.length) return;
                         const adjustedValue = 624 - pendingPreviewValue;
@@ -1438,6 +1495,16 @@ function insertCustomSettingsPanel() {
                         enrolledEls.forEach(el => el.style.setProperty('height', calcExpression, 'important'));
                     };
                     (typeof requestAnimationFrame === 'function' ? requestAnimationFrame : (cb) => setTimeout(cb, 16))(run);
+                };
+
+                window.__mgcApplySidebarHeightAdjust = (value, persist = true, userInteraction = false) => {
+                    const numValue = parseInt(value, 10);
+                    if (!Number.isFinite(numValue)) return;
+                    if (userInteraction && !persist && !sidebarForceVisible) startInteraction();
+                    sliderInput.value = String(numValue);
+                    applyEnrolledHeightAdjustment(numValue, persist);
+                    renderDragPreview(numValue);
+                    if (userInteraction && persist) endInteraction();
                 };
 
                 sliderInput.addEventListener('input', (e) => {
@@ -1453,7 +1520,7 @@ function insertCustomSettingsPanel() {
                     applyEnrolledHeightAdjustment(e.target.value, true);
                     endInteraction();
                 });
-
+                
                 sliderInput.addEventListener('mouseup', endInteraction);
                 sliderInput.addEventListener('mouseleave', endInteraction);
                 sliderInput.addEventListener('touchend', endInteraction, { passive: true });
@@ -1465,7 +1532,7 @@ function insertCustomSettingsPanel() {
 
                 applyInitial(initialHeight);
                 setTimeout(() => applyInitial(initialHeight), 220);
-
+                
                 // Load from sync storage in background
                 reconcileSync('sidebarHeightAdjust', 420, initialHeight, (syncHeight) => {
                     initialHeight = parseInt(syncHeight, 10);
@@ -1510,15 +1577,15 @@ function insertCustomSettingsPanel() {
                 // Bind archived toggle and apply saved state when element appears
                 // This handles both settings page and other pages where it may load dynamically
                 // Multilingual selector for archived classes (supports 12+ languages)
-                const archivedClassesSelector = '[aria-label="Archived classes"], [aria-label="Archived Classes"], [aria-label="Clases archivadas"], [aria-label="Classes archivÃ©es"], [aria-label="Archivierte Kurse"], [aria-label="Aulas arquivadas"], [aria-label="Classi archiviate"], [aria-label="Gearchiveerde klassen"], [aria-label="ÐÑ€Ñ…Ð¸Ð²Ð½Ñ‹Ðµ ÐºÐ»Ð°ÑÑÑ‹"], [aria-label="å·²å½’æ¡£çš„è¯¾ç¨‹"], [aria-label="å·²å°å­˜çš„èª²ç¨‹"], [aria-label="ã‚¢ãƒ¼ã‚«ã‚¤ãƒ–ã•ã‚ŒãŸã‚¯ãƒ©ã‚¹"], [aria-label="ë³´ê´€ëœ í´ëž˜ìŠ¤"]';
+                const archivedClassesSelector = '[aria-label="Archived classes"], [aria-label="Archived Classes"], [aria-label="Clases archivadas"], [aria-label="Classes archivées"], [aria-label="Archivierte Kurse"], [aria-label="Aulas arquivadas"], [aria-label="Classi archiviate"], [aria-label="Gearchiveerde klassen"], [aria-label="Архивные классы"], [aria-label="已归档的课程"], [aria-label="已封存的課程"], [aria-label="アーカイブされたクラス"], [aria-label="보관된 클래스"]';
                 const geminiSelector = '[aria-label="Gemini"], a[href="/u/0/ai"], a[href*="/ai"]';
-
+                
                 waitForElement(archivedClassesSelector, () => {
                     const btn = document.querySelector('#toggle-archived-btn');
                     const target = document.querySelector(archivedClassesSelector);
                     if (!target) return;
-
-                    // Element exists â€” apply saved hidden state and set up listener
+                    
+                    // Element exists — apply saved hidden state and set up listener
                     const hidden = readLocalBool('hideArchived', false);
 
                     if (hidden) {
@@ -1556,23 +1623,23 @@ function insertCustomSettingsPanel() {
                     }
                 });
 
-
+                
                 function updateSidebarImages() {
                     const isDark = document.body.classList.contains('dark-mode');
                     if (classicImg) {
-                        classicImg.src = tutorialBase + (isDark ? classicImg.dataset.darkImg : classicImg.dataset.lightImg);
+                        classicImg.src = settingsImagesBase + (isDark ? classicImg.dataset.darkImg : classicImg.dataset.lightImg);
                     }
                     if (floatingImg) {
-                        floatingImg.src = tutorialBase + (isDark ? floatingImg.dataset.darkImg : floatingImg.dataset.lightImg);
+                        floatingImg.src = settingsImagesBase + (isDark ? floatingImg.dataset.darkImg : floatingImg.dataset.lightImg);
                     }
                     if (showOneImg) {
-                        showOneImg.src = tutorialBase + (isDark ? showOneImg.dataset.darkImg : showOneImg.dataset.lightImg);
+                        showOneImg.src = settingsImagesBase + (isDark ? showOneImg.dataset.darkImg : showOneImg.dataset.lightImg);
                     }
                     if (showAllImg) {
-                        showAllImg.src = tutorialBase + (isDark ? showAllImg.dataset.darkImg : showAllImg.dataset.lightImg);
+                        showAllImg.src = settingsImagesBase + (isDark ? showAllImg.dataset.darkImg : showAllImg.dataset.lightImg);
                     }
                 }
-
+                
                 updateSidebarImages();
 
                 onBodyClassChange(() => {
@@ -1580,8 +1647,7 @@ function insertCustomSettingsPanel() {
                 });
 
                 feedbackBtn.style.marginLeft = '0px';
-
-                // ---- LIQUID GLASS TOGGLE ----
+                  // ---- LIQUID GLASS TOGGLE ----
                 const glassRow = document.createElement('div');
                 glassRow.className = 'layout-row';
                 glassRow.style.cssText = 'display:flex;flex-direction:column;gap:8px;margin-top:12px;';
@@ -1771,6 +1837,8 @@ function insertCustomSettingsPanel() {
         fontObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
         // END FONT PICKER
 
+      
+
         function setSidebarMode(mode, persist = true) {
             const isClassic = mode === 'classic';
             try {
@@ -1793,7 +1861,7 @@ function insertCustomSettingsPanel() {
         // Load from localStorage immediately
         let storedClassic = readLocalBool('classicSidebar', false);
         setSidebarMode(storedClassic ? 'classic' : 'floating', false);
-
+        
         // Then load from sync storage in background
         reconcileSync('classicSidebar', false, storedClassic, (syncClassic) => {
             setSidebarMode(syncClassic ? 'classic' : 'floating', false);
@@ -1802,3 +1870,6 @@ function insertCustomSettingsPanel() {
     }
     return true;
 }
+
+
+              

@@ -200,6 +200,12 @@
   let useNewSidebarIcons = true;
   let replaceScheduled = false;
 
+  function parseSidebarIconMode(value, fallback = true) {
+    if (value === null || typeof value === 'undefined') return fallback;
+    if (typeof value === 'string') return value !== 'false';
+    return value !== false;
+  }
+
   function setIconMode(enabled) {
     useNewSidebarIcons = !!enabled;
     try {
@@ -340,15 +346,14 @@
   // Load saved icon mode from localStorage immediately, then sync storage in background.
   try {
     const raw = localStorage.getItem(SIDEBAR_NEW_ICONS_KEY);
-    if (raw !== null) setIconMode(raw !== 'false');
-    else setIconMode(true);
+    setIconMode(parseSidebarIconMode(raw));
   } catch (_) {
     setIconMode(true);
   }
 
   if (typeof storageGet === 'function') {
     storageGet(SIDEBAR_NEW_ICONS_KEY, true).then(syncValue => {
-      setIconMode(!!syncValue);
+      setIconMode(parseSidebarIconMode(syncValue));
       scheduleReplaceMatchingIcons();
     }).catch(() => {});
   }
@@ -529,7 +534,7 @@ function applySavedPreferences(prefSource) {
   let geminiHidden = false;
   let sidebarSize = null;
   let sidebarHeightAdjust = 420;
-
+  
   if (prefSource) {
     todoHidden = !!prefSource.hideTodo;
     calHidden = !!prefSource.hideCalendar;
@@ -569,7 +574,7 @@ function applySavedPreferences(prefSource) {
   todos.forEach(todo => { todo.style.display = todoHidden ? 'none' : ''; });
   if (calendar) calendar.style.display = calHidden ? 'none' : '';
   if (gemini) gemini.style.display = geminiHidden ? 'none' : '';
-
+  
   try {
     if (calHidden) {
       document.body.classList.add('calendar-hidden');
@@ -592,7 +597,7 @@ function applySavedPreferences(prefSource) {
       if (document.body) document.body.style.setProperty('--enrolled-height-adjust', adjustedValue + 'px');
     } catch (_) {}
   } catch (_) {}
-
+  
 }
 
 function loadSyncPreferencesOnce() {
@@ -697,3 +702,5 @@ if (document.readyState === 'loading') {
 } else {
   initSidebarControls();
 }
+
+

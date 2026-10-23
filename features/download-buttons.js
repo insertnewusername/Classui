@@ -62,6 +62,23 @@
         });
     }
 
+    let rescanScheduled = false;
+    function scheduleDownloadRescan() {
+        if (rescanScheduled) return;
+        rescanScheduled = true;
+
+        const run = () => {
+            rescanScheduled = false;
+            try { addDownloadButtons(); } catch (e) {}
+        };
+
+        if (typeof requestAnimationFrame === 'function') {
+            requestAnimationFrame(run);
+        } else {
+            setTimeout(run, 0);
+        }
+    }
+
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', addDownloadButtons);
     } else {
@@ -104,28 +121,19 @@
         console.warn('Light attachment observer failed:', e);
     }
 
-    // Periodic fallback: some Classroom re-renders replace anchors repeatedly
-    // which can remove our appended buttons. Run a lightweight rescan every
-    // second to ensure buttons are present. This is intentionally simple and
-    // uses the existing `addDownloadButtons()` guard to avoid duplicates.
+    // Observe removals and trigger a quick rescan when our button is removed
+    // from the DOM so we reattach shortly after without polling the whole page.
     try {
-        const RESCAN_MS = 1000;
-        const rescanHandle = setInterval(() => {
-            try { addDownloadButtons(); } catch (e) {}
-        }, RESCAN_MS);
-
-        // Also observe removals and trigger a quick rescan when our button is
-        // removed from the DOM so we reattach shortly after.
         const removalObserver = new MutationObserver((mutations) => {
             for (const m of mutations) {
                 for (const node of m.removedNodes) {
                     if (!(node instanceof Element)) continue;
                     if (node.classList && node.classList.contains('downloadBtn')) {
-                        setTimeout(addDownloadButtons, 50);
+                        scheduleDownloadRescan();
                         continue;
                     }
                     if (node.querySelector && node.querySelector('.downloadBtn')) {
-                        setTimeout(addDownloadButtons, 50);
+                        scheduleDownloadRescan();
                     }
                 }
             }
