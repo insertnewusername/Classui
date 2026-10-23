@@ -13305,7 +13305,7 @@ body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .eVOdue i {
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme {
     position: relative !important;
     border-radius: 16px !important;
-    overflow: hidden !important;
+    overflow: visible !important;
     background: rgba(255, 255, 255, 0.35) !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06),
                 inset 1px 1px 0 rgba(255, 255, 255, 0.75),
@@ -13314,22 +13314,29 @@ body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme {
     transition: box-shadow 0.2s ease !important;
     margin-bottom: 12px !important;
 }
+
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme::before {
     content: '' !important;
     position: absolute !important;
     inset: 0 !important;
-    border-radius: inherit !important;
+    border-radius: 16px !important;
+    overflow: hidden !important;
     z-index: 0 !important;
     pointer-events: none !important;
     backdrop-filter: blur(4px) !important;
     -webkit-backdrop-filter: blur(4px) !important;
+}
+
+body.cui-glass-enabled.glass-filter-ready .ovsVve.PM0jOb.jlxRme::before {
     filter: url(#glass-distortion) !important;
 }
+
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme::after {
     content: '' !important;
     position: absolute !important;
     inset: 0 !important;
-    border-radius: inherit !important;
+    border-radius: 16px !important;
+    overflow: hidden !important;
     pointer-events: none !important;
     z-index: 2 !important;
     background: radial-gradient(
@@ -13340,12 +13347,24 @@ body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme::after {
     opacity: 0 !important;
     transition: opacity 0.3s ease !important;
 }
+
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme:hover::after {
     opacity: 1 !important;
 }
+
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme > * {
     position: relative !important;
     z-index: 3 !important;
+}
+
+/* Force the wide-layout Due soon block visible when its inner content is populated */
+body.cui-glass-enabled .T9UoTd > .dxDXsf:has([data-container-type="2"] [data-expanded="true"]) {
+    display: block !important;
+}
+
+/* Also un-hide the wide cards themselves if Classroom left them collapsed */
+body.cui-glass-enabled .T9UoTd > .dxDXsf:has([data-container-type="2"] [data-expanded="true"]) .MYIZ3e.JUr7jb {
+    display: list-item !important;
 }
 
 /* ---- Dark mode ---- */
@@ -13364,71 +13383,316 @@ body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme::after {
     ) !important;
 }
 
-/* Due soon assign cards*/
+/* Due soon list — read as one continuous block inside the outer glass container. */
+
+/* Header indent so "Due soon" isn't flush-left */
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme > .gmNu1d.NT3Ibe.SYd3U.kZHvee {
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+    padding-top: 10px !important;
+    padding-bottom: 6px !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+}
+
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme > .gmNu1d.NT3Ibe.SYd3U.kZHvee > h2.Ea4RVb {
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1.2 !important;
+}
+
+/* List container spacing */
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .sjxkNc.JQIfHf {
+    padding: 0 14px 12px 14px !important;
+}
+
+/* Wrappers and list rows: transparent */
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .FlcJk,
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .FlcJk > div,
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .DkySUc {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme li.MYIZ3e.JUr7jb,
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme li.HHKR7.JUr7jb {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none !important;
+    border-radius: 0 !important;
+}
+
+/* Subtle divider between visible wide rows */
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme li.MYIZ3e.JUr7jb + li.MYIZ3e.JUr7jb {
+    border-top: 1px solid rgba(255, 255, 255, 0.28) !important;
+    margin-top: 2px !important;
+    padding-top: 6px !important;
+}
+
+/* Inner card wrappers: transparent, no pill */
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EO16hc,
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .x4lrdf {
     position: relative !important;
-    border-radius: 12px !important;
-    overflow: hidden !important;
-    background: rgba(255, 255, 255, 0.25) !important;
-    backdrop-filter: blur(8px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(8px) saturate(180%) !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05),
-                inset 1px 1px 0 rgba(255, 255, 255, 0.5),
-                inset -1px -1px 0 rgba(255, 255, 255, 0.3) !important;
-    border: 1px solid rgba(255, 255, 255, 0.35) !important;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease !important;
-    margin: 4px 0 !important;
-    padding: 8px 12px !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    margin: 0 !important;
+    padding: 6px 4px !important;
+    transition: background 0.2s ease !important;
 }
-/* Add the distortion layer */
+
+/* Kill any lingering per-card pseudo layers */
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EO16hc::before,
-body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .x4lrdf::before {
-    content: '' !important;
-    position: absolute !important;
-    inset: 0 !important;
-    border-radius: inherit !important;
-    z-index: 0 !important;
-    pointer-events: none !important;
-    filter: url(#glass-distortion) !important;
-}
-/* Hover glow (like sidebar) */
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EO16hc::after,
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .x4lrdf::before,
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .x4lrdf::after {
-    content: '' !important;
-    position: absolute !important;
-    inset: 0 !important;
-    border-radius: inherit !important;
-    pointer-events: none !important;
-    z-index: 2 !important;
-    background: radial-gradient(
-        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-        rgba(255, 255, 255, 0.35) 0%,
-        transparent 60%
-    ) !important;
-    opacity: 0 !important;
-    transition: opacity 0.3s ease !important;
+    display: none !important;
+    content: none !important;
 }
-body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EO16hc:hover::after,
-body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .x4lrdf:hover::after {
-    opacity: 1 !important;
-}
-/* Ensure content sits above the pseudo layers */
+
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EO16hc > *,
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .x4lrdf > * {
     position: relative !important;
-    z-index: 3 !important;
-}
-/* Hover lift (like sidebar cards) */
-body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EO16hc:hover,
-body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .x4lrdf:hover {
-    transform: scale(1.015) !important;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10),
-                inset 1px 1px 0 rgba(255, 255, 255, 0.6),
-                inset -1px -1px 0 rgba(255, 255, 255, 0.4) !important;
-    background: rgba(255, 255, 255, 0.35) !important;
+    z-index: 1 !important;
 }
 
+/* Hover: gentle row tint, no lift */
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EO16hc:hover,
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .x4lrdf:hover {
+    background: rgba(255, 255, 255, 0.18) !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+/* ---- Class chip inside Due soon: strip surface only, keep label visible ---- */
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    padding: 0 4px !important;
+    min-height: 0 !important;
+    height: auto !important;
+    border-radius: 6px !important;
+    overflow: visible !important;
+}
+
+/* Flatten chip decoration without using opacity (opacity on a wrapper blanked the label) */
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe::before,
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe::after,
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe .UTNHae {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Force the visible label wrapper open (Classroom collapses it until hover) */
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe .XjoK4b {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: inline-flex !important;
+    width: auto !important;
+    max-width: none !important;
+    overflow: visible !important;
+    clip-path: none !important;
+    color: inherit !important;
+}
+
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe .mUIrbf-vQzf8d {
+    color: inherit !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: inline-block !important;
+}
+
+/* No pill on hover, no focus ring */
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe:hover,
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe:focus,
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe:focus-visible {
+    background: transparent !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Hide the static "Class" word — keep the class name from the chip */
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .QoHUr {
+    display: none !important;
+}
+
+/* ---- Dark mode ---- */
+body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .FlcJk,
+body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .FlcJk > div,
+body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .DkySUc,
+body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme li.MYIZ3e.JUr7jb,
+body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme li.HHKR7.JUr7jb,
+body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EO16hc,
+body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .x4lrdf {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme li.MYIZ3e.JUr7jb + li.MYIZ3e.JUr7jb {
+    border-top-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EO16hc:hover,
+body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .x4lrdf:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+}
+
+body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe:hover {
+    background: transparent !important;
+}
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-vQzf8d::before {
+    content: none !important;
+}
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-vQzf8d::after {
+    content: none !important;
+}
+
+/* Force the class chip text to be visible.
+   The chip host and label inherit color: transparent from somewhere — override both. */
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe {
+    color: #1f1f1f !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe .mUIrbf-vQzf8d,
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe .XjoK4b {
+    color: #1f1f1f !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+/* Kill the blue outline on the Material focus ring anchor */
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe .mUIrbf-mRLv6,
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe .mUIrbf-RLmnJb,
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe:focus-visible,
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe *:focus-visible {
+    outline: none !important;
+    outline-offset: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+/* Dark mode: chip text should be white, not black */
+body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe,
+body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe .mUIrbf-vQzf8d,
+body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe .XjoK4b {
+    color: #ffffff !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+/* Kill the blue focus ring on the class chip and everything inside it */
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe,
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe *,
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe::before,
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe::after {
+    outline: none !important;
+    outline-offset: 0 !important;
+    outline-width: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+/* Specifically the focus-anchor <a> — this is where the ring lives */
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-mRLv6,
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-RLmnJb,
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-mRLv6:focus,
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-RLmnJb:focus,
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-mRLv6:focus-visible,
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-RLmnJb:focus-visible {
+    outline: none !important;
+    outline-offset: 0 !important;
+    outline-width: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+}
+
+/* The XjoK4b content wrapper can also paint a focus ring via ::before/::after */
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .XjoK4b,
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .XjoK4b::before,
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .XjoK4b::after {
+    outline: none !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+/* "View To-do" button in the Due soon header — flatten to plain text inside the glass */
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .mUIrbf-LgbsSe.rjOIac {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    padding: 0 6px !important;
+    min-height: 0 !important;
+    height: auto !important;
+    border-radius: 6px !important;
+    color: inherit !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+/* Kill Material's state/decoration layers on the button */
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .mUIrbf-LgbsSe.rjOIac::before,
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .mUIrbf-LgbsSe.rjOIac::after,
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .mUIrbf-LgbsSe.rjOIac .UTNHae,
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .mUIrbf-LgbsSe.rjOIac .XjoK4b {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+/* Label visible */
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .mUIrbf-LgbsSe.rjOIac .mUIrbf-vQzf8d {
+    color: inherit !important;
+    -webkit-text-fill-color: currentColor !important;
+    opacity: 1 !important;
+}
+
+/* Focus-anchor — kill any ring */
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .mUIrbf-LgbsSe.rjOIac .mUIrbf-mRLv6,
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .mUIrbf-LgbsSe.rjOIac .mUIrbf-RLmnJb,
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .mUIrbf-LgbsSe.rjOIac:focus,
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .mUIrbf-LgbsSe.rjOIac:focus-visible,
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .mUIrbf-LgbsSe.rjOIac:hover {
+    background: transparent !important;
+    outline: none !important;
+    outline-offset: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+/* Optional: gentle hover tint (matches the row hover) */
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .mUIrbf-LgbsSe.rjOIac:hover {
+    background: rgba(255, 255, 255, 0.12) !important;
+}
+body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .mUIrbf-LgbsSe.rjOIac:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+}
+
+
+/* END TO DO BAR */
 /* ---- Dark mode (more frosted, subtle) ---- */
 body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EO16hc,
 body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .x4lrdf {
@@ -14948,6 +15212,3 @@ body.cui-glass-enabled .gHz6xd {
     margin-bottom: 18px !important;
 }
 
-body.cui-glass-enabled .gHz6xd + .gHz6xd {
-    margin-top: 18px !important;
-}
