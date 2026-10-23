@@ -14179,7 +14179,7 @@ body.dark-mode.cui-glass-enabled {
    MONITOR / LARGE SCREEN OVERRIDES
    Forces the sidebar to be a tall column with spacious gaps 
    ========================================================= */
-@media (min-width: 1200px) {
+@media screen and (min-width: 1700px)  {
     body.cui-glass-enabled .rknsod {
         /* Stretch to fill vertical space */
         height: fit-content!important;
@@ -14207,7 +14207,7 @@ body.dark-mode.cui-glass-enabled {
 
 
 /* Fix sidebar spacing to target individual classes and fill height on monitors */
-@media (min-width: 1200px) {
+@media screen and (min-width: 1700px)  {
     body.cui-glass-enabled .rknsod {
         height: calc(100vh - 40px) !important;
         display: block !important; /* Removes the weird giant gaps between sections */
