@@ -14026,7 +14026,7 @@ body.dark-mode.cui-glass-enabled .SZ0kZe .my-extension-image:hover {
                 inset 1px 1px 0 rgba(255, 255, 255, 0.08) !important;
 }
 
-/*Sidebar container*/
+/* Sidebar container */
 
 body.cui-glass-enabled .rknsod {
     position: relative !important;
@@ -14045,9 +14045,13 @@ body.cui-glass-enabled .rknsod {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
 
-    overflow-y: auto !important;
+    /* Hug content height instead of stretching to the viewport bottom */
+    height: fit-content !important;
+    min-height: 0 !important;
     max-height: calc(100vh - 120px) !important;
+    overflow-y: auto !important;
 }
+
 body.cui-glass-enabled .rknsod::before {
     content: '' !important;
     position: absolute !important;
@@ -14170,6 +14174,94 @@ body.dark-mode.cui-glass-enabled {
     --glass-dark-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
     --glass-dark-shadow-hover: 0 14px 40px rgba(0, 0, 0, 0.52);
 }
+
+/* =========================================================
+   MONITOR / LARGE SCREEN OVERRIDES
+   Forces the sidebar to be a tall column with spacious gaps 
+   ========================================================= */
+@media (min-width: 1200px) {
+    body.cui-glass-enabled .rknsod {
+        /* Stretch to fill vertical space */
+        height: fit-content!important;
+        min-height: calc(100vh - 1300px) !important;
+        max-height: calc(100vh - 700px) !important;
+        
+        /* Increase outer padding so the glass feels substantial */
+        padding: 18px 10px !important;
+        
+        /* Add a gap between all items */
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 30px !important;
+        
+        /* Align items to the top so they don't stretch vertically */
+        justify-content: flex-start !important;
+    }
+
+    /* Reset individual item margins since we are using the flex gap */
+    body.cui-glass-enabled .rknsod .uTwgne,
+    body.dark-mode.cui-glass-enabled .rknsod .uTwgne {
+        margin: 0 !important;
+    }
+}
+
+
+/* Fix sidebar spacing to target individual classes and fill height on monitors */
+@media (min-width: 1200px) {
+    body.cui-glass-enabled .rknsod {
+        height: calc(100vh - 40px) !important;
+        display: block !important; /* Removes the weird giant gaps between sections */
+    }
+
+    /* Target the actual lists holding the items */
+    body.cui-glass-enabled .rknsod div[role="group"],
+    body.cui-glass-enabled .rknsod .STek2d {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 30px !important; /* This applies the gap to every pill */
+        margin-bottom:15px !important;
+        height: 120% !important;
+    }
+
+    /* Reset margins so the flex gap handles the spacing */
+    body.cui-glass-enabled .rknsod .uTwgne,
+    body.dark-mode.cui-glass-enabled .rknsod .uTwgne {
+        margin: 0 !important;
+        min-height: 48px !important; /* Makes pills slightly taller */
+    }
+
+    /* Add a little internal padding to the pills */
+    body.cui-glass-enabled .rknsod .uTwgne {
+        padding-top: 10px !important;
+        padding-bottom: 10px !important;
+    }
+
+        body.cui-glass-enabled .uTwgne {
+        padding-top: 90px !important;
+
+    }
+
+
+    body.cui-glass-enabled .rknsod .uTwgne[aria-label="Home"] {
+    margin-bottom: 12px !important;
+}
+
+    /* Hide the default separators that normally sit between these items */
+    body.cui-glass-enabled .rknsod li.aqdrmf-clz4Ic {
+        display: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        height: 0 !important;
+    }
+
+    /* Add a bit of breathing room before the "Enrolled" folder heading */
+    body.cui-glass-enabled .rknsod .ug8OTc {
+        margin-top: 12px !important;
+        margin-bottom: 4px !important;
+    }
+
+}
+
 /* Classroom tabs*/
 body.cui-glass-enabled .xHPsid {
     position: relative !important;
