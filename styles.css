@@ -1,6 +1,7 @@
+
 /* LIQUID GLASS code*/
 
-/* ─── TO-DO ASSIGNMENTS ─── */
+/* to do assignments*/
 body.cui-glass-enabled [data-role="task-row"] {
     position: relative !important;
     overflow: hidden !important;
@@ -9,17 +10,21 @@ body.cui-glass-enabled [data-role="task-row"] {
     backdrop-filter: blur(8px) url(#glass-distortion) saturate(150%) !important;
     -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.95),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.6),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.9),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.55),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.10),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.12),
-        0 0 0 1px rgba(255, 255, 255, 0.35),
-        0 6px 16px rgba(0, 0, 0, 0.08) !important;
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.8),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.6),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.12),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.2),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.2),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.1),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.1),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.08) !important;
     border: none !important;
     transition: transform 0.2s ease, box-shadow 0.2s ease !important;
     margin-bottom: 8px !important;
 }
+/* Hover glow Ã¢â‚¬â€œ same as stream */
 body.cui-glass-enabled .MHxtic.JUr7jb.gmNu1d.CNpREd::after {
     content: '' !important;
     position: absolute !important;
@@ -27,50 +32,77 @@ body.cui-glass-enabled .MHxtic.JUr7jb.gmNu1d.CNpREd::after {
     border-radius: inherit !important;
     pointer-events: none !important;
     z-index: 2 !important;
-    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.3) 0%, transparent 60%) !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.3) 0%,
+        transparent 60%
+    ) !important;
     opacity: 0 !important;
     transition: opacity 0.3s ease !important;
 }
-body.cui-glass-enabled .MHxtic.JUr7jb.gmNu1d.CNpREd:hover::after { opacity: 1 !important; }
-body.cui-glass-enabled .MHxtic.JUr7jb.gmNu1d.CNpREd > * { position: relative !important; z-index: 3 !important; }
+body.cui-glass-enabled .MHxtic.JUr7jb.gmNu1d.CNpREd:hover::after {
+    opacity: 1 !important;
+}
+/* Content sits above glass */
+body.cui-glass-enabled .MHxtic.JUr7jb.gmNu1d.CNpREd > * {
+    position: relative !important;
+    z-index: 3 !important;
+}
+/* Hover lift Ã¢â‚¬â€œ same as stream */
 body.cui-glass-enabled .MHxtic.JUr7jb.gmNu1d.CNpREd:hover {
     transform: scale(1.015) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 1),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.7),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 1),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.65),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.08),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.10),
-        0 0 0 1px rgba(255, 255, 255, 0.45),
-        0 8px 24px rgba(0, 0, 0, 0.10) !important;
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.9),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.7),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.08),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.15),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.15),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.08),
+        0px 2px 8px 0px rgba(0, 0, 0, 0.12),
+        0px 8px 24px 0px rgba(0, 0, 0, 0.1) !important;
 }
+
+/* ---- Dark mode for ToÃ¢â‚¬â€˜Do assignments ---- */
 body.dark-mode.cui-glass-enabled .MHxtic.JUr7jb.gmNu1d.CNpREd {
     background: var(--glass-dark-surface) !important;
     border: 1px solid var(--glass-dark-border) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.18),
+        inset 0 0 0 1px var(--glass-dark-border),
         inset 2px 3px 0 -2px var(--glass-dark-inner),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.06),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.30),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.28),
-        0 0 0 1px rgba(255, 255, 255, 0.06),
-        0 6px 16px rgba(0, 0, 0, 0.26) !important;
+        inset -2px -2px 0 -2px var(--glass-dark-inner-soft),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.04),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.28),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.34),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.34),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.2),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.32),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.26) !important;
 }
 body.dark-mode.cui-glass-enabled .MHxtic.JUr7jb.gmNu1d.CNpREd:hover {
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.24),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.18),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.12),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.08),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.36),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.34),
-        0 0 0 1px rgba(255, 255, 255, 0.10),
-        0 8px 24px rgba(0, 0, 0, 0.32) !important;
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.08),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.05),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.18),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.22),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.22),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.14),
+        0px 2px 8px 0px rgba(0, 0, 0, 0.38),
+        0px 8px 24px 0px rgba(0, 0, 0, 0.32) !important;
 }
 body.dark-mode.cui-glass-enabled .MHxtic.JUr7jb.gmNu1d.CNpREd::after {
-    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.08) 0%, transparent 60%) !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.08) 0%,
+        transparent 60%
+    ) !important;
 }
 
-/* ─── YOUR WORK PANEL ─── */
+
+/* your work panel*/
 body.cui-glass-enabled .K2hR3c.BiaLW .AJFihd.T25sKc.jlxRme {
     position: relative !important;
     overflow: hidden !important;
@@ -79,17 +111,21 @@ body.cui-glass-enabled .K2hR3c.BiaLW .AJFihd.T25sKc.jlxRme {
     backdrop-filter: blur(8px) url(#glass-distortion) saturate(150%) !important;
     -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.95),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.6),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.9),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.55),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.10),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.12),
-        0 0 0 1px rgba(255, 255, 255, 0.35),
-        0 6px 16px rgba(0, 0, 0, 0.08) !important;
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.8),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.6),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.12),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.2),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.2),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.1),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.1),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.08) !important;
     border: none !important;
     transition: transform 0.2s ease, box-shadow 0.2s ease !important;
     margin-bottom: 12px !important;
 }
+/* Hover glow */
 body.cui-glass-enabled .K2hR3c.BiaLW .AJFihd.T25sKc.jlxRme::after {
     content: '' !important;
     position: absolute !important;
@@ -97,50 +133,77 @@ body.cui-glass-enabled .K2hR3c.BiaLW .AJFihd.T25sKc.jlxRme::after {
     border-radius: inherit !important;
     pointer-events: none !important;
     z-index: 2 !important;
-    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.3) 0%, transparent 60%) !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.3) 0%,
+        transparent 60%
+    ) !important;
     opacity: 0 !important;
     transition: opacity 0.3s ease !important;
 }
-body.cui-glass-enabled .K2hR3c.BiaLW .AJFihd.T25sKc.jlxRme:hover::after { opacity: 1 !important; }
-body.cui-glass-enabled .K2hR3c.BiaLW .AJFihd.T25sKc.jlxRme > * { position: relative !important; z-index: 3 !important; }
+body.cui-glass-enabled .K2hR3c.BiaLW .AJFihd.T25sKc.jlxRme:hover::after {
+    opacity: 1 !important;
+}
+/* Content sits above glass */
+body.cui-glass-enabled .K2hR3c.BiaLW .AJFihd.T25sKc.jlxRme > * {
+    position: relative !important;
+    z-index: 3 !important;
+}
+/* Hover lift */
 body.cui-glass-enabled .K2hR3c.BiaLW .AJFihd.T25sKc.jlxRme:hover {
     transform: scale(1.015) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 1),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.7),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 1),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.65),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.08),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.10),
-        0 0 0 1px rgba(255, 255, 255, 0.45),
-        0 8px 24px rgba(0, 0, 0, 0.10) !important;
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.9),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.7),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.08),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.15),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.15),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.08),
+        0px 2px 8px 0px rgba(0, 0, 0, 0.12),
+        0px 8px 24px 0px rgba(0, 0, 0, 0.1) !important;
 }
+
+/* ---- Dark mode ---- */
 body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .AJFihd.T25sKc.jlxRme {
     background: var(--glass-dark-surface) !important;
     border: 1px solid var(--glass-dark-border) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.18),
+        inset 0 0 0 1px var(--glass-dark-border),
         inset 2px 3px 0 -2px var(--glass-dark-inner),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.06),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.30),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.28),
-        0 0 0 1px rgba(255, 255, 255, 0.06),
-        0 6px 16px rgba(0, 0, 0, 0.26) !important;
+        inset -2px -2px 0 -2px var(--glass-dark-inner-soft),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.04),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.28),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.34),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.34),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.2),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.32),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.26) !important;
 }
 body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .AJFihd.T25sKc.jlxRme:hover {
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.24),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.18),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.12),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.08),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.36),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.34),
-        0 0 0 1px rgba(255, 255, 255, 0.10),
-        0 8px 24px rgba(0, 0, 0, 0.32) !important;
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.08),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.05),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.18),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.22),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.22),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.14),
+        0px 2px 8px 0px rgba(0, 0, 0, 0.38),
+        0px 8px 24px 0px rgba(0, 0, 0, 0.32) !important;
 }
 body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .AJFihd.T25sKc.jlxRme::after {
-    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.08) 0%, transparent 60%) !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.08) 0%,
+        transparent 60%
+    ) !important;
 }
 
-/* ─── PRIVATE COMMENTS ─── */
+
+/* priv comments */
 body.cui-glass-enabled .K2hR3c.BiaLW .PeGHgb.jbH5ac {
     position: relative !important;
     overflow: hidden !important;
@@ -149,16 +212,20 @@ body.cui-glass-enabled .K2hR3c.BiaLW .PeGHgb.jbH5ac {
     backdrop-filter: blur(8px) url(#glass-distortion) saturate(150%) !important;
     -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.95),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.6),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.9),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.55),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.10),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.12),
-        0 0 0 1px rgba(255, 255, 255, 0.35),
-        0 6px 16px rgba(0, 0, 0, 0.08) !important;
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.8),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.6),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.12),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.2),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.2),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.1),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.1),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.08) !important;
     border: none !important;
     transition: transform 0.2s ease, box-shadow 0.2s ease !important;
 }
+/* Hover glow */
 body.cui-glass-enabled .K2hR3c.BiaLW .PeGHgb.jbH5ac::after {
     content: '' !important;
     position: absolute !important;
@@ -166,50 +233,79 @@ body.cui-glass-enabled .K2hR3c.BiaLW .PeGHgb.jbH5ac::after {
     border-radius: inherit !important;
     pointer-events: none !important;
     z-index: 2 !important;
-    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.3) 0%, transparent 60%) !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.3) 0%,
+        transparent 60%
+    ) !important;
     opacity: 0 !important;
     transition: opacity 0.3s ease !important;
 }
-body.cui-glass-enabled .K2hR3c.BiaLW .PeGHgb.jbH5ac:hover::after { opacity: 1 !important; }
-body.cui-glass-enabled .K2hR3c.BiaLW .PeGHgb.jbH5ac > * { position: relative !important; z-index: 3 !important; }
+body.cui-glass-enabled .K2hR3c.BiaLW .PeGHgb.jbH5ac:hover::after {
+    opacity: 1 !important;
+}
+/* Content sits above glass */
+body.cui-glass-enabled .K2hR3c.BiaLW .PeGHgb.jbH5ac > * {
+    position: relative !important;
+    z-index: 3 !important;
+}
+/* Hover lift */
 body.cui-glass-enabled .K2hR3c.BiaLW .PeGHgb.jbH5ac:hover {
     transform: scale(1.015) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 1),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.7),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 1),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.65),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.08),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.10),
-        0 0 0 1px rgba(255, 255, 255, 0.45),
-        0 8px 24px rgba(0, 0, 0, 0.10) !important;
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.9),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.7),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.08),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.15),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.15),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.08),
+        0px 2px 8px 0px rgba(0, 0, 0, 0.12),
+        0px 8px 24px 0px rgba(0, 0, 0, 0.1) !important;
 }
+
+/* ---- Dark mode ---- */
 body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .PeGHgb.jbH5ac {
     background: var(--glass-dark-surface) !important;
     border: 1px solid var(--glass-dark-border) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.18),
+        inset 0 0 0 1px var(--glass-dark-border),
         inset 2px 3px 0 -2px var(--glass-dark-inner),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.06),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.30),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.28),
-        0 0 0 1px rgba(255, 255, 255, 0.06),
-        0 6px 16px rgba(0, 0, 0, 0.26) !important;
+        inset -2px -2px 0 -2px var(--glass-dark-inner-soft),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.04),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.28),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.34),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.34),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.2),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.32),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.26) !important;
 }
 body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .PeGHgb.jbH5ac:hover {
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.24),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.18),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.12),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.08),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.36),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.34),
-        0 0 0 1px rgba(255, 255, 255, 0.10),
-        0 8px 24px rgba(0, 0, 0, 0.32) !important;
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.08),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.05),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.18),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.22),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.22),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.14),
+        0px 2px 8px 0px rgba(0, 0, 0, 0.38),
+        0px 8px 24px 0px rgba(0, 0, 0, 0.32) !important;
 }
 body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .PeGHgb.jbH5ac::after {
-    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.08) 0%, transparent 60%) !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.08) 0%,
+        transparent 60%
+    ) !important;
 }
 
-/* ─── MARK AS DONE BUTTON ─── */
+
+/* ==========================================================================
+   MARK AS DONE BUTTON Ã¢â‚¬â€œ Liquid Glass pill
+   ========================================================================== */
 body.cui-glass-enabled .K2hR3c.BiaLW .upBbve {
     position: relative !important;
     border-radius: 40px !important;
@@ -218,22 +314,18 @@ body.cui-glass-enabled .K2hR3c.BiaLW .upBbve {
     backdrop-filter: blur(8px) url(#glass-distortion) saturate(150%) !important;
     -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.95),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.6),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.9),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.55),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.10),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.12),
-        0 0 0 1px rgba(255, 255, 255, 0.35),
-        0 6px 16px rgba(0, 0, 0, 0.08) !important;
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.8),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.6),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.1),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.08) !important;
     border: none !important;
     padding: 4px 16px !important;
     transition: transform 0.2s ease, box-shadow 0.2s ease !important;
     color: #1f1f1f !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    line-height: 1 !important;
 }
+/* Hover glow */
 body.cui-glass-enabled .K2hR3c.BiaLW .upBbve::after {
     content: '' !important;
     position: absolute !important;
@@ -241,71 +333,71 @@ body.cui-glass-enabled .K2hR3c.BiaLW .upBbve::after {
     border-radius: inherit !important;
     pointer-events: none !important;
     z-index: 2 !important;
-    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.3) 0%, transparent 60%) !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.3) 0%,
+        transparent 60%
+    ) !important;
     opacity: 0 !important;
     transition: opacity 0.3s ease !important;
 }
-body.cui-glass-enabled .K2hR3c.BiaLW .upBbve:hover::after { opacity: 1 !important; }
-body.cui-glass-enabled .K2hR3c.BiaLW .upBbve > .UTNHae,
-body.cui-glass-enabled .K2hR3c.BiaLW .upBbve > .XjoK4b,
-body.cui-glass-enabled .K2hR3c.BiaLW .upBbve > .AeBiU-RLmnJb {
-    position: absolute !important;
-    inset: 0 !important;
-    pointer-events: none !important;
-    z-index: 0 !important;
+body.cui-glass-enabled .K2hR3c.BiaLW .upBbve:hover::after {
+    opacity: 1 !important;
 }
-body.cui-glass-enabled .K2hR3c.BiaLW .upBbve .AeBiU-kBDsod-Rtc0Jf:empty { display: none !important; }
-body.cui-glass-enabled .K2hR3c.BiaLW .upBbve > .AeBiU-vQzf8d {
+/* Content sits above glass */
+body.cui-glass-enabled .K2hR3c.BiaLW .upBbve > .AeBiU-vQzf8d,
+body.cui-glass-enabled .K2hR3c.BiaLW .upBbve > .AeBiU-kBDsod-Rtc0Jf {
     position: relative !important;
     z-index: 3 !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    line-height: 1 !important;
-    margin: 0 !important;
-    padding: 0 !important;
 }
+/* Hover scale */
 body.cui-glass-enabled .K2hR3c.BiaLW .upBbve:hover {
     transform: scale(1.05) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 1),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.7),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 1),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.65),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.08),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.10),
-        0 0 0 1px rgba(255, 255, 255, 0.45),
-        0 8px 24px rgba(0, 0, 0, 0.10) !important;
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.9),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.7),
+        0px 2px 8px 0px rgba(0, 0, 0, 0.12),
+        0px 8px 24px 0px rgba(0, 0, 0, 0.1) !important;
 }
-body.cui-glass-enabled .K2hR3c.BiaLW .upBbve .UywwFc-vQzf8d,
-body.cui-glass-enabled .K2hR3c.BiaLW .upBbve .AeBiU-vQzf8d { color: #1f1f1f !important; }
+/* Text colour in light mode */
+body.cui-glass-enabled .K2hR3c.BiaLW .upBbve .UywwFc-vQzf8d {
+    color: #1f1f1f !important;
+}
+
+/* ---- Dark mode ---- */
 body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .upBbve {
     background: var(--glass-dark-surface) !important;
     border: 1px solid var(--glass-dark-border) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.18),
+        inset 0 0 0 1px var(--glass-dark-border),
         inset 2px 3px 0 -2px var(--glass-dark-inner),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.06),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.30),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.28),
-        0 0 0 1px rgba(255, 255, 255, 0.06),
-        0 6px 16px rgba(0, 0, 0, 0.26) !important;
+        inset -2px -2px 0 -2px var(--glass-dark-inner-soft),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.32),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.26) !important;
 }
 body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .upBbve:hover {
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.24),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.18),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.12),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.08),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.36),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.34),
-        0 0 0 1px rgba(255, 255, 255, 0.10),
-        0 8px 24px rgba(0, 0, 0, 0.32) !important;
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.08),
+        0px 2px 8px 0px rgba(0, 0, 0, 0.38),
+        0px 8px 24px 0px rgba(0, 0, 0, 0.32) !important;
 }
 body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .upBbve::after {
-    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.08) 0%, transparent 60%) !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.08) 0%,
+        transparent 60%
+    ) !important;
 }
-body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .upBbve .UywwFc-vQzf8d,
-body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .upBbve .AeBiU-vQzf8d { color: #ffffff !important; }
+body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .upBbve .UywwFc-vQzf8d {
+    color: #ffffff !important;
+}
 
-/* ─── ADD OR CREATE PILL ─── */
+
+/* Add or create pill */
 body.cui-glass-enabled .K2hR3c.BiaLW .eVOdue {
     position: relative !important;
     border-radius: 40px !important;
@@ -314,18 +406,18 @@ body.cui-glass-enabled .K2hR3c.BiaLW .eVOdue {
     backdrop-filter: blur(8px) url(#glass-distortion) saturate(150%) !important;
     -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.95),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.6),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.9),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.55),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.10),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.12),
-        0 0 0 1px rgba(255, 255, 255, 0.35),
-        0 6px 16px rgba(0, 0, 0, 0.08) !important;
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.8),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.6),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.1),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.08) !important;
     border: none !important;
     padding: 4px 12px !important;
     transition: transform 0.2s ease, box-shadow 0.2s ease !important;
     color: #1f1f1f !important;
 }
+/* Hover glow */
 body.cui-glass-enabled .K2hR3c.BiaLW .eVOdue::after {
     content: '' !important;
     position: absolute !important;
@@ -333,71 +425,84 @@ body.cui-glass-enabled .K2hR3c.BiaLW .eVOdue::after {
     border-radius: inherit !important;
     pointer-events: none !important;
     z-index: 2 !important;
-    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.3) 0%, transparent 60%) !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.3) 0%,
+        transparent 60%
+    ) !important;
     opacity: 0 !important;
     transition: opacity 0.3s ease !important;
 }
-body.cui-glass-enabled .K2hR3c.BiaLW .eVOdue:hover::after { opacity: 1 !important; }
-body.cui-glass-enabled .K2hR3c.BiaLW .eVOdue > * { position: relative !important; z-index: 3 !important; }
+body.cui-glass-enabled .K2hR3c.BiaLW .eVOdue:hover::after {
+    opacity: 1 !important;
+}
+/* Content sits above glass */
+body.cui-glass-enabled .K2hR3c.BiaLW .eVOdue > * {
+    position: relative !important;
+    z-index: 3 !important;
+}
+/* Hover scale */
 body.cui-glass-enabled .K2hR3c.BiaLW .eVOdue:hover {
     transform: scale(1.05) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 1),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.7),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 1),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.65),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.08),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.10),
-        0 0 0 1px rgba(255, 255, 255, 0.45),
-        0 8px 24px rgba(0, 0, 0, 0.10) !important;
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.9),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.7),
+        0px 2px 8px 0px rgba(0, 0, 0, 0.12),
+        0px 8px 24px 0px rgba(0, 0, 0, 0.1) !important;
 }
+/* Text & icon colour in light mode */
 body.cui-glass-enabled .K2hR3c.BiaLW .eVOdue .AeBiU-vQzf8d,
-body.cui-glass-enabled .K2hR3c.BiaLW .eVOdue i { color: #1f1f1f !important; }
+body.cui-glass-enabled .K2hR3c.BiaLW .eVOdue i {
+    color: #1f1f1f !important;
+}
+
+/* ---- Dark mode ---- */
 body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .eVOdue {
     background: var(--glass-dark-surface) !important;
     border: 1px solid var(--glass-dark-border) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.18),
+        inset 0 0 0 1px var(--glass-dark-border),
         inset 2px 3px 0 -2px var(--glass-dark-inner),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.06),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.30),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.28),
-        0 0 0 1px rgba(255, 255, 255, 0.06),
-        0 6px 16px rgba(0, 0, 0, 0.26) !important;
+        inset -2px -2px 0 -2px var(--glass-dark-inner-soft),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.32),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.26) !important;
 }
 body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .eVOdue:hover {
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.24),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.18),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.12),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.08),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.36),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.34),
-        0 0 0 1px rgba(255, 255, 255, 0.10),
-        0 8px 24px rgba(0, 0, 0, 0.32) !important;
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.08),
+        0px 2px 8px 0px rgba(0, 0, 0, 0.38),
+        0px 8px 24px 0px rgba(0, 0, 0, 0.32) !important;
 }
 body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .eVOdue::after {
-    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.08) 0%, transparent 60%) !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.08) 0%,
+        transparent 60%
+    ) !important;
 }
 body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .eVOdue .AeBiU-vQzf8d,
-body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .eVOdue i { color: #ffffff !important; }
+body.dark-mode.cui-glass-enabled .K2hR3c.BiaLW .eVOdue i {
+    color: #ffffff !important;
+}
 
-/* ─── DUE SOON / TO-DO ─── */
+/* Due soon and to do */
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme {
     position: relative !important;
     border-radius: 16px !important;
     overflow: visible !important;
     background: rgba(255, 255, 255, 0.35) !important;
-    box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.95),
-        inset 2px 3px 0 -2px rgba(255, 255, 255, 0.75),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.55),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.08),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.10),
-        0 0 0 1px rgba(255, 255, 255, 0.35),
-        0 4px 12px rgba(0, 0, 0, 0.06) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06),
+                inset 1px 1px 0 rgba(255, 255, 255, 0.75),
+                inset 0 0 5px rgba(255, 255, 255, 0.75) !important;
     border: 1px solid rgba(255, 255, 255, 0.3) !important;
     transition: box-shadow 0.2s ease !important;
     margin-bottom: 12px !important;
 }
+
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme::before {
     content: '' !important;
     position: absolute !important;
@@ -409,7 +514,11 @@ body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme::before {
     backdrop-filter: blur(4px) !important;
     -webkit-backdrop-filter: blur(4px) !important;
 }
-body.cui-glass-enabled.glass-filter-ready .ovsVve.PM0jOb.jlxRme::before { filter: url(#glass-distortion) !important; }
+
+body.cui-glass-enabled.glass-filter-ready .ovsVve.PM0jOb.jlxRme::before {
+    filter: url(#glass-distortion) !important;
+}
+
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme::after {
     content: '' !important;
     position: absolute !important;
@@ -418,30 +527,23 @@ body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme::after {
     overflow: hidden !important;
     pointer-events: none !important;
     z-index: 2 !important;
-    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.4) 0%, transparent 60%) !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.4) 0%,
+        transparent 60%
+    ) !important;
     opacity: 0 !important;
     transition: opacity 0.3s ease !important;
 }
-body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme:hover::after { opacity: 1 !important; }
-body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme > * { position: relative !important; z-index: 3 !important; }
-body.cui-glass-enabled .T9UoTd > .dxDXsf:has([data-container-type="2"] [data-expanded="true"]) { display: block !important; }
-body.cui-glass-enabled .T9UoTd > .dxDXsf:has([data-container-type="2"] [data-expanded="true"]) .MYIZ3e.JUr7jb { display: list-item !important; }
-body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme {
-    background: var(--glass-dark-surface-soft) !important;
-    border: 1px solid var(--glass-dark-border) !important;
-    box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.14),
-        inset 2px 3px 0 -2px rgba(255, 255, 255, 0.08),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.05),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.20),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.18),
-        0 0 0 1px rgba(255, 255, 255, 0.06),
-        0 4px 20px rgba(0, 0, 0, 0.30) !important;
-}
-body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme::after {
-    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.08) 0%, transparent 60%) !important;
+
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme:hover::after {
+    opacity: 1 !important;
 }
 
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme > * {
+    position: relative !important;
+    z-index: 3 !important;
+}
 
 /* Force the wide-layout Due soon block visible when its inner content is populated */
 body.cui-glass-enabled .T9UoTd > .dxDXsf:has([data-container-type="2"] [data-expanded="true"]) {
@@ -453,6 +555,25 @@ body.cui-glass-enabled .T9UoTd > .dxDXsf:has([data-container-type="2"] [data-exp
     display: list-item !important;
 }
 
+/* ---- Dark mode ---- */
+body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme {
+    background: var(--glass-dark-surface-soft) !important;
+    border: 1px solid var(--glass-dark-border) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3),
+                inset 1px 1px 0 rgba(255, 255, 255, 0.08),
+                inset 0 0 5px rgba(255, 255, 255, 0.03) !important;
+}
+body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme::after {
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.08) 0%,
+        transparent 60%
+    ) !important;
+}
+
+/* Due soon list — read as one continuous block inside the outer glass container. */
+
+/* Header indent so "Due soon" isn't flush-left */
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme > .gmNu1d.NT3Ibe.SYd3U.kZHvee {
     padding-left: 18px !important;
     padding-right: 18px !important;
@@ -462,12 +583,19 @@ body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme > .gmNu1d.NT3Ibe.SYd3U.kZHvee {
     box-sizing: border-box !important;
     width: 100% !important;
 }
+
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme > .gmNu1d.NT3Ibe.SYd3U.kZHvee > h2.Ea4RVb {
     margin: 0 !important;
     padding: 0 !important;
     line-height: 1.2 !important;
 }
-body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .sjxkNc.JQIfHf { padding: 0 14px 12px 14px !important; }
+
+/* List container spacing */
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .sjxkNc.JQIfHf {
+    padding: 0 14px 12px 14px !important;
+}
+
+/* Wrappers and list rows: transparent */
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .FlcJk,
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .FlcJk > div,
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .DkySUc {
@@ -477,6 +605,7 @@ body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .DkySUc {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
 }
+
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme li.MYIZ3e.JUr7jb,
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme li.HHKR7.JUr7jb {
     background: transparent !important;
@@ -487,11 +616,15 @@ body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme li.HHKR7.JUr7jb {
     list-style: none !important;
     border-radius: 0 !important;
 }
+
+/* Subtle divider between visible wide rows */
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme li.MYIZ3e.JUr7jb + li.MYIZ3e.JUr7jb {
     border-top: 1px solid rgba(255, 255, 255, 0.28) !important;
     margin-top: 2px !important;
     padding-top: 6px !important;
 }
+
+/* Inner card wrappers: transparent, no pill */
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EO16hc,
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .x4lrdf {
     position: relative !important;
@@ -504,6 +637,8 @@ body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .x4lrdf {
     padding: 6px 4px !important;
     transition: background 0.2s ease !important;
 }
+
+/* Kill any lingering per-card pseudo layers */
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EO16hc::before,
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EO16hc::after,
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .x4lrdf::before,
@@ -511,11 +646,14 @@ body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .x4lrdf::after {
     display: none !important;
     content: none !important;
 }
+
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EO16hc > *,
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .x4lrdf > * {
     position: relative !important;
     z-index: 1 !important;
 }
+
+/* Hover: gentle row tint, no lift */
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EO16hc:hover,
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .x4lrdf:hover {
     background: rgba(255, 255, 255, 0.18) !important;
@@ -523,6 +661,8 @@ body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .x4lrdf:hover {
     box-shadow: none !important;
     transform: none !important;
 }
+
+/* ---- Class chip inside Due soon: strip surface only, keep label visible ---- */
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe {
     background: transparent !important;
     background-color: transparent !important;
@@ -536,6 +676,8 @@ body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe {
     border-radius: 6px !important;
     overflow: visible !important;
 }
+
+/* Flatten chip decoration without using opacity (opacity on a wrapper blanked the label) */
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe::before,
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe::after,
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe .UTNHae {
@@ -545,6 +687,8 @@ body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe .UTNHae {
     border: none !important;
     box-shadow: none !important;
 }
+
+/* Force the visible label wrapper open (Classroom collapses it until hover) */
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe .XjoK4b {
     opacity: 1 !important;
     visibility: visible !important;
@@ -555,12 +699,15 @@ body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe .XjoK4b {
     clip-path: none !important;
     color: inherit !important;
 }
+
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe .mUIrbf-vQzf8d {
     color: inherit !important;
     opacity: 1 !important;
     visibility: visible !important;
     display: inline-block !important;
 }
+
+/* No pill on hover, no focus ring */
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe:hover,
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe:focus,
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe:focus-visible {
@@ -568,7 +715,13 @@ body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe:focus-visible
     outline: none !important;
     box-shadow: none !important;
 }
-body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .QoHUr { display: none !important; }
+
+/* Hide the static "Class" word — keep the class name from the chip */
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .QoHUr {
+    display: none !important;
+}
+
+/* ---- Dark mode ---- */
 body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .FlcJk,
 body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .FlcJk > div,
 body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .DkySUc,
@@ -582,25 +735,40 @@ body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .x4lrdf {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
 }
+
 body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme li.MYIZ3e.JUr7jb + li.MYIZ3e.JUr7jb {
     border-top-color: rgba(255, 255, 255, 0.12) !important;
 }
+
 body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EO16hc:hover,
 body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .x4lrdf:hover {
     background: rgba(255, 255, 255, 0.08) !important;
 }
-body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe:hover { background: transparent !important; }
-body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-vQzf8d::before { content: none !important; }
-body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-vQzf8d::after { content: none !important; }
+
+body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe:hover {
+    background: transparent !important;
+}
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-vQzf8d::before {
+    content: none !important;
+}
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-vQzf8d::after {
+    content: none !important;
+}
+
+/* Force the class chip text to be visible.
+   The chip host and label inherit color: transparent from somewhere — override both. */
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe {
     color: #1f1f1f !important;
     -webkit-text-fill-color: currentColor !important;
 }
+
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe .mUIrbf-vQzf8d,
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe .XjoK4b {
     color: #1f1f1f !important;
     -webkit-text-fill-color: currentColor !important;
 }
+
+/* Kill the blue outline on the Material focus ring anchor */
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe .mUIrbf-mRLv6,
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe .mUIrbf-RLmnJb,
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe:focus-visible,
@@ -610,12 +778,16 @@ body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe *:focus-visib
     box-shadow: none !important;
     border: none !important;
 }
+
+/* Dark mode: chip text should be white, not black */
 body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe,
 body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe .mUIrbf-vQzf8d,
 body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe .XjoK4b {
     color: #ffffff !important;
     -webkit-text-fill-color: currentColor !important;
 }
+
+/* Kill the blue focus ring on the class chip and everything inside it */
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe,
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe *,
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe::before,
@@ -626,6 +798,8 @@ body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-LgbsSe::after {
     box-shadow: none !important;
     border: none !important;
 }
+
+/* Specifically the focus-anchor <a> — this is where the ring lives */
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-mRLv6,
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-RLmnJb,
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-mRLv6:focus,
@@ -639,6 +813,8 @@ body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .mUIrbf-RLmnJb:focus-visible
     border: none !important;
     -webkit-tap-highlight-color: transparent !important;
 }
+
+/* The XjoK4b content wrapper can also paint a focus ring via ::before/::after */
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .XjoK4b,
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .XjoK4b::before,
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .XjoK4b::after {
@@ -646,6 +822,7 @@ body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EVk8e .XjoK4b::after {
     box-shadow: none !important;
     border: none !important;
 }
+/* "View To-do" button in the Due soon header — flatten to plain text inside the glass */
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .mUIrbf-LgbsSe.rjOIac {
     background: transparent !important;
     background-color: transparent !important;
@@ -660,6 +837,8 @@ body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .mUIrbf-LgbsSe.rjOIac {
     color: inherit !important;
     -webkit-text-fill-color: currentColor !important;
 }
+
+/* Kill Material's state/decoration layers on the button */
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .mUIrbf-LgbsSe.rjOIac::before,
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .mUIrbf-LgbsSe.rjOIac::after,
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .mUIrbf-LgbsSe.rjOIac .UTNHae,
@@ -671,11 +850,15 @@ body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .mUIrbf-LgbsSe.rjOIac .XjoK4b {
     box-shadow: none !important;
     outline: none !important;
 }
+
+/* Label visible */
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .mUIrbf-LgbsSe.rjOIac .mUIrbf-vQzf8d {
     color: inherit !important;
     -webkit-text-fill-color: currentColor !important;
     opacity: 1 !important;
 }
+
+/* Focus-anchor — kill any ring */
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .mUIrbf-LgbsSe.rjOIac .mUIrbf-mRLv6,
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .mUIrbf-LgbsSe.rjOIac .mUIrbf-RLmnJb,
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .mUIrbf-LgbsSe.rjOIac:focus,
@@ -687,28 +870,44 @@ body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .mUIrbf-LgbsSe.rjOIac:hover {
     box-shadow: none !important;
     border: none !important;
 }
-body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .mUIrbf-LgbsSe.rjOIac:hover { background: rgba(255, 255, 255, 0.12) !important; }
-body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .mUIrbf-LgbsSe.rjOIac:hover { background: rgba(255, 255, 255, 0.08) !important; }
+
+/* Optional: gentle hover tint (matches the row hover) */
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .mUIrbf-LgbsSe.rjOIac:hover {
+    background: rgba(255, 255, 255, 0.12) !important;
+}
+body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .mUIrbf-LgbsSe.rjOIac:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+}
+
+
+/* END TO DO BAR */
+/* ---- Dark mode (more frosted, subtle) ---- */
 body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EO16hc,
 body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .x4lrdf {
     background: rgba(255, 255, 255, 0.08) !important;
     border-color: rgba(255, 255, 255, 0.12) !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25), inset 1px 1px 0 rgba(255, 255, 255, 0.06), inset -1px -1px 0 rgba(255, 255, 255, 0.03) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25),
+                inset 1px 1px 0 rgba(255, 255, 255, 0.06),
+                inset -1px -1px 0 rgba(255, 255, 255, 0.03) !important;
 }
 body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EO16hc:hover,
 body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .x4lrdf:hover {
     background: rgba(255, 255, 255, 0.14) !important;
-    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35), inset 1px 1px 0 rgba(255, 255, 255, 0.10), inset -1px -1px 0 rgba(255, 255, 255, 0.05) !important;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35),
+                inset 1px 1px 0 rgba(255, 255, 255, 0.10),
+                inset -1px -1px 0 rgba(255, 255, 255, 0.05) !important;
 }
 body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .EO16hc::after,
 body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .x4lrdf::after {
-    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.12) 0%, transparent 60%) !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.12) 0%,
+        transparent 60%
+    ) !important;
 }
 
-body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme {
-    display: block !important;
-}
-/* ─── QUICK LINK SIDEBAR ─── */
+
+/* Qck link sidebar*/
 body.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc {
     position: relative !important;
     overflow: hidden !important;
@@ -717,16 +916,20 @@ body.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc {
     backdrop-filter: blur(8px) url(#glass-distortion) saturate(150%) !important;
     -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.95),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.6),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.9),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.55),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.10),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.12),
-        0 0 0 1px rgba(255, 255, 255, 0.35),
-        0 6px 16px rgba(0, 0, 0, 0.08) !important;
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.8),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.6),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.12),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.2),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.2),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.1),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.1),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.08) !important;
     border: none !important;
     transition: transform 0.2s ease, box-shadow 0.2s ease !important;
 }
+/* Hover glow exact same as stream posts */
 body.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc::after {
     content: '' !important;
     position: absolute !important;
@@ -734,50 +937,77 @@ body.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc::after {
     border-radius: inherit !important;
     pointer-events: none !important;
     z-index: 2 !important;
-    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.3) 0%, transparent 60%) !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.3) 0%,
+        transparent 60%
+    ) !important;
     opacity: 0 !important;
     transition: opacity 0.3s ease !important;
 }
-body.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc:hover::after { opacity: 1 !important; }
-body.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc > * { position: relative !important; z-index: 3 !important; }
+body.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc:hover::after {
+    opacity: 1 !important;
+}
+/* Content sits above the glass */
+body.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc > * {
+    position: relative !important;
+    z-index: 3 !important;
+}
+/* Hover lift exact same as stream posts */
 body.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc:hover {
     transform: scale(1.015) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 1),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.7),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 1),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.65),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.08),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.10),
-        0 0 0 1px rgba(255, 255, 255, 0.45),
-        0 8px 24px rgba(0, 0, 0, 0.10) !important;
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.9),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.7),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.08),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.15),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.15),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.08),
+        0px 2px 8px 0px rgba(0, 0, 0, 0.12),
+        0px 8px 24px 0px rgba(0, 0, 0, 0.1) !important;
 }
+
+/* ---- Dark mode (exact match to stream posts) ---- */
 body.dark-mode.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc {
     background: var(--glass-dark-surface) !important;
     border: 1px solid var(--glass-dark-border) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.18),
+        inset 0 0 0 1px var(--glass-dark-border),
         inset 2px 3px 0 -2px var(--glass-dark-inner),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.06),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.30),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.28),
-        0 0 0 1px rgba(255, 255, 255, 0.06),
-        0 6px 16px rgba(0, 0, 0, 0.26) !important;
+        inset -2px -2px 0 -2px var(--glass-dark-inner-soft),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.04),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.28),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.34),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.34),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.2),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.32),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.26) !important;
 }
 body.dark-mode.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc:hover {
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.24),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.18),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.12),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.08),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.36),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.34),
-        0 0 0 1px rgba(255, 255, 255, 0.10),
-        0 8px 24px rgba(0, 0, 0, 0.32) !important;
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.08),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.05),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.18),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.22),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.22),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.14),
+        0px 2px 8px 0px rgba(0, 0, 0, 0.38),
+        0px 8px 24px 0px rgba(0, 0, 0, 0.32) !important;
 }
 body.dark-mode.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc::after {
-    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.08) 0%, transparent 60%) !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.08) 0%,
+        transparent 60%
+    ) !important;
 }
 
-/* ─── STREAMSIDE TOGGLE ─── */
+
+/* Streamside toggle*/
 body.cui-glass-enabled .streamside-toggle-arrow-btn {
     position: relative !important;
     border-radius: 40px !important;
@@ -786,17 +1016,17 @@ body.cui-glass-enabled .streamside-toggle-arrow-btn {
     backdrop-filter: blur(8px) url(#glass-distortion) saturate(150%) !important;
     -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.95),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.6),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.9),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.55),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.10),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.12),
-        0 0 0 1px rgba(255, 255, 255, 0.35),
-        0 6px 16px rgba(0, 0, 0, 0.08) !important;
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.8),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.6),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.1),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.08) !important;
     border: none !important;
     padding: 8px !important;
     transition: transform 0.2s ease, box-shadow 0.2s ease !important;
 }
+/* Hover glow */
 body.cui-glass-enabled .streamside-toggle-arrow-btn::after {
     content: '' !important;
     position: absolute !important;
@@ -804,50 +1034,67 @@ body.cui-glass-enabled .streamside-toggle-arrow-btn::after {
     border-radius: inherit !important;
     pointer-events: none !important;
     z-index: 2 !important;
-    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.3) 0%, transparent 60%) !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.3) 0%,
+        transparent 60%
+    ) !important;
     opacity: 0 !important;
     transition: opacity 0.3s ease !important;
 }
-body.cui-glass-enabled .streamside-toggle-arrow-btn:hover::after { opacity: 1 !important; }
-body.cui-glass-enabled .streamside-toggle-arrow-btn > * { position: relative !important; z-index: 3 !important; }
+body.cui-glass-enabled .streamside-toggle-arrow-btn:hover::after {
+    opacity: 1 !important;
+}
+/* Content sits above */
+body.cui-glass-enabled .streamside-toggle-arrow-btn > * {
+    position: relative !important;
+    z-index: 3 !important;
+}
+/* Hover lift */
 body.cui-glass-enabled .streamside-toggle-arrow-btn:hover {
     transform: scale(1.05) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 1),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.7),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 1),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.65),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.08),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.10),
-        0 0 0 1px rgba(255, 255, 255, 0.45),
-        0 8px 24px rgba(0, 0, 0, 0.10) !important;
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.9),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.7),
+        0px 2px 8px 0px rgba(0, 0, 0, 0.12),
+        0px 8px 24px 0px rgba(0, 0, 0, 0.1) !important;
 }
+
+/* ---- Dark mode ---- */
 body.dark-mode.cui-glass-enabled .streamside-toggle-arrow-btn {
     background: var(--glass-dark-surface) !important;
     border: 1px solid var(--glass-dark-border) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.18),
+        inset 0 0 0 1px var(--glass-dark-border),
         inset 2px 3px 0 -2px var(--glass-dark-inner),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.06),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.30),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.28),
-        0 0 0 1px rgba(255, 255, 255, 0.06),
-        0 6px 16px rgba(0, 0, 0, 0.26) !important;
+        inset -2px -2px 0 -2px var(--glass-dark-inner-soft),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.32),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.26) !important;
 }
 body.dark-mode.cui-glass-enabled .streamside-toggle-arrow-btn:hover {
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.24),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.18),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.12),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.08),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.36),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.34),
-        0 0 0 1px rgba(255, 255, 255, 0.10),
-        0 8px 24px rgba(0, 0, 0, 0.32) !important;
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.08),
+        0px 2px 8px 0px rgba(0, 0, 0, 0.38),
+        0px 8px 24px 0px rgba(0, 0, 0, 0.32) !important;
 }
 body.dark-mode.cui-glass-enabled .streamside-toggle-arrow-btn::after {
-    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.08) 0%, transparent 60%) !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.08) 0%,
+        transparent 60%
+    ) !important;
 }
 
-/* ─── ACTION BAR ─── */
+
+
+
+
+/* Homepage class card*/
+/* --- The whole action bar container --- */
 body.cui-glass-enabled .SZ0kZe {
     position: relative !important;
     border-radius: 16px !important;
@@ -855,19 +1102,15 @@ body.cui-glass-enabled .SZ0kZe {
     background: rgba(255, 255, 255, 0.35) !important;
     backdrop-filter: blur(8px) saturate(180%) !important;
     -webkit-backdrop-filter: blur(8px) saturate(180%) !important;
-    box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.85),
-        inset 2px 3px 0 -2px rgba(255, 255, 255, 0.5),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.4),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.06),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.08),
-        0 0 0 1px rgba(255, 255, 255, 0.35),
-        0 4px 15px rgba(0, 0, 0, 0.05) !important;
-    border: none !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05),
+                inset 1px 1px 0 rgba(255, 255, 255, 0.5),
+                inset -1px -1px 0 rgba(255, 255, 255, 0.3) !important;
+    border: 1px solid rgba(255, 255, 255, 0.35) !important;
     transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease !important;
     display: flex !important;
     align-items: center !important;
 }
+/* Distortion layer */
 body.cui-glass-enabled .SZ0kZe::before {
     content: '' !important;
     position: absolute !important;
@@ -877,6 +1120,7 @@ body.cui-glass-enabled .SZ0kZe::before {
     pointer-events: none !important;
     filter: url(#glass-distortion) !important;
 }
+/* Hover glow */
 body.cui-glass-enabled .SZ0kZe::after {
     content: '' !important;
     position: absolute !important;
@@ -884,50 +1128,54 @@ body.cui-glass-enabled .SZ0kZe::after {
     border-radius: inherit !important;
     pointer-events: none !important;
     z-index: 2 !important;
-    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.35) 0%, transparent 60%) !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.35) 0%,
+        transparent 60%
+    ) !important;
     opacity: 0 !important;
     transition: opacity 0.3s ease !important;
 }
-body.cui-glass-enabled .SZ0kZe:hover::after { opacity: 1 !important; }
-body.cui-glass-enabled .SZ0kZe > * { position: relative !important; z-index: 3 !important; }
+body.cui-glass-enabled .SZ0kZe:hover::after {
+    opacity: 1 !important;
+}
+/* Keep child elements above the glass */
+body.cui-glass-enabled .SZ0kZe > * {
+    position: relative !important;
+    z-index: 3 !important;
+}
+/* Hover lift */
 body.cui-glass-enabled .SZ0kZe:hover {
     transform: scale(1.015) !important;
-    box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 1),
-        inset 2px 3px 0 -2px rgba(255, 255, 255, 0.6),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.5),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.08),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.10),
-        0 0 0 1px rgba(255, 255, 255, 0.45),
-        0 8px 24px rgba(0, 0, 0, 0.10) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10),
+                inset 1px 1px 0 rgba(255, 255, 255, 0.6),
+                inset -1px -1px 0 rgba(255, 255, 255, 0.4) !important;
     background: rgba(255, 255, 255, 0.45) !important;
 }
+
+/* --- Dark mode for the bar --- */
 body.dark-mode.cui-glass-enabled .SZ0kZe {
     background: rgba(255, 255, 255, 0.08) !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.14),
-        inset 2px 3px 0 -2px rgba(255, 255, 255, 0.06),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.05),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.20),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.18),
-        0 0 0 1px rgba(255, 255, 255, 0.06),
-        0 4px 20px rgba(0, 0, 0, 0.25) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25),
+                inset 1px 1px 0 rgba(255, 255, 255, 0.06),
+                inset -1px -1px 0 rgba(255, 255, 255, 0.03) !important;
 }
 body.dark-mode.cui-glass-enabled .SZ0kZe:hover {
     background: rgba(255, 255, 255, 0.14) !important;
-    box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.20),
-        inset 2px 3px 0 -2px rgba(255, 255, 255, 0.10),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.06),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.24),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.22),
-        0 0 0 1px rgba(255, 255, 255, 0.10),
-        0 8px 28px rgba(0, 0, 0, 0.35) !important;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35),
+                inset 1px 1px 0 rgba(255, 255, 255, 0.10),
+                inset -1px -1px 0 rgba(255, 255, 255, 0.05) !important;
 }
 body.dark-mode.cui-glass-enabled .SZ0kZe::after {
-    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.12) 0%, transparent 60%) !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.12) 0%,
+        transparent 60%
+    ) !important;
 }
+
+/* --- Individual action buttons inside the bar (frosted glass pills) --- */
 body.cui-glass-enabled .SZ0kZe .pYTkkf-Bz112c-LgbsSe,
 body.cui-glass-enabled .SZ0kZe .my-extension-edit,
 body.cui-glass-enabled .SZ0kZe .my-extension-image {
@@ -939,27 +1187,32 @@ body.cui-glass-enabled .SZ0kZe .my-extension-image {
     -webkit-backdrop-filter: blur(4px) saturate(120%) !important;
     transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease !important;
 }
+/* Button hover Ã¢â‚¬â€œ scale & brighten */
 body.cui-glass-enabled .SZ0kZe .pYTkkf-Bz112c-LgbsSe:hover,
 body.cui-glass-enabled .SZ0kZe .my-extension-edit:hover,
 body.cui-glass-enabled .SZ0kZe .my-extension-image:hover {
     background: rgba(255, 255, 255, 0.35) !important;
     transform: scale(1.05) !important;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), inset 1px 1px 0 rgba(255, 255, 255, 0.6) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08),
+                inset 1px 1px 0 rgba(255, 255, 255, 0.6) !important;
 }
+
+/* --- Dark mode for buttons --- */
 body.dark-mode.cui-glass-enabled .SZ0kZe .pYTkkf-Bz112c-LgbsSe,
 body.dark-mode.cui-glass-enabled .SZ0kZe .my-extension-edit,
 body.dark-mode.cui-glass-enabled .SZ0kZe .my-extension-image {
     background: rgba(255, 255, 255, 0.06) !important;
     border-color: rgba(255, 255, 255, 0.08) !important;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2), inset 1px 1px 0 rgba(255, 255, 255, 0.04) !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2),
+                inset 1px 1px 0 rgba(255, 255, 255, 0.04) !important;
 }
 body.dark-mode.cui-glass-enabled .SZ0kZe .pYTkkf-Bz112c-LgbsSe:hover,
 body.dark-mode.cui-glass-enabled .SZ0kZe .my-extension-edit:hover,
 body.dark-mode.cui-glass-enabled .SZ0kZe .my-extension-image:hover {
     background: rgba(255, 255, 255, 0.12) !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), inset 1px 1px 0 rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3),
+                inset 1px 1px 0 rgba(255, 255, 255, 0.08) !important;
 }
-
 
 /* Sidebar container */
 
@@ -1480,37 +1733,17 @@ body.cui-glass-enabled .rknsod > * {
     position: relative !important;
     z-index: 3 !important;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- 
-
-/* ─── HOMEPAGE CLASS CARD ─── */
+/* Homepage class card*/
 body.cui-glass-enabled .gHz6xd {
     position: relative !important;
     overflow: hidden !important;
-    border-radius: 16px !important;
-    margin: 4px 8px 18px !important;
+    border-radius: 32px !important;
+    margin: 4px 8px !important;
     background: transparent !important;
-    border: 1px solid rgba(255, 255, 255, 0.3) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.45),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.25),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.10),
-        0 0 0 1px rgba(255, 255, 255, 0.20),
         0 4px 4px rgba(0, 0, 0, 0.15),
         0 0 12px rgba(0, 0, 0, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
     transition: transform 0.2s ease, box-shadow 0.2s ease !important;
 }
 body.cui-glass-enabled .gHz6xd::before {
@@ -1532,52 +1765,49 @@ body.cui-glass-enabled .gHz6xd::after {
     pointer-events: none !important;
     z-index: 2 !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.45),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.25),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.10),
         inset 3px 3px 3px 0 rgba(255, 255, 255, 0.45),
         inset -3px -3px 3px 0 rgba(255, 255, 255, 0.45) !important;
-    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.4) 0%, transparent 60%) !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.4) 0%,
+        transparent 60%
+    ) !important;
     opacity: 0 !important;
     transition: opacity 0.3s ease !important;
 }
-body.cui-glass-enabled .gHz6xd:hover::after { opacity: 1 !important; }
-body.cui-glass-enabled .gHz6xd > * { position: relative !important; z-index: 3 !important; }
+body.cui-glass-enabled .gHz6xd:hover::after {
+    opacity: 1 !important;
+}
+body.cui-glass-enabled .gHz6xd > * {
+    position: relative !important;
+    z-index: 3 !important;
+}
 body.cui-glass-enabled .gHz6xd:hover {
     transform: scale(1.015) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.6),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.35),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.10),
-        0 0 0 1px rgba(255, 255, 255, 0.30),
-        0 8px 16px rgba(0, 0, 0, 0.20),
+        0 8px 16px rgba(0, 0, 0, 0.2),
         0 0 20px rgba(0, 0, 0, 0.12) !important;
 }
 body.dark-mode.cui-glass-enabled .gHz6xd {
     background: rgba(18, 20, 26, 0.56) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.10),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.05),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.36),
-        0 0 0 1px rgba(255, 255, 255, 0.04),
         0 4px 10px rgba(0, 0, 0, 0.36),
         0 0 14px rgba(0, 0, 0, 0.28) !important;
 }
 body.dark-mode.cui-glass-enabled .gHz6xd:hover {
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.16),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.08),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.40),
-        0 0 0 1px rgba(255, 255, 255, 0.08),
         0 10px 24px rgba(0, 0, 0, 0.5),
         0 0 24px rgba(0, 0, 0, 0.38) !important;
 }
 body.dark-mode.cui-glass-enabled .gHz6xd::after {
-    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.09) 0%, transparent 60%) !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.09) 0%,
+        transparent 60%
+    ) !important;
 }
-
-/* ─── MAIN STREAM CARD ─── */
+/* Main stream card*/
 body.cui-glass-enabled [role="main"] .wBE4bf.TIunU {
     position: relative !important;
     overflow: hidden !important;
@@ -1586,13 +1816,16 @@ body.cui-glass-enabled [role="main"] .wBE4bf.TIunU {
     backdrop-filter: blur(8px) url(#glass-distortion) saturate(150%) !important;
     -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.95),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.6),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.9),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.55),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.10),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.12),
-        0 0 0 1px rgba(255, 255, 255, 0.35),
-        0 6px 16px rgba(0, 0, 0, 0.08) !important;
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.8),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.6),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.12),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.2),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.2),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.1),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.1),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.08) !important;
     border: none !important;
     transition: transform 0.2s ease, box-shadow 0.2s ease !important;
 }
@@ -1603,22 +1836,34 @@ body.cui-glass-enabled [role="main"] .wBE4bf.TIunU::after {
     border-radius: inherit !important;
     pointer-events: none !important;
     z-index: 2 !important;
-    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.3) 0%, transparent 60%) !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.3) 0%,
+        transparent 60%
+    ) !important;
     opacity: 0 !important;
     transition: opacity 0.3s ease !important;
 }
-body.cui-glass-enabled [role="main"] .wBE4bf.TIunU:hover::after { opacity: 1 !important; }
-body.cui-glass-enabled [role="main"] .wBE4bf.TIunU > * { position: relative !important; z-index: 3 !important; }
+body.cui-glass-enabled [role="main"] .wBE4bf.TIunU:hover::after {
+    opacity: 1 !important;
+}
+body.cui-glass-enabled [role="main"] .wBE4bf.TIunU > * {
+    position: relative !important;
+    z-index: 3 !important;
+}
 body.cui-glass-enabled [role="main"] .wBE4bf.TIunU:hover {
     transform: scale(1.015) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 1),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.7),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 1),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.65),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.08),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.10),
-        0 0 0 1px rgba(255, 255, 255, 0.45),
-        0 8px 24px rgba(0, 0, 0, 0.10) !important;
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.9),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.7),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.08),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.15),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.15),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.08),
+        0px 2px 8px 0px rgba(0, 0, 0, 0.12),
+        0px 8px 24px 0px rgba(0, 0, 0, 0.1) !important;
 }
 body.cui-glass-enabled [role="main"] .wBE4bf.TIunU .GQW44b,
 body.cui-glass-enabled [role="main"] .wBE4bf.TIunU .QUEiXc,
@@ -1637,42 +1882,49 @@ body.dark-mode.cui-glass-enabled [role="main"] .wBE4bf.TIunU {
     background: var(--glass-dark-surface) !important;
     border: 1px solid var(--glass-dark-border) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.18),
+        inset 0 0 0 1px var(--glass-dark-border),
         inset 2px 3px 0 -2px var(--glass-dark-inner),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.06),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.30),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.28),
-        0 0 0 1px rgba(255, 255, 255, 0.06),
-        0 6px 16px rgba(0, 0, 0, 0.26) !important;
+        inset -2px -2px 0 -2px var(--glass-dark-inner-soft),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.04),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.28),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.34),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.34),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.2),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.32),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.26) !important;
 }
 body.dark-mode.cui-glass-enabled [role="main"] .wBE4bf.TIunU:hover {
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.24),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.18),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.12),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.08),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.36),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.34),
-        0 0 0 1px rgba(255, 255, 255, 0.10),
-        0 8px 24px rgba(0, 0, 0, 0.32) !important;
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.08),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.05),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.18),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.22),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.22),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.14),
+        0px 2px 8px 0px rgba(0, 0, 0, 0.38),
+        0px 8px 24px 0px rgba(0, 0, 0, 0.32) !important;
 }
 body.dark-mode.cui-glass-enabled [role="main"] .wBE4bf.TIunU::after {
-    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.08) 0%, transparent 60%) !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.08) 0%,
+        transparent 60%
+    ) !important;
 }
-
-/* ─── TEACH & MY ATTACHMENTS ─── */
+/* Teach and my attachments*/
 body.cui-glass-enabled .riU7le.FHXi2c,
 body.cui-glass-enabled .t2wIBc .riU7le.FHXi2c {
     position: relative !important;
     border-radius: 24px !important;
     overflow: hidden !important;
     background: rgba(255, 255, 255, 0.35) !important;
-    border: 1px solid rgba(255, 255, 255, 0.3) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.85),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.45),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.08),
-        0 0 0 1px rgba(255, 255, 255, 0.25),
-        0 4px 12px rgba(0, 0, 0, 0.06) !important;
+        0 4px 12px rgba(0, 0, 0, 0.06),
+        inset 1px 1px 0 rgba(255, 255, 255, 0.75),
+        inset 0 0 5px rgba(255, 255, 255, 0.75) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
     transition: transform 0.2s ease, box-shadow 0.2s ease !important;
 }
 body.cui-glass-enabled .riU7le.FHXi2c .bHOAdb,
@@ -1702,50 +1954,57 @@ body.cui-glass-enabled .t2wIBc .riU7le.FHXi2c::after {
     border-radius: inherit !important;
     pointer-events: none !important;
     z-index: 2 !important;
-    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.4) 0%, transparent 60%) !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.4) 0%,
+        transparent 60%
+    ) !important;
     opacity: 0 !important;
     transition: opacity 0.3s ease !important;
 }
 body.cui-glass-enabled .riU7le.FHXi2c:hover::after,
-body.cui-glass-enabled .t2wIBc .riU7le.FHXi2c:hover::after { opacity: 1 !important; }
+body.cui-glass-enabled .t2wIBc .riU7le.FHXi2c:hover::after {
+    opacity: 1 !important;
+}
 body.cui-glass-enabled .riU7le.FHXi2c > *,
-body.cui-glass-enabled .t2wIBc .riU7le.FHXi2c > * { position: relative !important; z-index: 3 !important; }
+body.cui-glass-enabled .t2wIBc .riU7le.FHXi2c > * {
+    position: relative !important;
+    z-index: 3 !important;
+}
 body.cui-glass-enabled .riU7le.FHXi2c:hover,
 body.cui-glass-enabled .t2wIBc .riU7le.FHXi2c:hover {
     transform: scale(1.015) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 1),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.55),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.08),
-        0 0 0 1px rgba(255, 255, 255, 0.35),
-        0 8px 24px rgba(0, 0, 0, 0.12) !important;
+        0 8px 24px rgba(0, 0, 0, 0.12),
+        inset 1px 1px 0 rgba(255, 255, 255, 0.9),
+        inset 0 0 8px rgba(255, 255, 255, 0.9) !important;
 }
+/* ---- Attachments (dark mode) ---- */
 body.dark-mode.cui-glass-enabled .riU7le.FHXi2c,
 body.dark-mode.cui-glass-enabled .t2wIBc .riU7le.FHXi2c {
     background: var(--glass-dark-surface-soft) !important;
     border: 1px solid var(--glass-dark-border) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.12),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.05),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.20),
-        0 0 0 1px rgba(255, 255, 255, 0.04),
-        0 4px 20px rgba(0, 0, 0, 0.30) !important;
+        0 4px 20px rgba(0, 0, 0, 0.3),
+        inset 1px 1px 0 rgba(255, 255, 255, 0.08),
+        inset 0 0 5px rgba(255, 255, 255, 0.03) !important;
 }
 body.dark-mode.cui-glass-enabled .riU7le.FHXi2c:hover,
 body.dark-mode.cui-glass-enabled .t2wIBc .riU7le.FHXi2c:hover {
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.18),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.08),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.24),
-        0 0 0 1px rgba(255, 255, 255, 0.08),
-        0 8px 30px rgba(0, 0, 0, 0.42) !important;
+        0 8px 30px rgba(0, 0, 0, 0.42),
+        inset 1px 1px 0 rgba(255, 255, 255, 0.12),
+        inset 0 0 8px rgba(255, 255, 255, 0.05) !important;
 }
 body.dark-mode.cui-glass-enabled .riU7le.FHXi2c::after,
 body.dark-mode.cui-glass-enabled .t2wIBc .riU7le.FHXi2c::after {
-    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.08) 0%, transparent 60%) !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.08) 0%,
+        transparent 60%
+    ) !important;
 }
-
-/* ─── ANNOUNCEMENT BUTTON ─── */
+/* Make an announcement button*/
 body.cui-glass-enabled .Utoz9b {
     position: relative !important;
     display: inline-flex !important;
@@ -1761,28 +2020,37 @@ body.cui-glass-enabled .Utoz9b {
     backdrop-filter: blur(8px) url(#glass-distortion) saturate(150%) !important;
     -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.95),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.6),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.9),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.55),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.10),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.12),
-        0 0 0 1px rgba(255, 255, 255, 0.35),
-        0 6px 16px rgba(0, 0, 0, 0.08) !important;
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.8),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.6),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.12),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.2),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.2),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.1),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.1),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.08) !important;
     border: none !important;
     transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease !important;
 }
-body.cui-glass-enabled .Utoz9b > * { position: relative !important; z-index: 3 !important; }
+body.cui-glass-enabled .Utoz9b > * {
+    position: relative !important;
+    z-index: 3 !important;
+}
 body.cui-glass-enabled .Utoz9b:hover {
     background: rgba(255, 255, 255, 0.4) !important;
     transform: translateY(-2px) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 1),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.8),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 1),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.65),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.08),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.10),
-        0 0 0 1px rgba(255, 255, 255, 0.45),
-        0 8px 24px rgba(0, 0, 0, 0.10) !important;
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.9),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.8),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.08),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.15),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.15),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.08),
+        0px 2px 8px 0px rgba(0, 0, 0, 0.12),
+        0px 8px 24px 0px rgba(0, 0, 0, 0.1) !important;
 }
 body.cui-glass-enabled .Utoz9b::after {
     content: '' !important;
@@ -1791,53 +2059,69 @@ body.cui-glass-enabled .Utoz9b::after {
     border-radius: inherit !important;
     pointer-events: none !important;
     z-index: 2 !important;
-    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.3) 0%, transparent 60%) !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.3) 0%,
+        transparent 60%
+    ) !important;
     opacity: 0 !important;
     transition: opacity 0.3s ease !important;
 }
-body.cui-glass-enabled .Utoz9b:hover::after { opacity: 1 !important; }
+body.cui-glass-enabled .Utoz9b:hover::after {
+    opacity: 1 !important;
+}
 body.cui-glass-enabled .Utoz9b .UywwFc-kBDsod-Rtc0Jf,
-body.cui-glass-enabled .Utoz9b .UywwFc-vQzf8d { margin: 0 !important; padding: 0 !important; }
+body.cui-glass-enabled .Utoz9b .UywwFc-vQzf8d {
+    margin: 0 !important;
+    padding: 0 !important;
+}
 body.dark-mode.cui-glass-enabled .Utoz9b {
     background: var(--glass-dark-surface-soft) !important;
     border: 1px solid var(--glass-dark-border) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.14),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.08),
         inset 2px 3px 0 -2px rgba(255, 255, 255, 0.08),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.05),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.24),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.22),
-        0 0 0 1px rgba(255, 255, 255, 0.06),
-        0 6px 16px rgba(0, 0, 0, 0.24) !important;
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.05),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.03),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.3),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.34),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.34),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.2),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.3),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.24) !important;
 }
 body.dark-mode.cui-glass-enabled .Utoz9b:hover {
     background: rgba(255, 255, 255, 0.14) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.20),
-        inset 2px 3px 0 -2px rgba(255, 255, 255, 0.10),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.08),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.28),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.26),
-        0 0 0 1px rgba(255, 255, 255, 0.10),
-        0 8px 24px rgba(0, 0, 0, 0.32) !important;
+        inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+        inset 2px 3px 0 -2px rgba(255, 255, 255, 0.1),
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.08),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.05),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.18),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.22),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.22),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.12),
+        0px 2px 8px 0px rgba(0, 0, 0, 0.4),
+        0px 8px 24px 0px rgba(0, 0, 0, 0.32) !important;
 }
 body.dark-mode.cui-glass-enabled .Utoz9b::after {
-    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.08) 0%, transparent 60%) !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.08) 0%,
+        transparent 60%
+    ) !important;
 }
-
-/* ─── TOPIC BOXES ─── */
+/* Topic boxes */
 body.cui-glass-enabled .jHgkif.KSMuDe.u0dx8e {
     position: relative !important;
     border-radius: 16px !important;
     overflow: hidden !important;
     background: rgba(255, 255, 255, 0.35) !important;
-    border: 1px solid rgba(255, 255, 255, 0.3) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.85),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.45),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.08),
-        0 0 0 1px rgba(255, 255, 255, 0.25),
-        0 4px 12px rgba(0, 0, 0, 0.06) !important;
+        0 4px 12px rgba(0, 0, 0, 0.06),
+        inset 1px 1px 0 rgba(255, 255, 255, 0.75),
+        inset 0 0 5px rgba(255, 255, 255, 0.75) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
     transition: box-shadow 0.2s ease !important;
     margin-bottom: 12px !important;
 }
@@ -1859,12 +2143,21 @@ body.cui-glass-enabled .jHgkif.KSMuDe.u0dx8e::after {
     border-radius: inherit !important;
     pointer-events: none !important;
     z-index: 2 !important;
-    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.4) 0%, transparent 60%) !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.4) 0%,
+        transparent 60%
+    ) !important;
     opacity: 0 !important;
     transition: opacity 0.3s ease !important;
 }
-body.cui-glass-enabled .jHgkif.KSMuDe.u0dx8e:hover::after { opacity: 1 !important; }
-body.cui-glass-enabled .jHgkif.KSMuDe.u0dx8e > * { position: relative !important; z-index: 3 !important; }
+body.cui-glass-enabled .jHgkif.KSMuDe.u0dx8e:hover::after {
+    opacity: 1 !important;
+}
+body.cui-glass-enabled .jHgkif.KSMuDe.u0dx8e > * {
+    position: relative !important;
+    z-index: 3 !important;
+}
 body.cui-glass-enabled .jHgkif.KSMuDe.u0dx8e .KmLLod,
 body.cui-glass-enabled .jHgkif.KSMuDe.u0dx8e .DzHQo,
 body.cui-glass-enabled .jHgkif.KSMuDe.u0dx8e .iBZDFb {
@@ -1876,17 +2169,18 @@ body.dark-mode.cui-glass-enabled .jHgkif.KSMuDe.u0dx8e {
     background: var(--glass-dark-surface-soft) !important;
     border: 1px solid var(--glass-dark-border) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.12),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.05),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.20),
-        0 0 0 1px rgba(255, 255, 255, 0.04),
-        0 4px 20px rgba(0, 0, 0, 0.30) !important;
+        0 4px 20px rgba(0, 0, 0, 0.3),
+        inset 1px 1px 0 rgba(255, 255, 255, 0.08),
+        inset 0 0 5px rgba(255, 255, 255, 0.03) !important;
 }
 body.dark-mode.cui-glass-enabled .jHgkif.KSMuDe.u0dx8e::after {
-    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.08) 0%, transparent 60%) !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.08) 0%,
+        transparent 60%
+    ) !important;
 }
-
-/* ─── ASSIGNMENT / MATERIAL STAR BUTTONS ─── */
+/* Assign and material */
 body.cui-glass-enabled [role="main"] .wBE4bf.TIunU:has([aria-label*="Assignment"]) .kpDQ8,
 body.cui-glass-enabled [role="main"] .wBE4bf.TIunU:has([aria-label*="Material"]) .kpDQ8 {
     position: absolute !important;
@@ -1917,10 +2211,12 @@ body.cui-glass-enabled [role="main"] .wBE4bf.TIunU:has([aria-label*="Material"])
     margin: 0 0 2px 0 !important;
     line-height: normal !important;
 }
+/* Accouncement*/
 body.cui-glass-enabled [role="main"] .wBE4bf.TIunU:not(:has([aria-label*="Assignment"])) .pco8Kc,
 body.cui-glass-enabled [role="main"] .wBE4bf.TIunU:not(:has([aria-label*="Assignment"])) .GQW44b {
     padding-right: 0 !important;
 }
+/* Comment*/
 body.cui-glass-enabled [role="main"] .wBE4bf.TIunU .s2g3Xd,
 body.cui-glass-enabled [role="main"] .wBE4bf.TIunU .PeGHgb,
 body.cui-glass-enabled [role="main"] .wBE4bf.TIunU .Q8U8uc,
@@ -1947,37 +2243,189 @@ body.cui-glass-enabled [role="main"] .wBE4bf.TIunU [role="region"] * {
     border: none !important;
 }
 
-/* ─── TOP HEADER (DARK) ─── */
+/* Dark mode toggle button*/
+body.dark-mode.cui-glass-enabled .joJglb,
+body.dark-mode.cui-glass-enabled header[role="banner"] {
+    background: rgba(18, 20, 26, 0.72) !important;
+    border-bottom: none !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24) !important;
+}
+/* ---- MAIN STREAM CARDS (dark mode) ---- */
+body.dark-mode.cui-glass-enabled [role="main"] .wBE4bf.TIunU {
+    background: rgba(255, 255, 255, 0.11) !important;
+    backdrop-filter: blur(8px) url(#glass-distortion) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.22),
+        inset 2px 3px 0 -2px rgba(255, 255, 255, 0.18),
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.14),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.1),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.16),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.22),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.22),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.12),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.22),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.16) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+}
+body.dark-mode.cui-glass-enabled [role="main"] .wBE4bf.TIunU:hover {
+    background: rgba(255, 255, 255, 0.16) !important;
+    border-color: rgba(255, 255, 255, 0.24) !important;
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.32),
+        inset 2px 3px 0 -2px rgba(255, 255, 255, 0.24),
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.18),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.14),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.12),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.16),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.16),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.1),
+        0px 2px 8px 0px rgba(0, 0, 0, 0.22),
+        0px 8px 24px 0px rgba(0, 0, 0, 0.18) !important;
+}
+body.dark-mode.cui-glass-enabled [role="main"] .wBE4bf.TIunU::after {
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.28) 0%,
+        transparent 60%
+    ) !important;
+    opacity: 0.18 !important;
+}
+/* ---- Main stream cards (additional dark) ---- */
+body.dark-mode.cui-glass-enabled [role="main"] .wBE4bf.TIunU {
+    background: rgba(255, 255, 255, 0.11) !important;
+    backdrop-filter: blur(8px) url(#glass-distortion) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.22),
+        inset 2px 3px 0 -2px rgba(255, 255, 255, 0.18),
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.14),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.1),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.16),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.22),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.22),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.12),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.22),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.16) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+}
+body.dark-mode.cui-glass-enabled [role="main"] .wBE4bf.TIunU::before {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+body.dark-mode.cui-glass-enabled [role="main"] .wBE4bf.TIunU::after {
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.28) 0%,
+        transparent 60%
+    ) !important;
+    opacity: 0.18 !important;
+}
+body.dark-mode.cui-glass-enabled [role="main"] .wBE4bf.TIunU:hover {
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.32),
+        inset 2px 3px 0 -2px rgba(255, 255, 255, 0.24),
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.18),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.14),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.12),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.16),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.16),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.1),
+        0px 2px 8px 0px rgba(0, 0, 0, 0.22),
+        0px 8px 24px 0px rgba(0, 0, 0, 0.18) !important;
+}
+body.dark-mode.cui-glass-enabled [role="main"] .wBE4bf.TIunU:hover::after {
+    opacity: 0.3 !important;
+}
+body.dark-mode.cui-glass-enabled [role="main"] .qhnNic.jlxRme.Aopndd.TIunU,
+body.dark-mode.cui-glass-enabled [role="main"] .qhnNic.i8Wprc.wBE4bf.TIunU,
+body.dark-mode.cui-glass-enabled [role="main"] .wBE4bf {
+    background: rgba(255, 255, 255, 0.11) !important;
+    backdrop-filter: blur(8px) url(#glass-distortion) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.22),
+        inset 2px 3px 0 -2px rgba(255, 255, 255, 0.18),
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.14),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.1),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.16),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.22),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.22),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.12),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.22),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.16) !important;
+}
+body.dark-mode.cui-glass-enabled [role="main"] .qhnNic.jlxRme.Aopndd.TIunU::before,
+body.dark-mode.cui-glass-enabled [role="main"] .qhnNic.i8Wprc.wBE4bf.TIunU::before,
+body.dark-mode.cui-glass-enabled [role="main"] .wBE4bf::before {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+body.dark-mode.cui-glass-enabled [role="main"] .qhnNic.jlxRme.Aopndd.TIunU::after,
+body.dark-mode.cui-glass-enabled [role="main"] .qhnNic.i8Wprc.wBE4bf.TIunU::after,
+body.dark-mode.cui-glass-enabled [role="main"] .wBE4bf::after {
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.28) 0%,
+        transparent 60%
+    ) !important;
+    opacity: 0.18 !important;
+}
+body.dark-mode.cui-glass-enabled [role="main"] .qhnNic.jlxRme.Aopndd.TIunU:hover,
+body.dark-mode.cui-glass-enabled [role="main"] .qhnNic.i8Wprc.wBE4bf.TIunU:hover,
+body.dark-mode.cui-glass-enabled [role="main"] .wBE4bf:hover {
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.32),
+        inset 2px 3px 0 -2px rgba(255, 255, 255, 0.24),
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.18),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.14),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.12),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.16),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.16),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.1),
+        0px 2px 8px 0px rgba(0, 0, 0, 0.22),
+        0px 8px 24px 0px rgba(0, 0, 0, 0.18) !important;
+}
+body.dark-mode.cui-glass-enabled [role="main"] .qhnNic.jlxRme.Aopndd.TIunU:hover::after,
+body.dark-mode.cui-glass-enabled [role="main"] .qhnNic.i8Wprc.wBE4bf.TIunU:hover::after,
+body.dark-mode.cui-glass-enabled [role="main"] .wBE4bf:hover::after {
+    opacity: 0.3 !important;
+}
+/* ---- Top header (dark) ---- */
 body.dark-mode.cui-glass-enabled .joJglb,
 body.dark-mode.cui-glass-enabled header[role="banner"] {
     background: rgba(18, 20, 26, 0.72) !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-    box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.10),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.04),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.30),
-        0 0 0 1px rgba(255, 255, 255, 0.06),
-        0 8px 24px rgba(0, 0, 0, 0.28) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+        inset 1px 1px 0 rgba(255, 255, 255, 0.06),
+        inset -1px -1px 0 rgba(255, 255, 255, 0.04) !important;
 }
-body:not(.sidebar-expand-all-hover) .rknsod { max-height: none !important; overflow-y: visible !important; }
-body:not(.sidebar-expand-all-hover) .rknsod .uTwgne { overflow: visible !important; }
-body:not(.sidebar-expand-all-hover) .rknsod div[role="group"] { height: auto !important; max-height: none !important; overflow: visible !important; }
-body:not(.sidebar-expand-all-hover) .rknsod { overflow: visible !important; }
-body:not(.sidebar-expand-all-hover) .rknsod .uTwgne::after { pointer-events: none; }
+body:not(.sidebar-expand-all-hover) .rknsod {
+    max-height: none !important;
+    overflow-y: visible !important;
+}
+body:not(.sidebar-expand-all-hover) .rknsod .uTwgne {
+    overflow: visible !important;
+}
+body:not(.sidebar-expand-all-hover) .rknsod div[role="group"] {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+}
+body:not(.sidebar-expand-all-hover) .rknsod {
+    overflow: visible !important;
+}
+body:not(.sidebar-expand-all-hover) .rknsod .uTwgne::after {
+    pointer-events: none;
+}
 
-/* ─── CLASS COMMENTS (NON-PRIVATE) ─── */
+/* Target class comments (.PeGHgb) that are NOT private (.jbH5ac)
+   inside the assignment view wrapper (.eqqrO) */
 body.cui-glass-enabled .eqqrO .PeGHgb:not(.jbH5ac) {
     position: relative !important;
     border-radius: 16px !important;
     overflow: hidden !important;
     background: rgba(255, 255, 255, 0.25) !important;
-    border: none !important;
-    box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.85),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.45),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.08),
-        0 0 0 1px rgba(255, 255, 255, 0.25),
-        0 4px 12px rgba(0, 0, 0, 0.05) !important;
     transition: background 0.2s ease !important;
     padding: 8px 12px !important;
 }
@@ -1992,7 +2440,10 @@ body.cui-glass-enabled .eqqrO .PeGHgb:not(.jbH5ac)::before {
     -webkit-backdrop-filter: blur(4px) !important;
     filter: url(#glass-distortion) !important;
 }
-body.cui-glass-enabled .eqqrO .PeGHgb:not(.jbH5ac) > * { position: relative !important; z-index: 3 !important; }
+body.cui-glass-enabled .eqqrO .PeGHgb:not(.jbH5ac) > * {
+    position: relative !important;
+    z-index: 3 !important;
+}
 body.cui-glass-enabled .eqqrO .PeGHgb:not(.jbH5ac)::after {
     content: '' !important;
     position: absolute !important;
@@ -2000,23 +2451,25 @@ body.cui-glass-enabled .eqqrO .PeGHgb:not(.jbH5ac)::after {
     border-radius: inherit !important;
     pointer-events: none !important;
     z-index: 2 !important;
-    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.3) 0%, transparent 60%) !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.3) 0%,
+        transparent 60%
+    ) !important;
     opacity: 0 !important;
     transition: opacity 0.3s ease !important;
 }
-body.cui-glass-enabled .eqqrO .PeGHgb:not(.jbH5ac):hover::after { opacity: 1 !important; }
+body.cui-glass-enabled .eqqrO .PeGHgb:not(.jbH5ac):hover::after {
+    opacity: 1 !important;
+}
+/* ---- Dark mode for class comments ---- */
 body.dark-mode.cui-glass-enabled .eqqrO .PeGHgb:not(.jbH5ac) {
     background: rgba(255, 255, 255, 0.05) !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.10),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.04),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.20),
-        0 0 0 1px rgba(255, 255, 255, 0.04),
-        0 4px 16px rgba(0, 0, 0, 0.24) !important;
+        0 4px 16px rgba(0, 0, 0, 0.24),
+        inset 1px 1px 0 rgba(255, 255, 255, 0.06) !important;
 }
-
-/* ─── HOME BUTTONS ─── */
 body.cui-glass-enabled .home-buttons-container:not(.expanded) {
     width: 164px !important;
     min-height: 48px !important;
@@ -2024,65 +2477,124 @@ body.cui-glass-enabled .home-buttons-container:not(.expanded) {
     gap: 12px !important;
     padding: 7px 10px !important;
 }
+
 body.cui-glass-enabled .home-buttons-container:not(.expanded) > .home-btn {
     flex: 0 0 32px;
     width: 32px !important;
     height: 32px !important;
 }
 
-/* ─── SEARCH BUTTON ─── */
+body.cui-glass-enabled .gHz6xd {
+    margin-bottom: 18px !important;
+}
+
+
+
+
+/* Liquid-glass homepage spacing. */
+ 
+
+
+
+
 body.cui-glass-enabled .mc-classroom-search-button {
     box-sizing: border-box !important;
     border-radius: 40px !important;
-    overflow: hidden !important;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0.35) 100%) !important;
-    border: none !important;
+    overflow: hidden !important;    
+
+    background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.55) 0%,
+        rgba(255, 255, 255, 0.35) 100%
+    ) !important;
+    border: 1px solid rgba(255, 255, 255, 0.65) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 1),
-        inset 2px 3px 0 -2px rgba(255, 255, 255, 0.9),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.55),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.06),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.08),
-        0 0 0 1px rgba(255, 255, 255, 0.55),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.06),
+        0 1px 3px rgba(0, 0, 0, 0.08),
         0 4px 12px rgba(0, 0, 0, 0.06) !important;
     transition: background 0.2s ease, box-shadow 0.2s ease !important;
 }
-body.cui-glass-enabled .mc-classroom-search-button:hover {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.45) 100%) !important;
-    box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 1),
-        inset 2px 3px 0 -2px rgba(255, 255, 255, 1),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.65),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.08),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.10),
-        0 0 0 1px rgba(255, 255, 255, 0.65),
-        0 6px 18px rgba(0, 0, 0, 0.08) !important;
-}
-body.dark-mode.cui-glass-enabled .mc-classroom-search-button {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.08) 100%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.16) !important;
-    box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.18),
-        inset 2px 3px 0 -2px rgba(255, 255, 255, 0.10),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.08),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.20),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.18),
-        0 0 0 1px rgba(255, 255, 255, 0.06),
-        0 4px 12px rgba(0, 0, 0, 0.20) !important;
-}
-body.dark-mode.cui-glass-enabled .mc-classroom-search-button:hover {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.20) 0%, rgba(255, 255, 255, 0.12) 100%) !important;
+
+/* Distortion layer — warps the pill's own content, safe (can't go invisible) */
+body.cui-glass-enabled .mc-classroom-search-button::before {
+    content: '' !important;
+    position: absolute;
+    inset: 0 !important;
+    border-radius: inherit !important;
+    pointer-events: none !important;
+    z-index: 0 !important;
+    filter: url(#glass-distortion) !important;
+    background: transparent !important;
 }
 
-/* ─── SEARCH PANEL ─── */
+/* Content above the warp layer */
+body.cui-glass-enabled .mc-classroom-search-button > * {
+    position: relative !important; 
+    z-index: 1 !important;
+}
+
+body.cui-glass-enabled .mc-classroom-search-button:hover {
+    background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.7) 0%,
+        rgba(255, 255, 255, 0.45) 100%
+    ) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 1),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.08),
+        0 2px 6px rgba(0, 0, 0, 0.1),
+        0 6px 18px rgba(0, 0, 0, 0.08) !important;
+}
+
+body.dark-mode.cui-glass-enabled .mc-classroom-search-button {
+    background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.14) 0%,
+        rgba(255, 255, 255, 0.08) 100%
+    ) !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.14),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+        0 1px 3px rgba(0, 0, 0, 0.25),
+        0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+body.dark-mode.cui-glass-enabled .mc-classroom-search-button:hover {
+    background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.2) 0%,
+        rgba(255, 255, 255, 0.12) 100%
+    ) !important;
+}
+
+
+
+
 body.cui-glass-enabled .mc-classroom-search-panel {
     border-radius: 20px !important;
-    background: transparent !important;
+
+    background: rgba(255, 255, 255, 0.25) !important;
+    /* blur on backdrop is fine; url() removed — it was being stripped and doing nothing */
+    backdrop-filter: blur(8px) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
+
     border: none !important;
-    box-shadow: none !important;
-    overflow: hidden !important;
-    isolation: isolate !important;
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.6),
+        inset 2px 3px 0 -2px rgba(255, 255, 255, 0.9),
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.8),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.6),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.12),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.2),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.2),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.1),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.1),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.08) !important;
 }
+
+
 body.cui-glass-enabled .mc-classroom-search-panel::before {
     content: '' !important;
     position: absolute !important;
@@ -2090,107 +2602,65 @@ body.cui-glass-enabled .mc-classroom-search-panel::before {
     border-radius: inherit !important;
     pointer-events: none !important;
     z-index: 0 !important;
-    backdrop-filter: blur(14px) saturate(140%) !important;
-    -webkit-backdrop-filter: blur(14px) saturate(140%) !important;
     filter: url(#glass-distortion) !important;
-    -webkit-filter: url(#glass-distortion) !important;
-    background: rgba(255, 255, 255, 0.72) !important;
+    background: transparent !important;
 }
+
+/* Hover glow — radial-gradient tracking the cursor */
 body.cui-glass-enabled .mc-classroom-search-panel::after {
     content: '' !important;
-    position: absolute !important;
+    position: absolute !important;      /* required so inset: 0 resolves */
     inset: 0 !important;
     border-radius: inherit !important;
     pointer-events: none !important;
-    z-index: 1 !important;
-    box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 1),
-        inset 2px 3px 0 -2px rgba(255, 255, 255, 1),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.55),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.08),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.10),
-        0 0 0 1px rgba(255, 255, 255, 0.45),
-        0 8px 24px rgba(31, 38, 135, 0.12) !important;
-    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.28) 0%, transparent 60%) !important;
-    opacity: 0.25 !important;
+    z-index: 2 !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.3) 0%,
+        transparent 60%
+    ) !important;
+    opacity: 0 !important;
     transition: opacity 0.3s ease !important;
 }
-body.cui-glass-enabled .mc-classroom-search-panel > * { position: relative !important; z-index: 2 !important; }
-body.cui-glass-enabled .mc-classroom-search-panel:hover::after { opacity: 1 !important; }
-body.dark-mode.cui-glass-enabled .mc-classroom-search-panel::before {
-    background: rgba(24, 26, 34, 0.85) !important;
-    backdrop-filter: blur(18px) saturate(160%) !important;
-    -webkit-backdrop-filter: blur(18px) saturate(160%) !important;
+
+body.cui-glass-enabled .mc-classroom-search-panel:hover::after {
+    opacity: 1 !important;
 }
-body.dark-mode.cui-glass-enabled .mc-classroom-search-panel::after {
+
+/* Children sit above the warp + glow layers.
+   z-index only works on positioned elements, hence position: relative. */
+body.cui-glass-enabled .mc-classroom-search-panel > * {
+    position: relative !important;
+    z-index: 3 !important;
+}
+
+/* ---- Dark mode ---- */
+body.dark-mode.cui-glass-enabled .mc-classroom-search-panel {
+    background: var(--glass-dark-surface) !important;
+    border: 1px solid var(--glass-dark-border) !important;
     box-shadow:
-        inset 0 1.5px 0 0 rgba(255, 255, 255, 0.18),
-        inset 2px 3px 0 -2px rgba(255, 255, 255, 0.10),
-        inset -1px 0 0 0 rgba(255, 255, 255, 0.06),
-        inset 0 -1px 0 0 rgba(0, 0, 0, 0.30),
-        inset -2px -2px 0 -2px rgba(0, 0, 0, 0.28),
-        0 0 0 1px rgba(255, 255, 255, 0.06),
-        0 8px 24px rgba(0, 0, 0, 0.4) !important;
-    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.10) 0%, transparent 60%) !important;
+        inset 0 0 0 1px var(--glass-dark-border),
+        inset 2px 3px 0 -2px var(--glass-dark-inner),
+        inset -2px -2px 0 -2px var(--glass-dark-inner-soft),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.04),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.28),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.34),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.34),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.2),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.32),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.26) !important;
 }
-body.cui-glass-enabled .mc-classroom-search-field {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
+
+body.dark-mode.cui-glass-enabled .mc-classroom-search-panel::after {
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.08) 0%,
+        transparent 60%
+    ) !important;
 }
-body.cui-glass-enabled .mc-classroom-search-result {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    transition: background 0.15s ease !important;
-}
-body.cui-glass-enabled .mc-classroom-search-result:hover,
-body.cui-glass-enabled .mc-classroom-search-result.is-keyboard-active {
-    background: rgba(255, 255, 255, 0.45) !important;
-    border-radius: 12px !important;
-}
-body.dark-mode.cui-glass-enabled .mc-classroom-search-result:hover,
-body.dark-mode.cui-glass-enabled .mc-classroom-search-result.is-keyboard-active {
-    background: rgba(255, 255, 255, 0.08) !important;
-}
-body.cui-glass-enabled .mc-classroom-search-settings-menu {
-    background: rgba(255, 255, 255, 0.96) !important;
-    backdrop-filter: blur(16px) saturate(150%) !important;
-    -webkit-backdrop-filter: blur(16px) saturate(150%) !important;
-    border-radius: 14px !important;
-    border: 1px solid rgba(235, 237, 255, 0.58) !important;
-    box-shadow: 0 8px 24px rgba(31, 38, 135, 0.12) !important;
-}
-body.dark-mode.cui-glass-enabled .mc-classroom-search-settings-menu {
-    background: rgba(30, 32, 40, 0.96) !important;
-    border-color: rgba(43, 45, 63, 0.42) !important;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
-}
-body.cui-glass-enabled .mc-classroom-search-field input {
-    background: transparent !important;
-    color: #1f1f1f !important;
-    caret-color: #1f1f1f !important;
-}
-body.dark-mode.cui-glass-enabled .mc-classroom-search-field input {
-    color: #f2f3fa !important;
-    caret-color: #f2f3fa !important;
-}
-body.cui-glass-enabled .mc-classroom-search-field input::placeholder { color: rgba(31, 31, 31, 0.55) !important; }
-body.dark-mode.cui-glass-enabled .mc-classroom-search-field input::placeholder { color: rgba(242, 243, 250, 0.5) !important; }
-body.cui-glass-enabled .mc-classroom-search-icon,
-body.cui-glass-enabled .mc-classroom-search-add,
-body.cui-glass-enabled .mc-classroom-search-settings { color: #3b4250 !important; }
-body.dark-mode.cui-glass-enabled .mc-classroom-search-icon,
-body.dark-mode.cui-glass-enabled .mc-classroom-search-add,
-body.dark-mode.cui-glass-enabled .mc-classroom-search-settings { color: #d7dcff !important; }
-body.cui-glass-enabled .mc-classroom-search-result strong { color: #1f2328 !important; }
-body.cui-glass-enabled .mc-classroom-search-result small,
-body.cui-glass-enabled .mc-classroom-search-folder-view-all { color: rgba(31, 35, 40, 0.62) !important; }
-body.dark-mode.cui-glass-enabled .mc-classroom-search-result strong { color: #f2f3fa !important; }
-body.dark-mode.cui-glass-enabled .mc-classroom-search-result small,
-body.dark-mode.cui-glass-enabled .mc-classroom-search-folder-view-all { color: rgba(242, 243, 250, 0.62) !important; }
 
 /* --- END LIQUID GLASS ---*/
+
 
 .update-popup-message[data-empty] {
     min-height: 1.5em;
