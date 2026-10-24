@@ -345,7 +345,8 @@ body.cui-glass-enabled .K2hR3c.BiaLW .upBbve:hover::after {
     opacity: 1 !important;
 }
 /* Content sits above glass */
-body.cui-glass-enabled .K2hR3c.BiaLW .upBbve > * {
+body.cui-glass-enabled .K2hR3c.BiaLW .upBbve > .AeBiU-vQzf8d,
+body.cui-glass-enabled .K2hR3c.BiaLW .upBbve > .AeBiU-kBDsod-Rtc0Jf {
     position: relative !important;
     z-index: 3 !important;
 }
@@ -1406,7 +1407,6 @@ body.dark-mode.cui-glass-enabled {
         display: flex !important;
         flex-direction: column !important;
         gap: 30px !important; /* This applies the gap to every pill */
-        margin-bottom:15px !important;
         height: 120% !important;
     }
 
@@ -1523,7 +1523,6 @@ body.cui-glass-enabled .hN1OOc:hover {
         inset 1px 2px 0 -1px rgba(255, 255, 255, 0.7),
         inset -1px -1px 0 -1px rgba(255, 255, 255, 0.4),
         0px 2px 6px 0px rgba(0, 0, 0, 0.08) !important;
-    transform: translateY(-1px) !important;
 }
 body.cui-glass-enabled .hN1OOc.eumXzf,
 body.cui-glass-enabled .hN1OOc[aria-current="page"] {
@@ -1533,7 +1532,7 @@ body.cui-glass-enabled .hN1OOc[aria-current="page"] {
         inset 1px 2px 0 -1px rgba(255, 255, 255, 0.9),
         inset -1px -1px 0 -1px rgba(255, 255, 255, 0.5),
         0px 2px 8px 0px rgba(0, 0, 0, 0.1) !important;
-    transform: translateY(-1px) !important;
+
 }
 body.cui-glass-enabled .hN1OOc::after {
     content: '' !important;
@@ -1642,7 +1641,7 @@ body.cui-glass-enabled .rknsod .uTwgne:hover {
 
     border-radius: 999px !important;
 
-    transform: scale(1.015) !important;
+
 }
 
 /* ===== MAIN SIDEBAR LIQUID GLASS ===== */
@@ -2489,29 +2488,178 @@ body.cui-glass-enabled .gHz6xd {
     margin-bottom: 18px !important;
 }
 
-/* --- END LIQUID GLASS ---*/
+
+
+
 /* Liquid-glass homepage spacing. */
  
 
 
 
 
+body.cui-glass-enabled .mc-classroom-search-button {
+    box-sizing: border-box !important;
+    border-radius: 40px !important;
+    overflow: hidden !important;    
+
+    background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.55) 0%,
+        rgba(255, 255, 255, 0.35) 100%
+    ) !important;
+    border: 1px solid rgba(255, 255, 255, 0.65) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.9),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.06),
+        0 1px 3px rgba(0, 0, 0, 0.08),
+        0 4px 12px rgba(0, 0, 0, 0.06) !important;
+    transition: background 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+/* Distortion layer — warps the pill's own content, safe (can't go invisible) */
+body.cui-glass-enabled .mc-classroom-search-button::before {
+    content: '' !important;
+    position: absolute;
+    inset: 0 !important;
+    border-radius: inherit !important;
+    pointer-events: none !important;
+    z-index: 0 !important;
+    filter: url(#glass-distortion) !important;
+    background: transparent !important;
+}
+
+/* Content above the warp layer */
+body.cui-glass-enabled .mc-classroom-search-button > * {
+    position: relative !important; 
+    z-index: 1 !important;
+}
+
+body.cui-glass-enabled .mc-classroom-search-button:hover {
+    background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.7) 0%,
+        rgba(255, 255, 255, 0.45) 100%
+    ) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 1),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.08),
+        0 2px 6px rgba(0, 0, 0, 0.1),
+        0 6px 18px rgba(0, 0, 0, 0.08) !important;
+}
+
+body.dark-mode.cui-glass-enabled .mc-classroom-search-button {
+    background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.14) 0%,
+        rgba(255, 255, 255, 0.08) 100%
+    ) !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.14),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+        0 1px 3px rgba(0, 0, 0, 0.25),
+        0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+body.dark-mode.cui-glass-enabled .mc-classroom-search-button:hover {
+    background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.2) 0%,
+        rgba(255, 255, 255, 0.12) 100%
+    ) !important;
+}
 
 
 
 
+body.cui-glass-enabled .mc-classroom-search-panel {
+    border-radius: 20px !important;
+
+    background: rgba(255, 255, 255, 0.25) !important;
+    /* blur on backdrop is fine; url() removed — it was being stripped and doing nothing */
+    backdrop-filter: blur(8px) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
+
+    border: none !important;
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.6),
+        inset 2px 3px 0 -2px rgba(255, 255, 255, 0.9),
+        inset -2px -2px 0 -2px rgba(255, 255, 255, 0.8),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.6),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.12),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.2),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.2),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.1),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.1),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.08) !important;
+}
 
 
+body.cui-glass-enabled .mc-classroom-search-panel::before {
+    content: '' !important;
+    position: absolute !important;
+    inset: 0 !important;
+    border-radius: inherit !important;
+    pointer-events: none !important;
+    z-index: 0 !important;
+    filter: url(#glass-distortion) !important;
+    background: transparent !important;
+}
 
+/* Hover glow — radial-gradient tracking the cursor */
+body.cui-glass-enabled .mc-classroom-search-panel::after {
+    content: '' !important;
+    position: absolute !important;      /* required so inset: 0 resolves */
+    inset: 0 !important;
+    border-radius: inherit !important;
+    pointer-events: none !important;
+    z-index: 2 !important;
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.3) 0%,
+        transparent 60%
+    ) !important;
+    opacity: 0 !important;
+    transition: opacity 0.3s ease !important;
+}
 
+body.cui-glass-enabled .mc-classroom-search-panel:hover::after {
+    opacity: 1 !important;
+}
 
+/* Children sit above the warp + glow layers.
+   z-index only works on positioned elements, hence position: relative. */
+body.cui-glass-enabled .mc-classroom-search-panel > * {
+    position: relative !important;
+    z-index: 3 !important;
+}
 
+/* ---- Dark mode ---- */
+body.dark-mode.cui-glass-enabled .mc-classroom-search-panel {
+    background: var(--glass-dark-surface) !important;
+    border: 1px solid var(--glass-dark-border) !important;
+    box-shadow:
+        inset 0 0 0 1px var(--glass-dark-border),
+        inset 2px 3px 0 -2px var(--glass-dark-inner),
+        inset -2px -2px 0 -2px var(--glass-dark-inner-soft),
+        inset -3px -8px 1px -6px rgba(255, 255, 255, 0.04),
+        inset -0.3px -1px 4px 0px rgba(0, 0, 0, 0.28),
+        inset -1.5px 2.5px 0px -2px rgba(0, 0, 0, 0.34),
+        inset 0px 3px 4px -2px rgba(0, 0, 0, 0.34),
+        inset 2px -6.5px 1px -4px rgba(0, 0, 0, 0.2),
+        0px 1px 5px 0px rgba(0, 0, 0, 0.32),
+        0px 6px 16px 0px rgba(0, 0, 0, 0.26) !important;
+}
 
+body.dark-mode.cui-glass-enabled .mc-classroom-search-panel::after {
+    background: radial-gradient(
+        circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.08) 0%,
+        transparent 60%
+    ) !important;
+}
 
-
-
-
-
+/* --- END LIQUID GLASS ---*/
 
 
 .update-popup-message[data-empty] {

@@ -1,4 +1,3 @@
-
 const SIDEBAR_HEIGHT_PROMPT_DISMISSED_KEY = 'modernClassroom_sidebarHeightPromptDismissed';
 
 function mountSidebarHeightPrompt() {
@@ -324,8 +323,13 @@ function insertCustomSettingsPanel() {
     tutorialPanel.id = 'my-extension-tutorial-panel';
     tutorialPanel.style.marginBottom = '24px';
 
+    // ── FIX 4: guard showClassroomTutorial so a broken tutorial can't abort the panel
     if (typeof window.showClassroomTutorial === 'function') {
-        window.showClassroomTutorial({ target: tutorialPanel });
+        try {
+            window.showClassroomTutorial({ target: tutorialPanel });
+        } catch (err) {
+            console.error('showClassroomTutorial failed:', err);
+        }
     }
 
   // --- Customisation Panel ---
@@ -578,10 +582,18 @@ function insertCustomSettingsPanel() {
     let decorationRowEl = null;
   profilePanel.insertAdjacentElement('afterend', newPanel);
 
-  // Support aria-labels in multiple languages
-    setupToggleButton('#toggle-todo-btn', '[aria-label="To-do"], [aria-label="To do"], [aria-label="Por hacer"], [aria-label="À faire"], [aria-label="Aufgaben"], [aria-label="A fazer"], [aria-label="Da fare"], [aria-label="Te doen"], [aria-label="Задачи"], [aria-label="待做"], [aria-label="待執行"], [aria-label="やることリスト"], [aria-label="할 일"], [href*="/todo"], [data-href*="/todo"]', 'hideTodo');
-  setupToggleButton('#toggle-calendar-btn', '[aria-label="Calendar"], [aria-label="Calendario"], [aria-label="Calendrier"], [aria-label="Kalender"], [aria-label="Calendário"], [aria-label="Calendario"], [aria-label="Agenda"], [aria-label="Календарь"], [aria-label="日历"], [aria-label="日曆"], [aria-label="カレンダー"], [aria-label="일정"]', 'hideCalendar', 'calendar-hidden');
-  setupToggleButton('#toggle-gemini-btn', '[aria-label="Gemini"], a[href="/u/0/ai"], a[href*="/ai"]', 'hideGemini');
+  // ── FIX 5: guard setupToggleButton so a missing helper can't abort the panel
+  if (typeof setupToggleButton === 'function') {
+    try {
+      setupToggleButton('#toggle-todo-btn', '[aria-label="To-do"], [aria-label="To do"], [aria-label="Por hacer"], [aria-label="À faire"], [aria-label="Aufgaben"], [aria-label="A fazer"], [aria-label="Da fare"], [aria-label="Te doen"], [aria-label="Задачи"], [aria-label="待做"], [aria-label="待執行"], [aria-label="やることリスト"], [aria-label="할 일"], [href*="/todo"], [data-href*="/todo"]', 'hideTodo');
+      setupToggleButton('#toggle-calendar-btn', '[aria-label="Calendar"], [aria-label="Calendario"], [aria-label="Calendrier"], [aria-label="Kalender"], [aria-label="Calendário"], [aria-label="Calendario"], [aria-label="Agenda"], [aria-label="Календарь"], [aria-label="日历"], [aria-label="日曆"], [aria-label="カレンダー"], [aria-label="일정"]', 'hideCalendar', 'calendar-hidden');
+      setupToggleButton('#toggle-gemini-btn', '[aria-label="Gemini"], a[href="/u/0/ai"], a[href*="/ai"]', 'hideGemini');
+    } catch (err) {
+      console.error('setupToggleButton calls failed:', err);
+    }
+  } else {
+    console.warn('setupToggleButton not defined; toggle buttons will not bind');
+  }
 
   const panelRoot = document.querySelector('#my-extension-settings-panel');
     const settingsImagesBase = (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL)
@@ -765,16 +777,16 @@ function insertCustomSettingsPanel() {
                     item.dataset.decorationUrl = `url("${base}${file}")`;
                     item.textContent = file.replace(/[-_]/g,' ').replace(/\.png$/i,'');
                     item.title = file.replace(/[-_]/g,' ').replace(/\.png$/i,'');
-                    
+
                     const loadDecorationImage = () => {
                         if (!item.style.getPropertyValue('--decoration-url')) {
                             item.style.setProperty('--decoration-url', item.dataset.decorationUrl);
                         }
                     };
                     item.addEventListener('mouseenter', loadDecorationImage);
-                    
+
                     item.addEventListener('click', async () => {
-                        try { 
+                        try {
                             await applyDecoration(file);
                         } catch(_) {}
                         grid.querySelectorAll('.decoration-item').forEach(it => it.classList.remove('selected'));
@@ -793,23 +805,23 @@ function insertCustomSettingsPanel() {
                 customBtn.type = 'button';
                 customBtn.textContent = '+';
                 customBtn.title = 'Add custom decoration';
-                
+
                 const hiddenFileInput = document.createElement('input');
                 hiddenFileInput.type = 'file';
                 hiddenFileInput.accept = 'image/jpeg,image/png,image/gif,image/webp,.jpg,.jpeg,.png,.gif,.webp';
                 hiddenFileInput.style.display = 'none';
                 document.body.appendChild(hiddenFileInput);
-                
+
                 hiddenFileInput.addEventListener('change', async (e) => {
                     const file = e.target.files[0];
                     if (!file) return;
-                    
+
                     // Check file size (limit to 5MB)
                     if (file.size > 5 * 1024 * 1024) {
                         alert('File size must be less than 5MB');
                         return;
                     }
-                    
+
                     const reader = new FileReader();
                     reader.onload = async (event) => {
                         const dataUrl = event.target.result;
@@ -826,15 +838,15 @@ function insertCustomSettingsPanel() {
                         } catch(_) {}
                     };
                     reader.readAsDataURL(file);
-                    
+
                     // Reset input
                     hiddenFileInput.value = '';
                 });
-                
+
                 customBtn.addEventListener('click', () => {
                     hiddenFileInput.click();
                 });
-                
+
                 grid.appendChild(customBtn);
 
                 // Restore previously selected decoration (including custom)
@@ -854,7 +866,7 @@ function insertCustomSettingsPanel() {
 
                     // Clear any previous selection
                     grid.querySelectorAll('.decoration-item').forEach(it => it.classList.remove('selected'));
-                    
+
                     // Apply the saved decoration
                     if (saved === '__CUSTOM__') {
                         // Custom decoration
@@ -863,7 +875,7 @@ function insertCustomSettingsPanel() {
                                 resolve(data['decoration:custom']);
                             });
                         });
-                        
+
                         if (customData) {
                             customBtn.classList.add('selected');
                             await applyDecorationFilename('__CUSTOM__', { persist: false });
@@ -1021,7 +1033,7 @@ function insertCustomSettingsPanel() {
         setSidebarSizeValue(currentSize + 1);
     });
 
-    
+
     controlsRow.appendChild(minusBtn);
     controlsRow.appendChild(plusBtn);
     sizeRow.appendChild(sizeLabel);
@@ -1038,11 +1050,11 @@ function insertCustomSettingsPanel() {
     sizeRow.appendChild(controlsRow);
 
 
-    
+
     // Update dots after they're created
     updateScaleButtons(String(initialSize));
     setSidebarSizeValue(initialSize, false);
-    
+
     // Load from sync storage in background
     reconcileSync('sidebarSize', 3, initialSize, (storedSize) => {
         const syncSize = (storedSize !== null) ? parseInt(storedSize, 10) : 3;
@@ -1223,7 +1235,7 @@ function insertCustomSettingsPanel() {
         let stored = readLocalRaw('layoutMode') || 'standard';
         let currentLayoutMode = stored;
         applyLayoutMode(stored, false);
-        
+
         reconcileSync('layoutMode', 'standard', stored, (syncStored) => {
             currentLayoutMode = syncStored;
             applyLayoutMode(syncStored, false);
@@ -1353,7 +1365,7 @@ function insertCustomSettingsPanel() {
                 sliderInput.min = '-168';
                 sliderInput.max = '612';
                 sliderInput.step = '20';
-                
+
                 // Load from localStorage immediately
                 let initialHeight = readLocalNumber('sidebarHeightAdjust', 420);
                 sliderInput.value = initialHeight;
@@ -1461,7 +1473,7 @@ function insertCustomSettingsPanel() {
 
                 const endInteraction = () => {
                     sidebarForceVisible = false;
-                    
+
                     // Re-evaluate sidebar visibility based on screen size
                     const currentSidebar = document.querySelector('.STek2d');
                     if (currentSidebar) {
@@ -1472,7 +1484,7 @@ function insertCustomSettingsPanel() {
                             if (sidebarHotspot) sidebarHotspot.classList.remove('sidebar-hide-indicator');
                         }
                     }
-                    
+
                     const enrolledEls = document.querySelectorAll('.STek2d div[role="group"]');
                     enrolledEls.forEach(el => el.style.setProperty('height', 'auto', 'important'));
                 };
@@ -1520,7 +1532,7 @@ function insertCustomSettingsPanel() {
                     applyEnrolledHeightAdjustment(e.target.value, true);
                     endInteraction();
                 });
-                
+
                 sliderInput.addEventListener('mouseup', endInteraction);
                 sliderInput.addEventListener('mouseleave', endInteraction);
                 sliderInput.addEventListener('touchend', endInteraction, { passive: true });
@@ -1532,7 +1544,7 @@ function insertCustomSettingsPanel() {
 
                 applyInitial(initialHeight);
                 setTimeout(() => applyInitial(initialHeight), 220);
-                
+
                 // Load from sync storage in background
                 reconcileSync('sidebarHeightAdjust', 420, initialHeight, (syncHeight) => {
                     initialHeight = parseInt(syncHeight, 10);
@@ -1579,12 +1591,12 @@ function insertCustomSettingsPanel() {
                 // Multilingual selector for archived classes (supports 12+ languages)
                 const archivedClassesSelector = '[aria-label="Archived classes"], [aria-label="Archived Classes"], [aria-label="Clases archivadas"], [aria-label="Classes archivées"], [aria-label="Archivierte Kurse"], [aria-label="Aulas arquivadas"], [aria-label="Classi archiviate"], [aria-label="Gearchiveerde klassen"], [aria-label="Архивные классы"], [aria-label="已归档的课程"], [aria-label="已封存的課程"], [aria-label="アーカイブされたクラス"], [aria-label="보관된 클래스"]';
                 const geminiSelector = '[aria-label="Gemini"], a[href="/u/0/ai"], a[href*="/ai"]';
-                
+
                 waitForElement(archivedClassesSelector, () => {
                     const btn = document.querySelector('#toggle-archived-btn');
                     const target = document.querySelector(archivedClassesSelector);
                     if (!target) return;
-                    
+
                     // Element exists — apply saved hidden state and set up listener
                     const hidden = readLocalBool('hideArchived', false);
 
@@ -1623,7 +1635,7 @@ function insertCustomSettingsPanel() {
                     }
                 });
 
-                
+
                 function updateSidebarImages() {
                     const isDark = document.body.classList.contains('dark-mode');
                     if (classicImg) {
@@ -1639,7 +1651,7 @@ function insertCustomSettingsPanel() {
                         showAllImg.src = settingsImagesBase + (isDark ? showAllImg.dataset.darkImg : showAllImg.dataset.lightImg);
                     }
                 }
-                
+
                 updateSidebarImages();
 
                 onBodyClassChange(() => {
@@ -1684,30 +1696,41 @@ function insertCustomSettingsPanel() {
                     newPanel.appendChild(glassRow);
                 }
 
-                // ---- Load initial state using existing helpers ----
+                // ── FIX 2: on init, also inject the filter — not just add the class
                 const glassEnabled = readLocalBool('glassEnabled', false);
                 if (glassEnabled) {
                     glassToggle.style.background = '#6c5ce7';
                     glassThumb.style.left = '22px';
                     document.body.classList.add('cui-glass-enabled');
+                    if (typeof injectGlassFilter === 'function') {
+                        try { injectGlassFilter(); } catch (err) { console.error('injectGlassFilter (init) failed:', err); }
+                    } else {
+                        console.warn('injectGlassFilter not defined at init; glass effect will not apply yet');
+                    }
                 }
 
-                // ---- Toggle event ----
-            glassToggle.addEventListener('click', function() {
-            const current = readLocalBool('glassEnabled', false);
-            const newVal = !current;
-            writePref('glassEnabled', newVal);
-            if (newVal) {
-                injectGlassFilter();               // <-- ADD THIS
-                document.body.classList.add('cui-glass-enabled');
-                this.style.background = '#6c5ce7';
-                this.querySelector('.cui-toggle-thumb').style.left = '22px';
-            } else {
-                document.body.classList.remove('cui-glass-enabled');
-                this.style.background = '#444';
-                this.querySelector('.cui-toggle-thumb').style.left = '2px';
-            }
-        });
+                // ── FIX 3: guard injectGlassFilter, save pref AFTER state is applied
+                glassToggle.addEventListener('click', function() {
+                    const current = readLocalBool('glassEnabled', false);
+                    const newVal = !current;
+
+                    if (newVal) {
+                        if (typeof injectGlassFilter === 'function') {
+                            try { injectGlassFilter(); } catch (err) { console.error('injectGlassFilter failed:', err); }
+                        } else {
+                            console.warn('injectGlassFilter not available; glass effect will not apply');
+                        }
+                        document.body.classList.add('cui-glass-enabled');
+                        this.style.background = '#6c5ce7';
+                        this.querySelector('.cui-toggle-thumb').style.left = '22px';
+                    } else {
+                        document.body.classList.remove('cui-glass-enabled');
+                        this.style.background = '#444';
+                        this.querySelector('.cui-toggle-thumb').style.left = '2px';
+                    }
+
+                    writePref('glassEnabled', newVal);
+                });
                 // ---- END LIQUID GLASS ----
 
         // ---- FONT PICKER ----
@@ -1837,7 +1860,7 @@ function insertCustomSettingsPanel() {
         fontObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
         // END FONT PICKER
 
-      
+
 
         function setSidebarMode(mode, persist = true) {
             const isClassic = mode === 'classic';
@@ -1861,7 +1884,7 @@ function insertCustomSettingsPanel() {
         // Load from localStorage immediately
         let storedClassic = readLocalBool('classicSidebar', false);
         setSidebarMode(storedClassic ? 'classic' : 'floating', false);
-        
+
         // Then load from sync storage in background
         reconcileSync('classicSidebar', false, storedClassic, (syncClassic) => {
             setSidebarMode(syncClassic ? 'classic' : 'floating', false);
@@ -1872,4 +1895,27 @@ function insertCustomSettingsPanel() {
 }
 
 
-              
+// ── FIX 1: on-load apply — guarded + uses chrome.storage (via storageGet) + waits for body
+(async function applyLiquidGlassOnLoad() {
+    const run = async () => {
+        let isEnabled = false;
+        try {
+            if (typeof storageGet === 'function') {
+                isEnabled = (await storageGet('glassEnabled', false)) === true;
+            } else {
+                isEnabled = localStorage.getItem('glassEnabled') === 'true';
+            }
+        } catch (_) { isEnabled = false; }
+        if (!isEnabled) return;
+
+        if (typeof injectGlassFilter === 'function') {
+            try { injectGlassFilter(); } catch (err) { console.error('injectGlassFilter (onload) failed:', err); }
+        } else {
+            console.warn('injectGlassFilter not defined on load; glass effect will not apply yet');
+        }
+        if (document.body) document.body.classList.add('cui-glass-enabled');
+    };
+
+    if (document.body) await run();
+    else document.addEventListener('DOMContentLoaded', run, { once: true });
+})();
