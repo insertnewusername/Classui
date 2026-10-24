@@ -441,6 +441,18 @@ body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme {
 body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme::after {
     background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.08) 0%, transparent 60%) !important;
 }
+
+
+/* Force the wide-layout Due soon block visible when its inner content is populated */
+body.cui-glass-enabled .T9UoTd > .dxDXsf:has([data-container-type="2"] [data-expanded="true"]) {
+    display: block !important;
+}
+
+/* Also un-hide the wide cards themselves if Classroom left them collapsed */
+body.cui-glass-enabled .T9UoTd > .dxDXsf:has([data-container-type="2"] [data-expanded="true"]) .MYIZ3e.JUr7jb {
+    display: list-item !important;
+}
+
 body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme > .gmNu1d.NT3Ibe.SYd3U.kZHvee {
     padding-left: 18px !important;
     padding-right: 18px !important;
@@ -693,6 +705,9 @@ body.dark-mode.cui-glass-enabled .ovsVve.PM0jOb.jlxRme .x4lrdf::after {
     background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.12) 0%, transparent 60%) !important;
 }
 
+body.cui-glass-enabled .ovsVve.PM0jOb.jlxRme {
+    display: block !important;
+}
 /* ─── QUICK LINK SIDEBAR ─── */
 body.cui-glass-enabled .DXLeqd .d4Fe0d.i8Wprc {
     position: relative !important;

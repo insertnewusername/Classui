@@ -4,7 +4,7 @@
    },
    "content_scripts": [ {
       "css": [ "styles.css", "dark.css", "color-pickers.css" ],
-      "js": [ "Features/storage-utils.js", "Features/cloud-sync.js", "Features/tutorial-content.js", "Features/download-buttons.js", "Features/core-timetable-sidebar-icons.js", "Features/decoration.js", "Features/sidebar-controls.js", "Features/settings-panel.js", "Features/sidebar-titles-banners.js", "Features/tutorial-modal.js", "Features/updates-popup.js", "Features/update-checker.js", "Features/homebar-streamside.js", "Features/classroom-search.js", "Features/clock.js", "Features/cursor-attraction.js", "Features/floating-notes.js", "Features/assignment-stars.js", "Features/font-picker.js", "content.js" ],
+      "js": [ "Features/storage-utils.js", "Features/cloud-sync.js", "Features/download-buttons.js", "Features/core-timetable-sidebar-icons.js", "Features/decoration.js", "Features/sidebar-controls.js", "Features/settings-panel.js", "Features/sidebar-titles-banners.js", "Features/tutorial-modal.js", "Features/updates-popup.js", "Features/update-checker.js", "Features/homebar-streamside.js", "Features/classroom-search.js", "Features/clock.js", "Features/cursor-attraction.js", "Features/floating-notes.js", "Features/assignment-stars.js", "Features/font-picker.js", "content.js" ],
       "matches": [ "*://classroom.google.com/*" ]
    } ],
    "description": "Redefine Google Classroom with Dark mode, Search, Extensive customisation, and new intuitive features",
